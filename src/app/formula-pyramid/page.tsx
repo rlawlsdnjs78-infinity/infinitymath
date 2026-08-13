@@ -251,7 +251,7 @@ export default function FormulaPyramidPage() {
               className="text-3xl sm:text-4xl text-yellow-300 flex items-center gap-2"
               style={{ fontFamily: "var(--font-chalk)" }}
             >
-              <Sparkles className="text-yellow-400" />
+              <Pyramid className="text-yellow-400 flex-shrink-0" size={32} />
               수식 피라미드 (Formula Pyramid)
             </h1>
           </div>
@@ -629,18 +629,18 @@ export default function FormulaPyramidPage() {
                     </p>
                   </div>
 
-                  {/* [요구사항 7] ③번 하위 '주의' 표시 항목 전용 박스 - 명시적 인라인 스타일 패딩 및 여백 부여 */}
+                  {/* [요구사항] ③번 설명 바로 아래 밀착 배치 & ④번 항목과의 간격(1rem) 조율 */}
                   <div
                     className="w-full rounded-lg shadow-md"
                     style={{
                       border: "2px dashed #f5e642",
                       backgroundColor: "rgba(15, 45, 45, 0.9)",
-                      padding: "20px 20px",
-                      marginTop: "1.25rem",
-                      marginBottom: "1.25rem",
+                      padding: "16px 18px",
+                      marginTop: "0.5rem",
+                      marginBottom: "1rem",
                       display: "flex",
                       flexDirection: "column",
-                      gap: "14px",
+                      gap: "12px",
                       boxSizing: "border-box",
                     }}
                   >
