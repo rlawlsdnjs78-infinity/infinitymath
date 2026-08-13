@@ -72,8 +72,8 @@ function HexagonCell({
   return (
     <div
       onClick={onClick}
-      className={`relative cursor-pointer transition-all duration-200 hover:scale-105 select-none w-[76px] h-[87.8px] flex items-center justify-center ${
-        isSelected ? "drop-shadow-[0_0_20px_rgba(245,230,66,0.95)]" : ""
+      className={`relative cursor-pointer transition-all duration-200 hover:scale-105 select-none w-[64px] h-[73.9px] sm:w-[68px] sm:h-[78.5px] flex items-center justify-center ${
+        isSelected ? "drop-shadow-[0_0_16px_rgba(245,230,66,0.95)]" : ""
       }`}
     >
       <svg
@@ -100,23 +100,23 @@ function HexagonCell({
         {/* 상단 A~J 칸 번호 */}
         <text
           x="50"
-          y="33"
+          y="31"
           textAnchor="middle"
           fill={isSelected ? "#1a3a3a" : "var(--chalk-yellow)"}
-          fontSize="34"
+          fontSize="28"
           fontWeight="bold"
           fontFamily="var(--font-chalk)"
         >
           {node.id}
         </text>
 
-        {/* 중앙 사칙연산 값 텍스트 (크기 극대화: fontSize 60) */}
+        {/* 중앙 사칙연산 값 텍스트 */}
         <text
           x="50"
-          y="88"
+          y="85"
           textAnchor="middle"
           fill={isSelected ? "#f5e642" : "var(--chalk-white)"}
-          fontSize="60"
+          fontSize="48"
           fontWeight="bold"
           fontFamily="var(--font-chalk)"
         >
@@ -147,6 +147,18 @@ export default function FormulaPyramidPage() {
   const [selectedPenalty, setSelectedPenalty] = useState<string>("없음");
   const [generatedRoomCode, setGeneratedRoomCode] = useState<string>("");
 
+  const [tempNotice, setTempNotice] = useState<string | null>(null);
+  const [noticeTimer, setNoticeTimer] = useState<NodeJS.Timeout | null>(null);
+
+  const triggerNotice = (msg: string, durationMs: number = 1000) => {
+    if (noticeTimer) clearTimeout(noticeTimer);
+    setTempNotice(msg);
+    const timer = setTimeout(() => {
+      setTempNotice(null);
+    }, durationMs);
+    setNoticeTimer(timer);
+  };
+
   const handleNodeClick = (nodeId: string) => {
     if (selectedNodes.includes(nodeId)) {
       setSelectedNodes(selectedNodes.filter((id) => id !== nodeId));
@@ -155,6 +167,7 @@ export default function FormulaPyramidPage() {
       setSelectedNodes([...selectedNodes, nodeId]);
     }
     setSubmissionResult(null);
+    setTempNotice(null);
   };
 
   const calculateFormula = (nodeIds: string[]): { exprStr: string; result: number | null } => {
@@ -185,10 +198,8 @@ export default function FormulaPyramidPage() {
 
   const handleSubmitAnswer = () => {
     if (selectedNodes.length !== 3) {
-      setSubmissionResult({
-        success: false,
-        msg: "3개의 칸을 모두 선택해야 합니다!",
-      });
+      // [요구사항 5] 3개 미만 선택 시 1초 동안 '선택한 수식:' 박스 위치에 경고 표출
+      triggerNotice("3개의 칸을 모두 선택해야 합니다!", 1000);
       return;
     }
 
@@ -196,7 +207,7 @@ export default function FormulaPyramidPage() {
     if (currentResult === TARGET) {
       setSubmissionResult({
         success: true,
-        msg: `🎉 정답입니다! (+1점 획득) 수식 결과 = ${currentResult}`,
+        msg: `🎉 정답입니다! (+1점 획득) 결과 = ${currentResult}`,
         calcValue: currentResult,
       });
     } else {
@@ -421,16 +432,16 @@ export default function FormulaPyramidPage() {
                   style={{ marginTop: "1.1rem", marginBottom: "1.1rem" }}
                 />
 
-                {/* [요구사항 5] 피라미드와 아래 입력창 사이 간격 조절 (marginBottom: 1.25rem) */}
+                {/* [요구사항 1] 피라미드 호버 시 스크롤 생기지 않도록 overflow-visible 및 여백 조정 */}
                 <div
-                  className="py-4 my-2 flex flex-col items-center justify-center w-full overflow-x-auto"
-                  style={{ marginBottom: "1.25rem" }}
+                  className="py-3 my-1 flex flex-col items-center justify-center w-full overflow-visible"
+                  style={{ marginBottom: "1rem" }}
                 >
                   {PYRAMID_DATA.map((row, rowIndex) => (
                     <div
                       key={rowIndex}
                       className="flex justify-center gap-2 sm:gap-2.5"
-                      style={{ marginTop: rowIndex === 0 ? "0px" : "-11px" }}
+                      style={{ marginTop: rowIndex === 0 ? "0px" : "-10px" }}
                     >
                       {row.map((node) => (
                         <HexagonCell
@@ -444,38 +455,69 @@ export default function FormulaPyramidPage() {
                   ))}
                 </div>
 
-                {/* [요구사항 5 & 6] 정답 입력 박스 레이아웃 및 텍스트 수정 */}
+                {/* [요구사항 2, 3, 4, 5] 정답 입력 박스 레이아웃 & 고정 높이 안내창 변신 */}
                 <div
                   className="w-full chalk-box-straight bg-teal-900/60 rounded-md flex flex-col gap-6"
-                  style={{ padding: "1.75rem 1.5rem", marginTop: "1.25rem" }}
+                  style={{ padding: "1.5rem 1.5rem", marginTop: "1rem" }}
                 >
-                  {/* [요구사항 2] '선택한 수식:' 라벨과 A B C 수식 글자 크기 대폭 확대 및 자동 실시간 계산(=) 표시 제거 */}
+                  {/* [요구사항 2 & 5] '선택한 수식:' 박스 - 고정 높이(h-[72px]) & 경고/결과 안내창 변신 */}
                   <div
-                    className="w-full bg-teal-950 rounded-md border border-dashed border-teal-600 flex items-center justify-between"
-                    style={{
-                      padding: "22px 32px",
-                    }}
+                    className={`w-full rounded-md border border-dashed transition-all duration-200 flex items-center justify-between min-h-[72px] h-[72px] ${
+                      tempNotice
+                        ? "bg-rose-950/90 border-rose-500 text-rose-200 px-6 py-4"
+                        : submissionResult
+                        ? submissionResult.success
+                          ? "bg-emerald-950/90 border-emerald-500 text-emerald-200 px-6 py-4"
+                          : "bg-rose-950/90 border-rose-500 text-rose-200 px-6 py-4"
+                        : "bg-teal-950 border-teal-600 text-yellow-300 px-6 py-4"
+                    }`}
                   >
-                    <div className="flex items-center gap-5" style={{ paddingLeft: "1.5rem" }}>
-                      <span
-                        className="text-2xl sm:text-3xl text-teal-300 font-extrabold"
-                        style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.02em" }}
-                      >
-                        선택한 수식:
-                      </span>
-                      <span
-                        className="text-3xl sm:text-4xl font-black text-yellow-300 tracking-widest"
-                        style={{ fontFamily: "var(--font-chalk)", paddingLeft: "1rem" }}
-                      >
-                        {exprStr}
-                      </span>
-                    </div>
+                    {tempNotice ? (
+                      <div className="flex items-center gap-3 w-full justify-center text-xl font-bold text-rose-300">
+                        <AlertTriangle size={24} className="text-rose-400 flex-shrink-0 animate-bounce" />
+                        <span style={{ fontFamily: "var(--font-chalk)" }}>{tempNotice}</span>
+                      </div>
+                    ) : submissionResult ? (
+                      <div className="flex items-center justify-between w-full px-2">
+                        <div className="flex items-center gap-3 text-xl font-bold">
+                          {submissionResult.success ? (
+                            <CheckCircle2 size={24} className="text-emerald-400 flex-shrink-0" />
+                          ) : (
+                            <XCircle size={24} className="text-rose-400 flex-shrink-0" />
+                          )}
+                          <span style={{ fontFamily: "var(--font-chalk)" }}>{submissionResult.msg}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSubmissionResult(null)}
+                          className="text-xs text-gray-400 hover:text-white underline cursor-pointer"
+                        >
+                          닫기
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-5" style={{ paddingLeft: "1.5rem" }}>
+                        <span
+                          className="text-2xl sm:text-3xl text-teal-300 font-extrabold"
+                          style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.02em" }}
+                        >
+                          선택한 수식:
+                        </span>
+                        <span
+                          className="text-3xl sm:text-4xl font-black text-yellow-300 tracking-widest min-h-[40px] flex items-center"
+                          style={{ fontFamily: "var(--font-chalk)", paddingLeft: "1rem" }}
+                        >
+                          {exprStr || "\u00A0"}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
+                  {/* [요구사항 3] TARGET 표시 박스와 A~J 버튼 영역 높이 수평 완벽 정렬 */}
                   <div className="flex flex-col sm:flex-row items-stretch gap-4">
-                    <div className="chalk-box-straight bg-teal-950 px-7 py-5 flex flex-col items-center justify-center min-w-[130px] border-yellow-400/80">
+                    <div className="chalk-box-straight bg-teal-950 px-7 py-4 flex flex-col items-center justify-center min-w-[135px] border-yellow-400/80">
                       <span
-                        className="text-sm sm:text-base text-yellow-400 font-bold tracking-wider mb-1"
+                        className="text-base text-yellow-400 font-bold tracking-wider mb-1"
                         style={{ fontFamily: "var(--font-chalk)" }}
                       >
                         TARGET
@@ -488,8 +530,11 @@ export default function FormulaPyramidPage() {
                       </span>
                     </div>
 
-                    <div className="flex-1 flex flex-col gap-2.5">
-                      <div className="text-base text-gray-200 font-bold mb-0.5" style={{ fontFamily: "var(--font-chalk)" }}>
+                    <div className="flex-1 flex flex-col justify-between gap-2.5">
+                      <div
+                        className="text-xl sm:text-2xl text-yellow-300 font-bold mb-0.5"
+                        style={{ fontFamily: "var(--font-chalk)" }}
+                      >
                         제출할 수식 칸 선택
                       </div>
                       <div className="grid grid-cols-5 gap-2.5">
@@ -500,7 +545,7 @@ export default function FormulaPyramidPage() {
                               key={node.id}
                               type="button"
                               onClick={() => handleNodeClick(node.id)}
-                              className={`py-2.5 px-3 rounded-md text-lg font-bold transition-all ${
+                              className={`py-3 px-3 rounded-md text-xl sm:text-2xl font-black transition-all ${
                                 isSel
                                   ? "bg-yellow-400 text-teal-950 scale-105 shadow-md"
                                   : "bg-teal-800/90 text-white hover:bg-teal-700"
@@ -515,34 +560,16 @@ export default function FormulaPyramidPage() {
                     </div>
                   </div>
 
-                  {/* [요구사항 5] 제출하기 버튼 클릭 시 초기화되며, 오른쪽 초기화 버튼 제거 */}
-                  <div className="mt-1">
+                  {/* [요구사항 4] 올곧은 제출하기 버튼 배치 */}
+                  <div className="w-full mt-1">
                     <button
                       type="button"
                       onClick={handleSubmitAnswer}
-                      className="btn-chalk w-full justify-center py-3.5 text-xl"
+                      className="btn-chalk w-full justify-center py-4 text-2xl font-bold tracking-wider"
                     >
                       제출하기
                     </button>
                   </div>
-
-                  {submissionResult && (
-                    <div
-                      className={`p-4 rounded-md border text-base flex items-center gap-3 ${
-                        submissionResult.success
-                          ? "bg-emerald-950/90 border-emerald-500 text-emerald-300"
-                          : "bg-rose-950/90 border-rose-500 text-rose-300"
-                      }`}
-                      style={{ fontFamily: "var(--font-body)" }}
-                    >
-                      {submissionResult.success ? (
-                        <CheckCircle2 size={22} className="flex-shrink-0" />
-                      ) : (
-                        <XCircle size={22} className="flex-shrink-0" />
-                      )}
-                      <span>{submissionResult.msg}</span>
-                    </div>
-                  )}
                 </div>
               </>
             ) : (
