@@ -490,13 +490,13 @@ export default function FormulaPyramidPage() {
                       {showSolutions ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                     </button>
 
-                    {/* [요구사항 2] 정답 확인 창이 정답 입력 박스를 침범하지 않도록 max-h-[185px] overflow-y-auto 제한 */}
+                    {/* [요구사항] 스크롤 없이 4개 정답이 모두 쏙 들어가며 아래 정답 입력 박스를 침범하지 않도록 컴팩트 조율 */}
                     {showSolutions && (
                       <div
-                        className="absolute top-full left-0 mt-2 w-full max-h-[185px] overflow-y-auto bg-teal-900/98 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-2xl flex flex-col z-30 backdrop-blur-md"
+                        className="absolute top-full left-0 mt-1.5 w-full bg-teal-900/98 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-2xl flex flex-col z-30 backdrop-blur-md overflow-hidden"
                         style={{
-                          padding: "1rem 1rem",
-                          gap: "0.6rem",
+                          padding: "0.55rem 0.65rem",
+                          gap: "0.35rem",
                         }}
                       >
                         {validSolutions.slice(0, 4).map((sol, idx) => (
@@ -507,19 +507,19 @@ export default function FormulaPyramidPage() {
                               setSelectedNodes(sol.nodes);
                               setTempNotice(null);
                             }}
-                            className="w-full flex items-center justify-between rounded-lg bg-teal-950/95 hover:bg-yellow-400 hover:text-teal-950 text-white transition-all border border-teal-700/80 cursor-pointer shadow-md group"
+                            className="w-full flex items-center justify-between rounded-lg bg-teal-950/95 hover:bg-yellow-400 hover:text-teal-950 text-white transition-all border border-teal-700/80 cursor-pointer shadow-sm group"
                             style={{
-                              padding: "0.75rem 1.25rem",
+                              padding: "0.4rem 0.75rem",
                               fontFamily: "var(--font-chalk)",
                             }}
                           >
                             {/* 왼쪽: 정답 (예: A C F) */}
-                            <span className="text-xl sm:text-2xl font-black text-yellow-300 group-hover:text-teal-950 tracking-widest">
+                            <span className="text-lg sm:text-xl font-black text-yellow-300 group-hover:text-teal-950 tracking-widest">
                               {sol.nodes.join(" ")}
                             </span>
 
                             {/* 오른쪽: 계산식 (예: 1 + 3 + 5 = 9) */}
-                            <span className="text-base sm:text-lg text-teal-200 group-hover:text-teal-950 font-bold opacity-90">
+                            <span className="text-xs sm:text-sm text-teal-200 group-hover:text-teal-950 font-bold opacity-90">
                               {sol.formulaStr.split(" ( ")[1]?.replace(" )", "")}
                             </span>
                           </button>
