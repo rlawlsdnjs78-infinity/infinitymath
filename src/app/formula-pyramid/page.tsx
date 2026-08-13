@@ -243,8 +243,9 @@ export default function FormulaPyramidPage() {
 
   const handleSubmitAnswer = () => {
     if (selectedNodes.length !== 3) {
-      // 3개 미만 선택 시 1초 간 경고 표출 후 원복
+      // [요구사항 3] 3개 미만 선택 시 제출을 클릭해도 선택된 노드 즉시 초기화
       triggerNotice("3개의 칸을 모두 선택해야 합니다!", "warning", 1000);
+      setSelectedNodes([]);
       return;
     }
 
@@ -448,7 +449,7 @@ export default function FormulaPyramidPage() {
               <>
                 {/* [요구사항] 한 블록 안에서 좌측: 피라미드, 우측: 설명글 & 정답보기 */}
                 <div className="w-full flex flex-col xl:flex-row items-center xl:items-start justify-between gap-6 mb-4">
-                  {/* [좌측] 대칭 피라미드 */}
+                  {/* [좌측] 대칭 피라미드 (클릭해도 정답에 입력되지 않도록 onClick 제거) */}
                   <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0">
                     {PYRAMID_DATA.map((row, rowIndex) => (
                       <div
@@ -461,7 +462,6 @@ export default function FormulaPyramidPage() {
                             key={node.id}
                             node={node}
                             isSelected={selectedNodes.includes(node.id)}
-                            onClick={() => handleNodeClick(node.id)}
                           />
                         ))}
                       </div>
@@ -490,13 +490,13 @@ export default function FormulaPyramidPage() {
                       {showSolutions ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                     </button>
 
-                    {/* [요구사항] 정답을 펼쳤을 때 연습문제 박스 UI 크기가 변하지 않도록 absolute 레이어로 오버레이 */}
+                    {/* [요구사항 2] 정답 확인 창이 정답 입력 박스를 침범하지 않도록 max-h-[185px] overflow-y-auto 제한 */}
                     {showSolutions && (
                       <div
-                        className="absolute top-full left-0 mt-2 w-full bg-teal-900/98 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-2xl flex flex-col z-30 backdrop-blur-md"
+                        className="absolute top-full left-0 mt-2 w-full max-h-[185px] overflow-y-auto bg-teal-900/98 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-2xl flex flex-col z-30 backdrop-blur-md"
                         style={{
-                          padding: "1.25rem 1.25rem",
-                          gap: "0.75rem",
+                          padding: "1rem 1rem",
+                          gap: "0.6rem",
                         }}
                       >
                         {validSolutions.slice(0, 4).map((sol, idx) => (
