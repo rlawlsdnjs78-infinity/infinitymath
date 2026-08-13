@@ -1,11 +1,12 @@
 /**
  * Header.tsx
- * 전역 헤더 컴포넌트 — layout.tsx 에 등록되어 모든 페이지에 표시됩니다.
- * 이벤트 핸들러가 없는 Server Component 입니다.
- * 마우스 인터랙션이 필요한 nav 부분은 NavMenu (Client Component) 를 사용합니다.
+ * 전역 헤더 — layout.tsx 에 등록되어 모든 페이지에 항상 표시됩니다.
+ *
+ * [레이아웃 규칙]
+ * - layout.tsx 의 래퍼가 좌우 padding 을 담당합니다.
+ * - Header 는 래퍼 안에 자연스럽게 배치되어 동일한 좌우 여백을 공유합니다.
  */
 
-import { Calculator } from "lucide-react";
 import NavMenu from "./NavMenu";
 
 export default function Header() {
@@ -17,43 +18,50 @@ export default function Header() {
         borderBottom: "2px dashed rgba(240,237,232,0.2)",
         background: "rgba(26,58,58,0.85)",
         backdropFilter: "blur(10px)",
-        /* 헤더는 래퍼의 좌우 padding 을 무시하고 꽉 차도록 */
-        marginLeft: "calc(-1 * var(--page-px))",
-        marginRight: "calc(-1 * var(--page-px))",
-        paddingLeft: "var(--page-px)",
-        paddingRight: "var(--page-px)",
       }}
     >
-      {/* 내부 콘텐츠는 max-width 제한 */}
-      <div
-        className="max-w-6xl mx-auto flex items-center justify-between py-4"
-      >
-        {/* 로고 */}
+      {/* 내부 콘텐츠 — max-width 로 과도하게 넓어지지 않도록 제한 */}
+      <div className="max-w-6xl mx-auto flex items-center justify-between py-4">
+
+        {/* ── 로고 영역 ─────────────────────────────────────────────── */}
         <div className="flex items-center gap-3">
-          <div
-            className="flex items-center justify-center w-10 h-10 rounded-sm flex-shrink-0"
-            style={{
-              border: "2px dashed var(--chalk-yellow)",
-              color: "var(--chalk-yellow)",
-            }}
-          >
-            <Calculator size={20} strokeWidth={1.5} />
-          </div>
+          {/*
+           * 무한대 기호 로고
+           * - 테두리 없음
+           * - lucide-react 대신 텍스트 기반 ∞ 사용
+           * - 분필 느낌의 옅은 glow 효과 적용
+           */}
           <span
-            className="text-2xl chalk-flicker"
+            aria-hidden="true"
             style={{
               fontFamily: "var(--font-chalk)",
+              fontSize: "2.4rem",
+              lineHeight: 1,
+              color: "var(--chalk-yellow)",
+              textShadow:
+                "0 0 12px rgba(245,230,66,0.5), 0 0 24px rgba(245,230,66,0.2)",
+              userSelect: "none",
+            }}
+          >
+            ∞
+          </span>
+
+          {/* 사이트명 — ∞ 기호 없이 한글만 표시 */}
+          <span
+            className="chalk-flicker"
+            style={{
+              fontFamily: "var(--font-chalk)",
+              fontSize: "1.6rem",
               color: "var(--chalk-white)",
-              letterSpacing: "0.05em",
-              /* 텍스트가 너무 길 때 줄바꿈 방지 */
+              letterSpacing: "0.04em",
               whiteSpace: "nowrap",
             }}
           >
-            ∞ 무한대 수학반
+            무한대 수학반
           </span>
         </div>
 
-        {/* 네비게이션 — Client Component */}
+        {/* ── 네비게이션 — Client Component (마우스 이벤트 포함) ──── */}
         <NavMenu />
       </div>
     </header>

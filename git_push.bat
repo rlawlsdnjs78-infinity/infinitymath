@@ -1,4 +1,4 @@
 @echo off
 git add .
-git commit -m "feat: apply global layout with persistent header and box padding"
+git commit -m "fix: add header left margin, replace logo icon with infinity symbol"
 git push
