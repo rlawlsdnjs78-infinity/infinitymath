@@ -432,7 +432,7 @@ export default function FormulaPyramidPage() {
                 />
 
                 {/* [요구사항 2 & 4] 피라미드 정육각형 배치 및 층간 uniform spacing & 하단 박스와의 충분한 간격 */}
-                <div className="py-6 my-auto flex flex-col items-center justify-center w-full overflow-x-auto">
+                <div className="flex-1 py-8 my-4 flex flex-col items-center justify-center w-full overflow-x-auto">
                   {PYRAMID_DATA.map((row, rowIndex) => (
                     <div
                       key={rowIndex}
@@ -451,8 +451,8 @@ export default function FormulaPyramidPage() {
                   ))}
                 </div>
 
-                {/* [요구사항 4] 피라미드와 정답 입력 박스 사이 여백(mt-6 sm:mt-8) 확보 */}
-                <div className="w-full chalk-box-straight p-5 sm:p-6 bg-teal-900/60 rounded-md flex flex-col gap-5 mt-6 sm:mt-8">
+                {/* [요구사항 4] 피라미드와 정답 입력 박스 사이 여백(mt-10 sm:mt-12) 확실히 확보 */}
+                <div className="w-full chalk-box-straight p-6 sm:p-7 bg-teal-900/60 rounded-md flex flex-col gap-6 mt-10 sm:mt-12">
                   <div className="w-full bg-teal-950 px-5 py-4 rounded-md border border-dashed border-teal-600 flex items-center justify-between">
                     <span className="text-sm text-teal-400 font-semibold" style={{ fontFamily: "var(--font-chalk)" }}>
                       선택된 수식 보드:
@@ -608,19 +608,19 @@ export default function FormulaPyramidPage() {
                     </p>
                   </div>
 
-                  {/* [요구사항 7] ③번 하위 '주의' 표시 항목만 박스 처리 및 내부 공간(p-4.5) 확보 */}
-                  <div className="ml-7 my-1 p-4 sm:p-4.5 rounded-md border border-dashed border-yellow-500/50 bg-teal-900/60 flex flex-col gap-2.5">
-                    <div className="flex items-start gap-2 text-xs sm:text-sm text-yellow-300">
-                      <AlertTriangle size={16} className="flex-shrink-0 mt-0.5 text-yellow-400" />
-                      <span>동일한 칸은 중복선택할 수 없습니다.</span>
+                  {/* [요구사항 7] ③번 하위 '주의' 표시 항목만 박스 처리 및 내부 공간(p-5 sm:p-6) 및 여백 확실히 확보 */}
+                  <div className="w-full my-3.5 p-5 sm:p-6 rounded-lg border-2 border-dashed border-yellow-400/60 bg-teal-900/80 flex flex-col gap-3.5 shadow-md">
+                    <div className="flex items-start gap-3 text-sm sm:text-base text-yellow-200 font-medium [word-break:keep-all]">
+                      <AlertTriangle size={18} className="flex-shrink-0 mt-0.5 text-yellow-400" />
+                      <span className="leading-relaxed">동일한 칸은 중복선택할 수 없습니다.</span>
                     </div>
-                    <div className="flex items-start gap-2 text-xs sm:text-sm text-yellow-300">
-                      <AlertTriangle size={16} className="flex-shrink-0 mt-0.5 text-yellow-400" />
-                      <span>수식의 맨 앞에 사용된 칸의 연산 기호는 무시합니다.</span>
+                    <div className="flex items-start gap-3 text-sm sm:text-base text-yellow-200 font-medium [word-break:keep-all]">
+                      <AlertTriangle size={18} className="flex-shrink-0 mt-0.5 text-yellow-400" />
+                      <span className="leading-relaxed">수식의 맨 앞에 사용된 칸의 연산 기호는 무시합니다.</span>
                     </div>
-                    <div className="flex items-start gap-2 text-xs sm:text-sm text-yellow-300">
-                      <AlertTriangle size={16} className="flex-shrink-0 mt-0.5 text-yellow-400" />
-                      <span>완성된 수식은 사칙연산 순서에 따라 계산됩니다.</span>
+                    <div className="flex items-start gap-3 text-sm sm:text-base text-yellow-200 font-medium [word-break:keep-all]">
+                      <AlertTriangle size={18} className="flex-shrink-0 mt-0.5 text-yellow-400" />
+                      <span className="leading-relaxed">완성된 수식은 사칙연산 순서에 따라 계산됩니다.</span>
                     </div>
                   </div>
 
