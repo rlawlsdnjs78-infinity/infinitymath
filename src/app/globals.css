@@ -1,0 +1,186 @@
+/* =============================================================================
+ * globals.css
+ * 🏫 무한대수학반 - 아날로그 칠판 & 노트 스타일 디자인 시스템
+ * ============================================================================= */
+
+/* ── 1. Google Fonts ── */
+@import url("https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&family=Nanum+Pen+Script&display=swap");
+
+/* ── 2. Tailwind CSS v4 ── */
+@import "tailwindcss";
+
+@source "../**/*.{js,ts,jsx,tsx,html}";
+
+/* ── 3. 디자인 토큰 ── */
+:root {
+  --bg-board: #11382d;
+  --bg-board-dark: #0a251e;
+  --bg-board-light: #194e40;
+
+  --chalk-white: #f8fafc;
+  --chalk-yellow: #fef08a;
+  --chalk-green: #86efac;
+  --chalk-pink: #fca5a5;
+  --chalk-blue: #93c5fd;
+
+  --font-handwriting: "Nanum Pen Script", "Gaegu", cursive;
+  --font-gowun: "Gowun Dodum", sans-serif;
+}
+
+/* ── 4. 전역 리셋 & 칠판 질감 ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-board);
+  color: var(--chalk-white);
+  font-family: var(--font-gowun);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0),
+    radial-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 0);
+  background-size: 28px 28px, 14px 14px;
+  background-position: 0 0, 7px 7px;
+}
+
+/* ── 5. 분필 텍스트 utility ── */
+.chalk-font {
+  font-family: var(--font-handwriting);
+}
+
+.chalk-text-white {
+  color: var(--chalk-white);
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.6), 1px 1px 1px rgba(0, 0, 0, 0.6);
+  font-family: var(--font-handwriting);
+}
+
+.chalk-text-yellow {
+  color: var(--chalk-yellow);
+  text-shadow: 0 0 3px rgba(254, 240, 138, 0.6), 1px 1px 1px rgba(0, 0, 0, 0.6);
+  font-family: var(--font-handwriting);
+}
+
+.chalk-text-pink {
+  color: var(--chalk-pink);
+  text-shadow: 0 0 3px rgba(252, 165, 165, 0.6), 1px 1px 1px rgba(0, 0, 0, 0.6);
+  font-family: var(--font-handwriting);
+}
+
+.chalk-text-green {
+  color: var(--chalk-green);
+  text-shadow: 0 0 3px rgba(134, 239, 172, 0.6), 1px 1px 1px rgba(0, 0, 0, 0.6);
+  font-family: var(--font-handwriting);
+}
+
+/* ── 6. 칠판 점선 테두리 카드 & 버튼 ── */
+.chalk-border {
+  border: 2px dashed rgba(248, 250, 252, 0.35);
+  border-radius: 14px;
+  background-color: rgba(10, 37, 30, 0.55);
+  transition: all 0.2s ease-in-out;
+}
+
+.chalk-border:hover {
+  border-color: var(--chalk-yellow);
+  box-shadow: 0 0 15px rgba(254, 240, 138, 0.15);
+}
+
+.btn-chalk {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-handwriting);
+  font-size: 1.25rem;
+  border: 2px dashed var(--chalk-yellow);
+  color: var(--chalk-yellow);
+  background-color: rgba(10, 37, 30, 0.8);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.btn-chalk:hover {
+  background-color: var(--chalk-yellow);
+  color: var(--bg-board-dark);
+  font-weight: bold;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(254, 240, 138, 0.4);
+}
+
+/* ── 7. 상단 헤더 전용 레이아웃 ── */
+.header-board {
+  background-color: rgba(10, 37, 30, 0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 2px dashed rgba(255, 255, 255, 0.2);
+}
+
+.header-full-bar {
+  width: 100%;
+  height: 4rem; /* 64px */
+  padding-left: 3.5rem;  /* 무한대 로고 크기 정도의 좌측 여백 (56px) */
+  padding-right: 3.5rem; /* 우측 동일 여백 */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+@media (max-width: 640px) {
+  .header-full-bar {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
+
+/* ── 8. 수식 피라미드 대기실 전용 레이아웃 ── */
+.pyramid-page-container {
+  width: 100%;
+  max-width: 1480px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 3.5rem;  /* 로고와 정확하게 맞춘 좌측 여백 */
+  padding-right: 3.5rem; /* 우측 여백 */
+  padding-top: 5.5rem;
+  padding-bottom: 5rem;  /* 바닥 쏠림 방지 넉넉한 하단 공간 */
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .pyramid-page-container {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
+
+.pyramid-grid-layout {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2rem;
+  width: 100%;
+  align-items: stretch;
+}
+
+@media (max-width: 1024px) {
+  .pyramid-grid-layout {
+    grid-template-columns: 1fr;
+  }
+}
