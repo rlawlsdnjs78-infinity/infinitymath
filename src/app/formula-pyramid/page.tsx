@@ -2,9 +2,9 @@
  * src/app/formula-pyramid/page.tsx
  * 수식 피라미드 게임 페이지
  *
- * [제목 & 점선 사이 여백 인라인 지정]
- * '게임 입장하기', '수식 피라미드', '게임 설명', '게임 세팅' 제목 글자와
- * 하단 점선 구분선 사이의 여백을 paddingBottom: "1.25rem"(20px) 인라인으로 확실하게 확보
+ * [점선 위/아래 여백 1:1 동일 대칭 설정]
+ * 점선을 기준으로 위쪽 여백(paddingBottom)과 아래쪽 여백(marginBottom)을
+ * 모두 동일하게 1.25rem (20px) 으로 1:1 정밀 대칭 지정
  */
 
 "use client";
@@ -285,10 +285,10 @@ export default function FormulaPyramidPage() {
           <div className="xl:col-span-3 chalk-box content-box flex flex-col gap-6 bg-teal-950/75 backdrop-blur-md h-full min-h-[640px] p-6 sm:p-7">
             {mode === "player" ? (
               <>
-                {/* [핵심] 제목 글자와 아래 점선 사이 여백(paddingBottom: 1.25rem) 및 마진(marginBottom: 1.5rem) 확 벌림 */}
+                {/* [핵심] 위쪽 여백(paddingBottom: 1.25rem)과 아래쪽 여백(marginBottom: 1.25rem)을 1:1 대칭으로 완전 동일하게 지정 */}
                 <div
                   className="flex items-center gap-3 border-b border-dashed border-teal-700"
-                  style={{ paddingBottom: "1.25rem", marginBottom: "1.5rem" }}
+                  style={{ paddingBottom: "1.25rem", marginBottom: "1.25rem" }}
                 >
                   <LogIn className="text-yellow-400 flex-shrink-0" size={24} />
                   <h2
@@ -308,7 +308,7 @@ export default function FormulaPyramidPage() {
                 >
                   <div className="flex flex-col gap-5">
                     {/* 닉네임 입력 */}
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2.5">
                       <label
                         htmlFor="nickname-input"
                         className="text-base text-gray-200 font-medium tracking-wide"
@@ -332,7 +332,7 @@ export default function FormulaPyramidPage() {
                     </div>
 
                     {/* 입장 코드 입력 */}
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2.5">
                       <label
                         htmlFor="code-input"
                         className="text-base text-gray-200 font-medium tracking-wide"
@@ -369,7 +369,7 @@ export default function FormulaPyramidPage() {
               <>
                 <div
                   className="flex items-center gap-3 border-b border-dashed border-teal-700"
-                  style={{ paddingBottom: "1.25rem", marginBottom: "1.5rem" }}
+                  style={{ paddingBottom: "1.25rem", marginBottom: "1.25rem" }}
                 >
                   <Monitor className="text-yellow-400 flex-shrink-0" size={24} />
                   <h2
@@ -405,7 +405,7 @@ export default function FormulaPyramidPage() {
               <>
                 <div
                   className="text-center w-full border-b border-dashed border-teal-700"
-                  style={{ paddingBottom: "1.25rem", marginBottom: "1.5rem" }}
+                  style={{ paddingBottom: "1.25rem", marginBottom: "1.25rem" }}
                 >
                   <h2
                     className="text-3.5xl text-yellow-300 mb-1"
@@ -559,7 +559,7 @@ export default function FormulaPyramidPage() {
               <>
                 <div
                   className="flex items-center gap-3 border-b border-dashed border-teal-700"
-                  style={{ paddingBottom: "1.25rem", marginBottom: "1.5rem" }}
+                  style={{ paddingBottom: "1.25rem", marginBottom: "1.25rem" }}
                 >
                   <HelpCircle className="text-yellow-400 flex-shrink-0" size={24} />
                   <h2
@@ -616,7 +616,7 @@ export default function FormulaPyramidPage() {
               <>
                 <div
                   className="flex items-center gap-3 border-b border-dashed border-teal-700"
-                  style={{ paddingBottom: "1.25rem", marginBottom: "1.5rem" }}
+                  style={{ paddingBottom: "1.25rem", marginBottom: "1.25rem" }}
                 >
                   <Settings className="text-yellow-400 flex-shrink-0" size={24} />
                   <h2
