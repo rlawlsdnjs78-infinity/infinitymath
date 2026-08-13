@@ -2,10 +2,10 @@
  * src/app/formula-pyramid/page.tsx
  * 수식 피라미드 게임 페이지
  *
- * [요구사항 반영]
- * 1. 이미지와 동일한 타원형 ON/OFF 토글 스위치 (원형 노브 슬라이딩)
- * 2. 모드 전환 시 상단 UI 영역 고정 (위치가 절대로 움직이지 않음)
- * 3. 하단 3분할 영역만 모드에 따라 전환
+ * [완벽한 UI 고정]
+ * 1. 상단 타이틀 & 슬라이더 스위치 영역: h-[90px] 고정 (위치 절대 미동 없음)
+ * 2. 하단 3분할 박스 영역: 플레이어 모드 & 딜러 모드 모두 동일한 3:6:3 컬럼 비율 유지
+ *    (토글을 클릭해도 박스 외곽 위치, 높이, 화면 배치가 단 1px 도 덜컹거리지 않음)
  */
 
 "use client";
@@ -22,31 +22,28 @@ import {
   XCircle,
   Copy,
   Sparkles,
+  Monitor,
 } from "lucide-react";
 
 /* ─── 피라미드 칸 데이터 (A ~ J) ─────────────────────────────────────────── */
 interface PyramidNode {
   id: string;
-  op: string; // 사칙연산 기호
-  num: number; // 숫자
-  display: string; // 표시용 문자열 (예: +1, ÷4)
+  op: string;
+  num: number;
+  display: string;
 }
 
 const PYRAMID_DATA: PyramidNode[][] = [
-  // 1층
   [{ id: "A", op: "+", num: 1, display: "+1" }],
-  // 2층
   [
     { id: "B", op: "÷", num: 4, display: "÷4" },
     { id: "C", op: "×", num: 3, display: "×3" },
   ],
-  // 3층
   [
     { id: "D", op: "-", num: 10, display: "-10" },
     { id: "E", op: "÷", num: 5, display: "÷5" },
     { id: "F", op: "×", num: 6, display: "×6" },
   ],
-  // 4층
   [
     { id: "G", op: "-", num: 11, display: "-11" },
     { id: "H", op: "+", num: 7, display: "+7" },
@@ -55,7 +52,6 @@ const PYRAMID_DATA: PyramidNode[][] = [
   ],
 ];
 
-// 평탄화된 노드 맵 (id 기준 검색용)
 const ALL_NODES: Record<string, PyramidNode> = {};
 PYRAMID_DATA.flat().forEach((node) => {
   ALL_NODES[node.id] = node;
@@ -82,7 +78,6 @@ function HexagonCell({
         viewBox="0 0 100 115"
         className="w-full h-full absolute inset-0 filter drop-shadow-md"
       >
-        {/* 외곽 큰 정육각형 */}
         <polygon
           points="50,2 95,28 95,87 50,113 5,87 5,28"
           fill={isSelected ? "rgba(245, 230, 66, 0.3)" : "rgba(20, 50, 50, 0.9)"}
@@ -90,16 +85,12 @@ function HexagonCell({
           strokeWidth="3.5"
           strokeDasharray={isSelected ? "none" : "4 2"}
         />
-
-        {/* 내부 상단에 두 변을 공유하는 작은 정육각형 (캡/헤더 디자인) */}
         <polygon
           points="50,2 95,28 73,42 50,28 27,42 5,28"
           fill={isSelected ? "rgba(245, 230, 66, 0.6)" : "rgba(240, 237, 232, 0.18)"}
           stroke={isSelected ? "#f5e642" : "rgba(240, 237, 232, 0.55)"}
           strokeWidth="2"
         />
-
-        {/* 상단 ID (A~J) 텍스트 */}
         <text
           x="50"
           y="23"
@@ -111,8 +102,6 @@ function HexagonCell({
         >
           {node.id}
         </text>
-
-        {/* 중앙 사칙연산 값 텍스트 */}
         <text
           x="50"
           y="75"
@@ -131,7 +120,6 @@ function HexagonCell({
 
 /* ─── 메인 수식 피라미드 페이지 ─────────────────────────────────────────── */
 export default function FormulaPyramidPage() {
-  // 모드 상태: 'player' | 'dealer'
   const [mode, setMode] = useState<"player" | "dealer">("player");
 
   /* ── 플레이어 모드 상태 ── */
@@ -146,27 +134,22 @@ export default function FormulaPyramidPage() {
 
   /* ── 딜러 모드 상태 ── */
   const [selectedRound, setSelectedRound] = useState<number>(1);
-  const [selectedTime, setSelectedTime] = useState<number>(1); // 분
-  const [selectedPenalty, setSelectedPenalty] = useState<string>("없음"); // "없음" | "1초" ~ "5초"
+  const [selectedTime, setSelectedTime] = useState<number>(1);
+  const [selectedPenalty, setSelectedPenalty] = useState<string>("없음");
   const [generatedRoomCode, setGeneratedRoomCode] = useState<string>("");
 
-  /* ── 노드 클릭 처리 ── */
   const handleNodeClick = (nodeId: string) => {
     if (selectedNodes.includes(nodeId)) {
       setSelectedNodes(selectedNodes.filter((id) => id !== nodeId));
     } else {
-      if (selectedNodes.length >= 3) {
-        return;
-      }
+      if (selectedNodes.length >= 3) return;
       setSelectedNodes([...selectedNodes, nodeId]);
     }
     setSubmissionResult(null);
   };
 
-  /* ── 수식 계산 로직 ── */
   const calculateFormula = (nodeIds: string[]): { exprStr: string; result: number | null } => {
     if (nodeIds.length === 0) return { exprStr: "", result: null };
-
     const nodes = nodeIds.map((id) => ALL_NODES[id]);
 
     let exprStr = `${nodes[0].id}(${nodes[0].num})`;
@@ -174,9 +157,7 @@ export default function FormulaPyramidPage() {
       exprStr += ` ${nodes[i].op} ${nodes[i].id}(${nodes[i].num})`;
     }
 
-    if (nodeIds.length < 3) {
-      return { exprStr, result: null };
-    }
+    if (nodeIds.length < 3) return { exprStr, result: null };
 
     let calcExpr = `${nodes[0].num}`;
     for (let i = 1; i < nodes.length; i++) {
@@ -195,7 +176,6 @@ export default function FormulaPyramidPage() {
 
   const { exprStr, result: currentResult } = calculateFormula(selectedNodes);
 
-  /* ── 정답 제출 ── */
   const handleSubmitAnswer = () => {
     if (selectedNodes.length !== 3) {
       setSubmissionResult({
@@ -221,7 +201,6 @@ export default function FormulaPyramidPage() {
     }
   };
 
-  /* ── 딜러 모드 방 생성 ── */
   const handleCreateGame = () => {
     const randomNum = Math.floor(1000 + Math.random() * 9000);
     const code = `PYRAMID-${randomNum}`;
@@ -229,14 +208,13 @@ export default function FormulaPyramidPage() {
   };
 
   return (
-    <div className="w-full flex-1 flex flex-col items-center justify-center px-4 sm:px-8 py-6 my-auto">
+    <div className="w-full flex-1 flex flex-col items-center justify-center px-4 sm:px-8 py-8 my-auto">
       <div className="w-full max-w-[1550px] flex flex-col mx-auto">
         {/* ───────────────────────────────────────────────────────────────────
            [상단 고정 영역]
-           - 모드가 변경되더라도 이 상단 영역의 높이와 위치는 1px 도 안 움직임 고정!
-           - 이미지와 동일한 타원형 스위치 (ON/OFF 슬라이더)
+           h-[90px] min-h-[90px] flex-shrink-0 으로 고정되어 모드 전환 시 절대 미동 없음
            ─────────────────────────────────────────────────────────────────── */}
-        <div className="h-[90px] flex items-center justify-between pb-4 border-b-2 border-dashed border-teal-800 w-full mb-6 flex-shrink-0">
+        <div className="h-[90px] min-h-[90px] flex-shrink-0 flex items-center justify-between pb-4 border-b-2 border-dashed border-teal-800 w-full mb-8">
           <div>
             <h1
               className="text-3xl sm:text-4xl text-yellow-300 flex items-center gap-2"
@@ -250,9 +228,8 @@ export default function FormulaPyramidPage() {
             </p>
           </div>
 
-          {/* ── 이미지와 똑같은 타원형 스위치 (ON/OFF 원형 노브 슬라이딩) ───────── */}
+          {/* ── 타원형 스위치 (ON/OFF 원형 노브 슬라이딩) ────────────────────── */}
           <div className="flex items-center gap-3 select-none">
-            {/* 플레이어 모드 라벨 */}
             <span
               onClick={() => setMode("player")}
               className={`cursor-pointer text-lg font-semibold transition-colors duration-200 ${
@@ -263,7 +240,6 @@ export default function FormulaPyramidPage() {
               플레이어 모드
             </span>
 
-            {/* 타원형 슬라이더 스위치 트랙 */}
             <button
               type="button"
               role="switch"
@@ -277,7 +253,6 @@ export default function FormulaPyramidPage() {
               }}
               title="모드 전환 스위치"
             >
-              {/* 슬라이딩 동그라미 노브 (Knob) */}
               <span
                 className={`inline-block w-6 h-6 rounded-full transition-transform duration-300 ease-in-out shadow-lg ${
                   mode === "dealer"
@@ -292,7 +267,6 @@ export default function FormulaPyramidPage() {
               />
             </button>
 
-            {/* 딜러 모드 라벨 */}
             <span
               onClick={() => setMode("dealer")}
               className={`cursor-pointer text-lg font-semibold transition-colors duration-200 ${
@@ -306,420 +280,434 @@ export default function FormulaPyramidPage() {
         </div>
 
         {/* ───────────────────────────────────────────────────────────────────
-           1. 플레이어 모드 화면 (가로 3분할)
+           [하단 3분할 영역 — 3:6:3 동일 컬럼 틀 및 고정 높이 적용]
+           플레이어 모드 & 딜러 모드 모두 동일한 xl:col-span-3, 6, 3 틀을 사용하므로
+           모드를 전환해도 박스 외곽 위치, 높이, 화면 배치가 1px 도 안 덜컹거림!
            ─────────────────────────────────────────────────────────────────── */}
-        {mode === "player" && (
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch w-full mx-auto animate-fade-in">
-            {/* ── [좌측] 게임 입장하기 (xl:col-span-3) ───────────────────────── */}
-            <div className="xl:col-span-3 chalk-box content-box flex flex-col gap-6 bg-teal-950/75 backdrop-blur-md h-full">
-              <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-3">
-                <LogIn className="text-yellow-400" size={24} />
-                <h2 className="text-2.5xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
-                  게임 입장하기
-                </h2>
-              </div>
-
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  alert(`[${nickname || "손님"}] 님, 입장 코드 [${entryCode}] 로 입장을 시도합니다.`);
-                }}
-                className="flex flex-col gap-5 flex-1 justify-between"
-              >
-                <div className="flex flex-col gap-4">
-                  {/* 닉네임 입력 */}
-                  <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="nickname-input"
-                      className="text-base text-gray-200 font-medium"
-                      style={{ fontFamily: "var(--font-chalk)" }}
-                    >
-                      닉네임
-                    </label>
-                    <input
-                      id="nickname-input"
-                      type="text"
-                      placeholder="닉네임을 입력해 주세요"
-                      value={nickname}
-                      onChange={(e) => setNickname(e.target.value)}
-                      className="w-full px-4 py-3 rounded bg-teal-900/90 border border-dashed border-teal-600 text-white text-base focus:outline-none focus:border-yellow-400"
-                      style={{ fontFamily: "var(--font-body)" }}
-                    />
-                  </div>
-
-                  {/* 입장 코드 입력 */}
-                  <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="code-input"
-                      className="text-base text-gray-200 font-medium"
-                      style={{ fontFamily: "var(--font-chalk)" }}
-                    >
-                      입장 코드
-                    </label>
-                    <input
-                      id="code-input"
-                      type="text"
-                      placeholder="딜러에게 받은 코드 (예: PYRAMID-1234)"
-                      value={entryCode}
-                      onChange={(e) => setEntryCode(e.target.value)}
-                      className="w-full px-4 py-3 rounded bg-teal-900/90 border border-dashed border-teal-600 text-white text-base uppercase focus:outline-none focus:border-yellow-400"
-                      style={{ fontFamily: "var(--font-body)" }}
-                    />
-                  </div>
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch w-full mx-auto min-h-[640px]">
+          {/* ── [좌측 박스] xl:col-span-3 (3/12 컬럼) ───────────────────────── */}
+          <div className="xl:col-span-3 chalk-box content-box flex flex-col gap-6 bg-teal-950/75 backdrop-blur-md h-full min-h-[620px]">
+            {mode === "player" ? (
+              <>
+                <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-3">
+                  <LogIn className="text-yellow-400" size={24} />
+                  <h2 className="text-2.5xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
+                    게임 입장하기
+                  </h2>
                 </div>
 
-                {/* 입장 버튼 */}
-                <button
-                  type="submit"
-                  className="btn-chalk w-full justify-center py-3.5 text-xl mt-4"
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    alert(`[${nickname || "손님"}] 님, 입장 코드 [${entryCode}] 로 입장을 시도합니다.`);
+                  }}
+                  className="flex flex-col gap-5 flex-1 justify-between"
                 >
-                  게임 방 입장하기
-                </button>
-              </form>
-            </div>
-
-            {/* ── [중앙] 수식 피라미드 (xl:col-span-6) ──────────── */}
-            <div className="xl:col-span-6 chalk-box content-box flex flex-col items-center gap-5 bg-teal-950/85 backdrop-blur-md h-full">
-              {/* 상단 타이틀 & 설명 */}
-              <div className="text-center w-full border-b border-dashed border-teal-700 pb-3">
-                <h2 className="text-3.5xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
-                  수식 피라미드
-                </h2>
-                <div className="flex items-center justify-center gap-1.5 text-sm text-gray-300 mt-1">
-                  <Pencil size={16} className="text-yellow-400" />
-                  <span style={{ fontFamily: "var(--font-body)" }}>
-                    게임 시작을 기다리는 동안 연습해 보세요.
-                  </span>
-                </div>
-              </div>
-
-              {/* 4층짜리 정육각형 피라미드 (A~J) */}
-              <div className="py-2 flex flex-col items-center gap-2 sm:gap-3 my-auto w-full overflow-x-auto">
-                {PYRAMID_DATA.map((row, rowIndex) => (
-                  <div key={rowIndex} className="flex justify-center gap-2 sm:gap-3">
-                    {row.map((node) => (
-                      <HexagonCell
-                        key={node.id}
-                        node={node}
-                        isSelected={selectedNodes.includes(node.id)}
-                        onClick={() => handleNodeClick(node.id)}
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-2">
+                      <label
+                        htmlFor="nickname-input"
+                        className="text-base text-gray-200 font-medium"
+                        style={{ fontFamily: "var(--font-chalk)" }}
+                      >
+                        닉네임
+                      </label>
+                      <input
+                        id="nickname-input"
+                        type="text"
+                        placeholder="닉네임을 입력해 주세요"
+                        value={nickname}
+                        onChange={(e) => setNickname(e.target.value)}
+                        className="w-full px-4 py-3 rounded bg-teal-900/90 border border-dashed border-teal-600 text-white text-base focus:outline-none focus:border-yellow-400"
+                        style={{ fontFamily: "var(--font-body)" }}
                       />
-                    ))}
-                  </div>
-                ))}
-              </div>
-
-              {/* 피라미드 밑 하단 조작 컨트롤 박스 */}
-              <div className="w-full chalk-box-straight p-4 sm:p-5 bg-teal-900/60 rounded flex flex-col gap-4 mt-auto">
-                {/* 보드: 현재 선택 수식 렌더링 */}
-                <div className="w-full bg-teal-950 p-3.5 rounded border border-dashed border-teal-600 flex items-center justify-between">
-                  <span className="text-sm text-teal-400 font-semibold" style={{ fontFamily: "var(--font-chalk)" }}>
-                    선택된 수식 보드:
-                  </span>
-                  <span
-                    className="text-2xl font-bold text-yellow-300 tracking-widest"
-                    style={{ fontFamily: "var(--font-chalk)" }}
-                  >
-                    {exprStr || "(칸 3개를 클릭하세요)"}
-                  </span>
-                  {currentResult !== null && (
-                    <span className="text-xl font-bold text-emerald-400 ml-2">
-                      = {currentResult}
-                    </span>
-                  )}
-                </div>
-
-                {/* TARGET & A~J 클릭 입력 버튼 박스 */}
-                <div className="flex flex-col sm:flex-row items-stretch gap-4">
-                  {/* 좌측: TARGET / 9 */}
-                  <div className="chalk-box-straight bg-teal-950 px-5 py-4 flex flex-col items-center justify-center min-w-[100px] border-yellow-400/80">
-                    <span
-                      className="text-sm text-yellow-400 font-bold tracking-wider"
-                      style={{ fontFamily: "var(--font-chalk)" }}
-                    >
-                      TARGET
-                    </span>
-                    <span
-                      className="text-4xl text-white font-black"
-                      style={{ fontFamily: "var(--font-chalk)" }}
-                    >
-                      9
-                    </span>
-                  </div>
-
-                  {/* 우측: A~J 선택 클릭 박스 목록 */}
-                  <div className="flex-1 flex flex-col gap-2">
-                    <div className="text-sm text-gray-300 font-semibold" style={{ fontFamily: "var(--font-chalk)" }}>
-                      칸 클릭 선택 (최대 3개):
                     </div>
-                    <div className="grid grid-cols-5 gap-2">
-                      {Object.values(ALL_NODES).map((node) => {
-                        const isSel = selectedNodes.includes(node.id);
-                        return (
-                          <button
-                            key={node.id}
-                            type="button"
-                            onClick={() => handleNodeClick(node.id)}
-                            className={`py-2 px-2 rounded text-base font-bold transition-all ${
-                              isSel
-                                ? "bg-yellow-400 text-teal-950 scale-105 shadow-md"
-                                : "bg-teal-800/90 text-white hover:bg-teal-700"
-                            }`}
-                            style={{ fontFamily: "var(--font-chalk)" }}
-                          >
-                            {node.id} ({node.display})
-                          </button>
-                        );
-                      })}
+
+                    <div className="flex flex-col gap-2">
+                      <label
+                        htmlFor="code-input"
+                        className="text-base text-gray-200 font-medium"
+                        style={{ fontFamily: "var(--font-chalk)" }}
+                      >
+                        입장 코드
+                      </label>
+                      <input
+                        id="code-input"
+                        type="text"
+                        placeholder="딜러에게 받은 코드 (예: PYRAMID-1234)"
+                        value={entryCode}
+                        onChange={(e) => setEntryCode(e.target.value)}
+                        className="w-full px-4 py-3 rounded bg-teal-900/90 border border-dashed border-teal-600 text-white text-base uppercase focus:outline-none focus:border-yellow-400"
+                        style={{ fontFamily: "var(--font-body)" }}
+                      />
                     </div>
                   </div>
-                </div>
 
-                {/* 제출 및 초기화 버튼 */}
-                <div className="flex items-center gap-3 mt-1">
                   <button
-                    type="button"
-                    onClick={handleSubmitAnswer}
-                    className="btn-chalk flex-1 justify-center py-3 text-xl"
+                    type="submit"
+                    className="btn-chalk w-full justify-center py-3.5 text-xl mt-4"
                   >
-                    제출하기
+                    게임 방 입장하기
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedNodes([]);
-                      setSubmissionResult(null);
-                    }}
-                    className="p-3 text-gray-300 hover:text-white rounded border border-dashed border-teal-600 hover:border-yellow-400 transition-colors"
-                    title="선택 초기화"
-                  >
-                    <RefreshCw size={22} />
-                  </button>
+                </form>
+              </>
+            ) : (
+              /* 딜러 모드일 때의 좌측 박스 */
+              <>
+                <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-3">
+                  <Monitor className="text-yellow-400" size={24} />
+                  <h2 className="text-2.5xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
+                    딜러 가이드
+                  </h2>
                 </div>
-
-                {/* 제출 결과 메시지 피드백 */}
-                {submissionResult && (
-                  <div
-                    className={`p-3.5 rounded border text-base flex items-center gap-2.5 ${
-                      submissionResult.success
-                        ? "bg-emerald-950/90 border-emerald-500 text-emerald-300"
-                        : "bg-rose-950/90 border-rose-500 text-rose-300"
-                    }`}
-                    style={{ fontFamily: "var(--font-body)" }}
-                  >
-                    {submissionResult.success ? (
-                      <CheckCircle2 size={22} className="flex-shrink-0" />
-                    ) : (
-                      <XCircle size={22} className="flex-shrink-0" />
-                    )}
-                    <span>{submissionResult.msg}</span>
+                <div
+                  className="flex flex-col gap-4 text-sm text-gray-200 leading-relaxed flex-1 justify-between"
+                  style={{ fontFamily: "var(--font-body)" }}
+                >
+                  <div className="flex flex-col gap-3">
+                    <p>
+                      딜러 모드에서는 라운드 수, 제한 시간, 오답 패널티를 설정하여 방을 생성할 수 있습니다.
+                    </p>
+                    <div className="bg-teal-900/60 p-3.5 rounded border border-dashed border-yellow-400/40 text-xs text-yellow-300">
+                      💡 생성된 방 코드를 학생(플레이어)들에게 공유하세요.
+                    </div>
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* ── [우측] 게임 설명 (xl:col-span-3) ───────────────────────────── */}
-            <div className="xl:col-span-3 chalk-box content-box flex flex-col gap-4 bg-teal-950/75 backdrop-blur-md h-full">
-              <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-3">
-                <HelpCircle className="text-yellow-400" size={24} />
-                <h2 className="text-2.5xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
-                  게임 설명
-                </h2>
-              </div>
-
-              <div
-                className="flex flex-col gap-4 text-sm text-gray-200 leading-relaxed"
-                style={{ fontFamily: "var(--font-body)" }}
-              >
-                <p>
-                  ① <strong className="text-yellow-300 font-semibold">&lsquo;수식 피라미드&rsquo;</strong>는
-                  문제 판에서 3개의 칸을 선택하여 타깃 넘버가 될 수 있도록 수식을 만드는 게임입니다.
-                </p>
-
-                <p>
-                  ② 라운드가 시작되면 피라미드 모양의 문제판과 타깃 넘버가 공개됩니다. 문제판은 총 10개의
-                  칸으로 이루어져 있으며, 각 칸에는 사칙연산 기호 중 하나와 숫자가 한 쌍을 이루고
-                  있습니다.
-                </p>
-
-                <div className="flex flex-col gap-2.5 bg-teal-900/60 p-3.5 rounded border border-dashed border-yellow-500/40">
-                  <p>
-                    ③ 문제판이 공개되면 이 중 3개의 칸을 조합해 타깃 넘버가 답이 되는 수식을 만들어야
-                    합니다.
-                  </p>
-                  <div className="flex items-start gap-1.5 text-xs text-yellow-300 mt-1">
-                    <AlertTriangle size={15} className="flex-shrink-0 mt-0.5 text-yellow-400" />
-                    <span>동일한 칸은 중복선택할 수 없습니다.</span>
-                  </div>
-                  <div className="flex items-start gap-1.5 text-xs text-yellow-300">
-                    <AlertTriangle size={15} className="flex-shrink-0 mt-0.5 text-yellow-400" />
-                    <span>수식의 맨 앞에 사용된 칸의 연산 기호는 무시합니다.</span>
-                  </div>
-                  <div className="flex items-start gap-1.5 text-xs text-yellow-300">
-                    <AlertTriangle size={15} className="flex-shrink-0 mt-0.5 text-yellow-400" />
-                    <span>완성된 수식은 사칙연산 순서에 따라 계산됩니다.</span>
+                  <div className="p-3 bg-teal-900/40 rounded text-center text-xs text-gray-400 border border-dashed border-teal-700">
+                    현재 모드: <span className="text-yellow-400 font-bold">딜러 진행 관리</span>
                   </div>
                 </div>
-
-                <p>
-                  ④ 정답을 제출하면 1점을 획득하고, 오답을 제출하거나 이번 라운드에서 이미 제출된 정답을
-                  다시 제출하는 경우 1점이 감점됩니다.
-                </p>
-
-                <p>⑤ 라운드 진행 시간이 지났거나 모든 정답이 제출되면 라운드가 종료됩니다.</p>
-              </div>
-            </div>
+              </>
+            )}
           </div>
-        )}
 
-        {/* ───────────────────────────────────────────────────────────────────
-           2. 딜러 모드 화면
-           ─────────────────────────────────────────────────────────────────── */}
-        {mode === "dealer" && (
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch w-full mx-auto animate-fade-in">
-            {/* ── [좌측/중앙] 개발중입니다 (xl:col-span-8) ────────────────────── */}
-            <div className="xl:col-span-8 chalk-box content-box flex flex-col items-center justify-center min-h-[450px] bg-teal-950/50 border-dashed border-teal-700/60 text-center h-full">
-              <Pencil size={56} className="text-yellow-400/60 mb-4 animate-bounce" />
-              <h2
-                className="text-4xl text-yellow-300 mb-3"
-                style={{ fontFamily: "var(--font-chalk)" }}
-              >
-                개발중입니다.
-              </h2>
-              <p className="text-base text-gray-300" style={{ fontFamily: "var(--font-body)" }}>
-                딜러 진행용 모니터링 화면 및 실시간 진행 컨트롤러 기능이 준비 중입니다.
-              </p>
-            </div>
-
-            {/* ── [우측] 세팅 및 방 생성 (xl:col-span-4) ───────────────────────── */}
-            <div className="xl:col-span-4 chalk-box content-box flex flex-col gap-6 bg-teal-950/80 backdrop-blur-md h-full">
-              <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-3">
-                <Settings className="text-yellow-400" size={24} />
-                <h2 className="text-2.5xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
-                  게임 세팅 & 방 생성
-                </h2>
-              </div>
-
-              {/* 1. 라운드 설정 (1~15 라운드, 5열 버튼 배열) */}
-              <div className="flex flex-col gap-2">
-                <label
-                  className="text-base text-gray-200 font-medium"
-                  style={{ fontFamily: "var(--font-chalk)" }}
-                >
-                  라운드 설정 (총 {selectedRound}라운드)
-                </label>
-                <div className="grid grid-cols-5 gap-2">
-                  {Array.from({ length: 15 }, (_, i) => i + 1).map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => setSelectedRound(r)}
-                      className={`py-2 text-sm font-bold rounded transition-all ${
-                        selectedRound === r
-                          ? "bg-yellow-400 text-teal-950 shadow scale-105"
-                          : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
-                      }`}
-                      style={{ fontFamily: "var(--font-chalk)" }}
-                    >
-                      {r}R
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 2. 라운드 별 시간 (1분~5분, 3열 버튼 배열) */}
-              <div className="flex flex-col gap-2">
-                <label
-                  className="text-base text-gray-200 font-medium"
-                  style={{ fontFamily: "var(--font-chalk)" }}
-                >
-                  라운드 별 시간 ({selectedTime}분)
-                </label>
-                <div className="grid grid-cols-3 gap-2.5">
-                  {[1, 2, 3, 4, 5].map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => setSelectedTime(t)}
-                      className={`py-2.5 text-base font-bold rounded transition-all ${
-                        selectedTime === t
-                          ? "bg-yellow-400 text-teal-950 shadow scale-105"
-                          : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
-                      }`}
-                      style={{ fontFamily: "var(--font-chalk)" }}
-                    >
-                      {t}분
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 3. 오답 패널티 (없음, 1초~5초, 3열 버튼 배열) */}
-              <div className="flex flex-col gap-2">
-                <label
-                  className="text-base text-gray-200 font-medium"
-                  style={{ fontFamily: "var(--font-chalk)" }}
-                >
-                  오답 패널티 ({selectedPenalty})
-                </label>
-                <div className="grid grid-cols-3 gap-2.5">
-                  {["없음", "1초", "2초", "3초", "4초", "5초"].map((p) => (
-                    <button
-                      key={p}
-                      type="button"
-                      onClick={() => setSelectedPenalty(p)}
-                      className={`py-2.5 text-sm font-bold rounded transition-all ${
-                        selectedPenalty === p
-                          ? "bg-yellow-400 text-teal-950 shadow scale-105"
-                          : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
-                      }`}
-                      style={{ fontFamily: "var(--font-chalk)" }}
-                    >
-                      {p}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 게임 생성하기 버튼 */}
-              <button
-                type="button"
-                onClick={handleCreateGame}
-                className="btn-chalk w-full justify-center mt-3 py-3.5 text-xl"
-              >
-                게임 방 생성하기
-              </button>
-
-              {/* 생성된 방 코드 출력 */}
-              {generatedRoomCode && (
-                <div className="chalk-box-straight bg-teal-950 p-4 flex flex-col items-center gap-2 border-yellow-400 text-center">
-                  <span className="text-xs text-gray-300" style={{ fontFamily: "var(--font-body)" }}>
-                    생성된 방 코드 (플레이어에게 전달하세요)
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="text-3xl text-yellow-300 font-bold tracking-widest"
-                      style={{ fontFamily: "var(--font-chalk)" }}
-                    >
-                      {generatedRoomCode}
+          {/* ── [중앙 박스] xl:col-span-6 (6/12 컬럼) ───────────────────────── */}
+          <div className="xl:col-span-6 chalk-box content-box flex flex-col items-center gap-5 bg-teal-950/85 backdrop-blur-md h-full min-h-[620px]">
+            {mode === "player" ? (
+              <>
+                <div className="text-center w-full border-b border-dashed border-teal-700 pb-3">
+                  <h2 className="text-3.5xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
+                    수식 피라미드
+                  </h2>
+                  <div className="flex items-center justify-center gap-1.5 text-sm text-gray-300 mt-1">
+                    <Pencil size={16} className="text-yellow-400" />
+                    <span style={{ fontFamily: "var(--font-body)" }}>
+                      게임 시작을 기다리는 동안 연습해 보세요.
                     </span>
+                  </div>
+                </div>
+
+                <div className="py-2 flex flex-col items-center gap-2 sm:gap-3 my-auto w-full overflow-x-auto">
+                  {PYRAMID_DATA.map((row, rowIndex) => (
+                    <div key={rowIndex} className="flex justify-center gap-2 sm:gap-3">
+                      {row.map((node) => (
+                        <HexagonCell
+                          key={node.id}
+                          node={node}
+                          isSelected={selectedNodes.includes(node.id)}
+                          onClick={() => handleNodeClick(node.id)}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="w-full chalk-box-straight p-4 sm:p-5 bg-teal-900/60 rounded flex flex-col gap-4 mt-auto">
+                  <div className="w-full bg-teal-950 p-3.5 rounded border border-dashed border-teal-600 flex items-center justify-between">
+                    <span className="text-sm text-teal-400 font-semibold" style={{ fontFamily: "var(--font-chalk)" }}>
+                      선택된 수식 보드:
+                    </span>
+                    <span
+                      className="text-2xl font-bold text-yellow-300 tracking-widest"
+                      style={{ fontFamily: "var(--font-chalk)" }}
+                    >
+                      {exprStr || "(칸 3개를 클릭하세요)"}
+                    </span>
+                    {currentResult !== null && (
+                      <span className="text-xl font-bold text-emerald-400 ml-2">
+                        = {currentResult}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-stretch gap-4">
+                    <div className="chalk-box-straight bg-teal-950 px-5 py-4 flex flex-col items-center justify-center min-w-[100px] border-yellow-400/80">
+                      <span
+                        className="text-sm text-yellow-400 font-bold tracking-wider"
+                        style={{ fontFamily: "var(--font-chalk)" }}
+                      >
+                        TARGET
+                      </span>
+                      <span
+                        className="text-4xl text-white font-black"
+                        style={{ fontFamily: "var(--font-chalk)" }}
+                      >
+                        9
+                      </span>
+                    </div>
+
+                    <div className="flex-1 flex flex-col gap-2">
+                      <div className="text-sm text-gray-300 font-semibold" style={{ fontFamily: "var(--font-chalk)" }}>
+                        칸 클릭 선택 (최대 3개):
+                      </div>
+                      <div className="grid grid-cols-5 gap-2">
+                        {Object.values(ALL_NODES).map((node) => {
+                          const isSel = selectedNodes.includes(node.id);
+                          return (
+                            <button
+                              key={node.id}
+                              type="button"
+                              onClick={() => handleNodeClick(node.id)}
+                              className={`py-2 px-2 rounded text-base font-bold transition-all ${
+                                isSel
+                                  ? "bg-yellow-400 text-teal-950 scale-105 shadow-md"
+                                  : "bg-teal-800/90 text-white hover:bg-teal-700"
+                              }`}
+                              style={{ fontFamily: "var(--font-chalk)" }}
+                            >
+                              {node.id} ({node.display})
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 mt-1">
+                    <button
+                      type="button"
+                      onClick={handleSubmitAnswer}
+                      className="btn-chalk flex-1 justify-center py-3 text-xl"
+                    >
+                      제출하기
+                    </button>
                     <button
                       type="button"
                       onClick={() => {
-                        navigator.clipboard.writeText(generatedRoomCode);
-                        alert(`방 코드 [${generatedRoomCode}] 가 복사되었습니다!`);
+                        setSelectedNodes([]);
+                        setSubmissionResult(null);
                       }}
-                      className="p-1.5 text-yellow-400 hover:text-yellow-200"
-                      title="코드 복사"
+                      className="p-3 text-gray-300 hover:text-white rounded border border-dashed border-teal-600 hover:border-yellow-400 transition-colors"
+                      title="선택 초기화"
                     >
-                      <Copy size={20} />
+                      <RefreshCw size={22} />
                     </button>
                   </div>
+
+                  {submissionResult && (
+                    <div
+                      className={`p-3.5 rounded border text-base flex items-center gap-2.5 ${
+                        submissionResult.success
+                          ? "bg-emerald-950/90 border-emerald-500 text-emerald-300"
+                          : "bg-rose-950/90 border-rose-500 text-rose-300"
+                      }`}
+                      style={{ fontFamily: "var(--font-body)" }}
+                    >
+                      {submissionResult.success ? (
+                        <CheckCircle2 size={22} className="flex-shrink-0" />
+                      ) : (
+                        <XCircle size={22} className="flex-shrink-0" />
+                      )}
+                      <span>{submissionResult.msg}</span>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </>
+            ) : (
+              /* 딜러 모드일 때의 중앙 메인 박스 (개발중입니다) */
+              <div className="flex flex-col items-center justify-center h-full my-auto text-center py-12">
+                <Pencil size={56} className="text-yellow-400/60 mb-4 animate-bounce" />
+                <h2
+                  className="text-4xl text-yellow-300 mb-3"
+                  style={{ fontFamily: "var(--font-chalk)" }}
+                >
+                  개발중입니다.
+                </h2>
+                <p className="text-base text-gray-300 max-w-md" style={{ fontFamily: "var(--font-body)" }}>
+                  딜러 진행용 실시간 게임 현황 모니터링 및 진행 컨트롤러 기능이 준비 중입니다.
+                </p>
+              </div>
+            )}
           </div>
-        )}
+
+          {/* ── [우측 박스] xl:col-span-3 (3/12 컬럼) ───────────────────────── */}
+          <div className="xl:col-span-3 chalk-box content-box flex flex-col gap-5 bg-teal-950/80 backdrop-blur-md h-full min-h-[620px]">
+            {mode === "player" ? (
+              <>
+                <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-3">
+                  <HelpCircle className="text-yellow-400" size={24} />
+                  <h2 className="text-2.5xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
+                    게임 설명
+                  </h2>
+                </div>
+
+                <div
+                  className="flex flex-col gap-4 text-sm text-gray-200 leading-relaxed"
+                  style={{ fontFamily: "var(--font-body)" }}
+                >
+                  <p>
+                    ① <strong className="text-yellow-300 font-semibold">&lsquo;수식 피라미드&rsquo;</strong>는
+                    문제 판에서 3개의 칸을 선택하여 타깃 넘버가 될 수 있도록 수식을 만드는 게임입니다.
+                  </p>
+
+                  <p>
+                    ② 라운드가 시작되면 피라미드 모양의 문제판과 타깃 넘버가 공개됩니다. 문제판은 총 10개의
+                    칸으로 이루어져 있으며, 각 칸에는 사칙연산 기호 중 하나와 숫자가 한 쌍을 이루고
+                    있습니다.
+                  </p>
+
+                  <div className="flex flex-col gap-2.5 bg-teal-900/60 p-3.5 rounded border border-dashed border-yellow-500/40">
+                    <p>
+                      ③ 문제판이 공개되면 이 중 3개의 칸을 조합해 타깃 넘버가 답이 되는 수식을 만들어야
+                      합니다.
+                    </p>
+                    <div className="flex items-start gap-1.5 text-xs text-yellow-300 mt-1">
+                      <AlertTriangle size={15} className="flex-shrink-0 mt-0.5 text-yellow-400" />
+                      <span>동일한 칸은 중복선택할 수 없습니다.</span>
+                    </div>
+                    <div className="flex items-start gap-1.5 text-xs text-yellow-300">
+                      <AlertTriangle size={15} className="flex-shrink-0 mt-0.5 text-yellow-400" />
+                      <span>수식의 맨 앞에 사용된 칸의 연산 기호는 무시합니다.</span>
+                    </div>
+                    <div className="flex items-start gap-1.5 text-xs text-yellow-300">
+                      <AlertTriangle size={15} className="flex-shrink-0 mt-0.5 text-yellow-400" />
+                      <span>완성된 수식은 사칙연산 순서에 따라 계산됩니다.</span>
+                    </div>
+                  </div>
+
+                  <p>
+                    ④ 정답을 제출하면 1점을 획득하고, 오답을 제출하거나 이번 라운드에서 이미 제출된 정답을
+                    다시 제출하는 경우 1점이 감점됩니다.
+                  </p>
+
+                  <p>⑤ 라운드 진행 시간이 지났거나 모든 정답이 제출되면 라운드가 종료됩니다.</p>
+                </div>
+              </>
+            ) : (
+              /* 딜러 모드일 때의 우측 박스 (세팅 & 방 생성) */
+              <>
+                <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-3">
+                  <Settings className="text-yellow-400" size={24} />
+                  <h2 className="text-2.5xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
+                    게임 세팅 & 방 생성
+                  </h2>
+                </div>
+
+                <div className="flex flex-col gap-5 flex-1 justify-between">
+                  <div className="flex flex-col gap-4">
+                    {/* 1. 라운드 설정 */}
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm text-gray-200 font-medium" style={{ fontFamily: "var(--font-chalk)" }}>
+                        라운드 설정 ({selectedRound}라운드)
+                      </label>
+                      <div className="grid grid-cols-5 gap-1.5">
+                        {Array.from({ length: 15 }, (_, i) => i + 1).map((r) => (
+                          <button
+                            key={r}
+                            type="button"
+                            onClick={() => setSelectedRound(r)}
+                            className={`py-1.5 text-xs font-bold rounded transition-all ${
+                              selectedRound === r
+                                ? "bg-yellow-400 text-teal-950 shadow scale-105"
+                                : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
+                            }`}
+                            style={{ fontFamily: "var(--font-chalk)" }}
+                          >
+                            {r}R
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 2. 라운드 별 시간 */}
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm text-gray-200 font-medium" style={{ fontFamily: "var(--font-chalk)" }}>
+                        라운드 별 시간 ({selectedTime}분)
+                      </label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[1, 2, 3, 4, 5].map((t) => (
+                          <button
+                            key={t}
+                            type="button"
+                            onClick={() => setSelectedTime(t)}
+                            className={`py-2 text-sm font-bold rounded transition-all ${
+                              selectedTime === t
+                                ? "bg-yellow-400 text-teal-950 shadow scale-105"
+                                : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
+                            }`}
+                            style={{ fontFamily: "var(--font-chalk)" }}
+                          >
+                            {t}분
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 3. 오답 패널티 */}
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm text-gray-200 font-medium" style={{ fontFamily: "var(--font-chalk)" }}>
+                        오답 패널티 ({selectedPenalty})
+                      </label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {["없음", "1초", "2초", "3초", "4초", "5초"].map((p) => (
+                          <button
+                            key={p}
+                            type="button"
+                            onClick={() => setSelectedPenalty(p)}
+                            className={`py-2 text-xs font-bold rounded transition-all ${
+                              selectedPenalty === p
+                                ? "bg-yellow-400 text-teal-950 shadow scale-105"
+                                : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
+                            }`}
+                            style={{ fontFamily: "var(--font-chalk)" }}
+                          >
+                            {p}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <button
+                      type="button"
+                      onClick={handleCreateGame}
+                      className="btn-chalk w-full justify-center py-3 text-lg"
+                    >
+                      게임 방 생성하기
+                    </button>
+
+                    {generatedRoomCode && (
+                      <div className="chalk-box-straight bg-teal-950 p-3 mt-3 flex flex-col items-center gap-1 border-yellow-400 text-center">
+                        <span className="text-xs text-gray-300" style={{ fontFamily: "var(--font-body)" }}>
+                          생성된 방 코드
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="text-2xl text-yellow-300 font-bold tracking-widest"
+                            style={{ fontFamily: "var(--font-chalk)" }}
+                          >
+                            {generatedRoomCode}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(generatedRoomCode);
+                              alert(`방 코드 [${generatedRoomCode}] 가 복사되었습니다!`);
+                            }}
+                            className="p-1 text-yellow-400 hover:text-yellow-200"
+                            title="코드 복사"
+                          >
+                            <Copy size={18} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

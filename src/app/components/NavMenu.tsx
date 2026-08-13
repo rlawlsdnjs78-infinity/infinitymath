@@ -1,8 +1,8 @@
 /**
  * NavMenu.tsx
  * 네비게이션 메뉴 (Client Component)
- * - mode="center": 헤더 중앙에 위치할 '브레인 서바이벌' 드롭다운 메뉴
- * - mode="auth": 헤더 우측에 위치할 '로그인', '회원가입' 버튼 (넉넉한 패딩)
+ * - mode="auth": 상단 헤더 우측 '로그인', '회원가입' 버튼
+ * - mode="center": 하단 메뉴 바 중앙 '브레인 서바이벌' 드롭다운 메뉴
  */
 
 "use client";
@@ -14,7 +14,7 @@ import { ChevronDown, LogIn, UserPlus, Brain } from "lucide-react";
 export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // 중앙 '브레인 서바이벌' 메뉴
+  // mode="center": 중앙 브레인 서바이벌
   if (mode === "center") {
     return (
       <nav aria-label="메인 네비게이션" className="relative">
@@ -25,10 +25,10 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
         >
           <button
             type="button"
-            className="flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 hover:bg-teal-900/60"
+            className="flex items-center gap-2 px-4 py-1.5 rounded-md transition-all duration-200 hover:bg-teal-900/60"
             style={{
               fontFamily: "var(--font-chalk)",
-              fontSize: "1.5rem",
+              fontSize: "1.45rem",
               color: isDropdownOpen ? "var(--chalk-yellow)" : "var(--chalk-white)",
               background: "transparent",
               border: "none",
@@ -36,7 +36,7 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
               letterSpacing: "0.04em",
             }}
           >
-            <Brain size={24} className="text-yellow-400" />
+            <Brain size={22} className="text-yellow-400" />
             <span>브레인 서바이벌</span>
             <ChevronDown
               size={18}
@@ -81,7 +81,7 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
     );
   }
 
-  // 우측 '로그인' & '회원가입' 버튼
+  // mode="auth": 우측 로그인 / 회원가입 버튼
   return (
     <div className="flex items-center gap-4">
       {/* 로그인 버튼 */}
@@ -93,7 +93,7 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
           alignItems: "center",
           justifyContent: "center",
           gap: "8px",
-          padding: "10px 22px",
+          padding: "9px 22px",
           fontFamily: "var(--font-chalk)",
           fontSize: "1.15rem",
           lineHeight: 1,
@@ -118,7 +118,7 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
           alignItems: "center",
           justifyContent: "center",
           gap: "8px",
-          padding: "10px 22px",
+          padding: "9px 22px",
           fontFamily: "var(--font-chalk)",
           fontSize: "1.15rem",
           lineHeight: 1,
