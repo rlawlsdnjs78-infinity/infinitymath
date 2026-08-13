@@ -72,35 +72,35 @@ function HexagonCell({
   return (
     <div
       onClick={onClick}
-      className={`relative cursor-pointer transition-all duration-200 hover:scale-105 select-none w-18 h-22 sm:w-22 sm:h-26 flex items-center justify-center ${
+      className={`relative cursor-pointer transition-all duration-200 hover:scale-105 select-none w-[68px] h-[78.5px] sm:w-[80px] sm:h-[92.4px] flex items-center justify-center ${
         isSelected ? "drop-shadow-[0_0_16px_rgba(245,230,66,0.95)]" : ""
       }`}
     >
       <svg
-        viewBox="0 0 100 115"
+        viewBox="0 0 100 115.47"
         className="w-full h-full absolute inset-0 filter drop-shadow-md"
       >
-        {/* ① 메인 큰 정육각형 몸통 */}
+        {/* ① 메인 큰 정육각형 몸통 (Pointy-topped regular hexagon) */}
         <polygon
-          points="50,2 95,28 95,87 50,113 5,87 5,28"
+          points="50,4.62 96,31.18 96,84.30 50,110.85 4,84.30 4,31.18"
           fill={isSelected ? "rgba(245, 230, 66, 0.3)" : "rgba(20, 50, 50, 0.92)"}
           stroke={isSelected ? "#f5e642" : "rgba(240, 237, 232, 0.65)"}
           strokeWidth="3.5"
           strokeDasharray={isSelected ? "none" : "4 2"}
         />
 
-        {/* ② 상단 A~J 칸 번호를 독립적으로 감싸는 '정육각형(Mini Hexagon)' 도형 */}
+        {/* ② 상단 A~J 칸 번호를 감싸는 '정육각형(Mini Regular Hexagon)' - 큰 정육각형 상단 두 변 공유 */}
         <polygon
-          points="50,6 74,19 74,38 50,47 26,38 26,19"
-          fill={isSelected ? "#f5e642" : "rgba(245, 230, 66, 0.2)"}
+          points="50,4.62 67.32,14.62 67.32,34.62 50,44.62 32.68,34.62 32.68,14.62"
+          fill={isSelected ? "#f5e642" : "rgba(245, 230, 66, 0.25)"}
           stroke={isSelected ? "#1a3a3a" : "var(--chalk-yellow)"}
           strokeWidth="2"
         />
 
-        {/* 상단 A~J 칸 번호 (글씨 확대: fontSize 17) */}
+        {/* 상단 A~J 칸 번호 */}
         <text
           x="50"
-          y="31"
+          y="29.5"
           textAnchor="middle"
           fill={isSelected ? "#1a3a3a" : "var(--chalk-yellow)"}
           fontSize="17"
@@ -110,7 +110,7 @@ function HexagonCell({
           {node.id}
         </text>
 
-        {/* 중앙 사칙연산 값 텍스트 (글씨 확대: fontSize 26) */}
+        {/* 중앙 사칙연산 값 텍스트 */}
         <text
           x="50"
           y="82"
@@ -208,6 +208,9 @@ export default function FormulaPyramidPage() {
         calcValue: currentResult ?? undefined,
       });
     }
+
+    // 제출 시 내가 클릭했던 칸들 바로 초기화 (요구사항 5)
+    setSelectedNodes([]);
   };
 
   const handleCreateGame = () => {
@@ -220,9 +223,9 @@ export default function FormulaPyramidPage() {
     <div className="w-full flex-1 flex flex-col items-center justify-start px-4 sm:px-8 pt-6 pb-12">
       <div className="w-full max-w-[1550px] flex flex-col mx-auto">
         {/* ───────────────────────────────────────────────────────────────────
-           [상단 고정 타이틀 & 슬라이딩 스위치]
+           [상단 고정 타이틀 & 모드 설정 통합 버튼]
            ─────────────────────────────────────────────────────────────────── */}
-        <div className="h-[80px] min-h-[80px] flex-shrink-0 flex items-center justify-between pb-4 border-b-2 border-dashed border-teal-800 w-full mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-4">
           <div>
             <h1
               className="text-3xl sm:text-4xl text-yellow-300 flex items-center gap-2 mb-1"
@@ -236,56 +239,43 @@ export default function FormulaPyramidPage() {
             </p>
           </div>
 
-          {/* 타원형 ON/OFF 슬라이딩 스위치 */}
-          <div className="flex items-center gap-4 select-none">
-            <span
+          {/* 모드 설정 버튼 (요구사항 8: 모드 설정 버튼 안에 플레이어 모드와 딜러 모드 배치) */}
+          <div
+            className="flex items-center p-1.5 rounded-full select-none bg-teal-950/90 border border-yellow-400/60 shadow-inner"
+            style={{ backdropFilter: "blur(8px)" }}
+          >
+            <button
+              type="button"
               onClick={() => setMode("player")}
-              className={`cursor-pointer text-lg font-semibold transition-colors duration-200 ${
-                mode === "player" ? "text-yellow-300 font-bold scale-105" : "text-gray-400 hover:text-gray-200"
+              className={`px-4 py-1.5 sm:px-5 sm:py-2 rounded-full text-base sm:text-lg font-bold transition-all duration-200 cursor-pointer ${
+                mode === "player"
+                  ? "bg-yellow-400 text-teal-950 shadow-md scale-102"
+                  : "text-gray-300 hover:text-white"
               }`}
               style={{ fontFamily: "var(--font-chalk)" }}
             >
               플레이어 모드
-            </span>
-
+            </button>
             <button
               type="button"
-              role="switch"
-              aria-checked={mode === "dealer"}
-              onClick={() => setMode(mode === "player" ? "dealer" : "player")}
-              className="relative inline-flex items-center justify-start h-9 w-16 rounded-full p-1 cursor-pointer transition-colors duration-300 focus:outline-none"
-              style={{
-                background: "rgba(10, 30, 30, 0.95)",
-                border: "2px solid rgba(245, 230, 66, 0.8)",
-                boxShadow: "inset 0 2px 4px rgba(0,0,0,0.6), 0 0 10px rgba(245, 230, 66, 0.2)",
-              }}
-              title="모드 전환 스위치"
-            >
-              <span
-                className={`inline-block w-6 h-6 rounded-full transition-transform duration-300 ease-in-out shadow-lg ${
-                  mode === "dealer"
-                    ? "translate-x-7 bg-yellow-400"
-                    : "translate-x-0 bg-white"
-                }`}
-                style={{
-                  boxShadow: mode === "dealer"
-                    ? "0 0 8px rgba(245, 230, 66, 0.9)"
-                    : "0 0 8px rgba(255, 255, 255, 0.8)",
-                }}
-              />
-            </button>
-
-            <span
               onClick={() => setMode("dealer")}
-              className={`cursor-pointer text-lg font-semibold transition-colors duration-200 ${
-                mode === "dealer" ? "text-yellow-300 font-bold scale-105" : "text-gray-400 hover:text-gray-200"
+              className={`px-4 py-1.5 sm:px-5 sm:py-2 rounded-full text-base sm:text-lg font-bold transition-all duration-200 cursor-pointer ${
+                mode === "dealer"
+                  ? "bg-yellow-400 text-teal-950 shadow-md scale-102"
+                  : "text-gray-300 hover:text-white"
               }`}
               style={{ fontFamily: "var(--font-chalk)" }}
             >
               딜러 모드
-            </span>
+            </button>
           </div>
         </div>
+
+        {/* [요구사항 1] 상단 게임 소개와 UI 사이의 점선 구분선 (박스 내부 점선 스타일 및 여백과 동일하게 적용) */}
+        <div
+          className="w-full border-t border-dashed border-teal-700"
+          style={{ marginTop: "1.1rem", marginBottom: "1.1rem" }}
+        />
 
         {/* ───────────────────────────────────────────────────────────────────
            [하단 3분할 박스 영역]
@@ -441,10 +431,14 @@ export default function FormulaPyramidPage() {
                   style={{ marginTop: "1.1rem", marginBottom: "1.1rem" }}
                 />
 
-                {/* [요구사항 3] 피라미드 간격 축소 (gap-1.5) */}
-                <div className="py-2 flex flex-col items-center gap-1.5 my-auto w-full overflow-x-auto">
+                {/* [요구사항 2 & 4] 피라미드 정육각형 배치 및 층간 uniform spacing & 하단 박스와의 충분한 간격 */}
+                <div className="py-6 my-auto flex flex-col items-center justify-center w-full overflow-x-auto">
                   {PYRAMID_DATA.map((row, rowIndex) => (
-                    <div key={rowIndex} className="flex justify-center gap-1.5 sm:gap-2">
+                    <div
+                      key={rowIndex}
+                      className="flex justify-center gap-2 sm:gap-2.5"
+                      style={{ marginTop: rowIndex === 0 ? "0px" : "-13px" }}
+                    >
                       {row.map((node) => (
                         <HexagonCell
                           key={node.id}
@@ -457,7 +451,8 @@ export default function FormulaPyramidPage() {
                   ))}
                 </div>
 
-                <div className="w-full chalk-box-straight p-5 sm:p-6 bg-teal-900/60 rounded-md flex flex-col gap-5 mt-auto">
+                {/* [요구사항 4] 피라미드와 정답 입력 박스 사이 여백(mt-6 sm:mt-8) 확보 */}
+                <div className="w-full chalk-box-straight p-5 sm:p-6 bg-teal-900/60 rounded-md flex flex-col gap-5 mt-6 sm:mt-8">
                   <div className="w-full bg-teal-950 px-5 py-4 rounded-md border border-dashed border-teal-600 flex items-center justify-between">
                     <span className="text-sm text-teal-400 font-semibold" style={{ fontFamily: "var(--font-chalk)" }}>
                       선택된 수식 보드:
@@ -518,24 +513,14 @@ export default function FormulaPyramidPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3.5 mt-1">
+                  {/* [요구사항 5] 제출하기 버튼 클릭 시 초기화되며, 오른쪽 초기화 버튼 제거 */}
+                  <div className="mt-1">
                     <button
                       type="button"
                       onClick={handleSubmitAnswer}
-                      className="btn-chalk flex-1 justify-center py-3.5 text-xl"
+                      className="btn-chalk w-full justify-center py-3.5 text-xl"
                     >
                       제출하기
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedNodes([]);
-                        setSubmissionResult(null);
-                      }}
-                      className="p-3.5 text-gray-300 hover:text-white rounded-md border border-dashed border-teal-600 hover:border-yellow-400 transition-colors"
-                      title="선택 초기화"
-                    >
-                      <RefreshCw size={22} />
                     </button>
                   </div>
 
@@ -594,46 +579,65 @@ export default function FormulaPyramidPage() {
                   style={{ marginTop: "1.1rem", marginBottom: "1.1rem" }}
                 />
 
+                {/* [요구사항 6 & 7] 번호 기준 들여쓰기 & ③번 '주의' 표시 항목 전용 박스 */}
                 <div
-                  className="flex flex-col gap-5 text-sm text-gray-200 leading-relaxed py-1"
+                  className="flex flex-col gap-4 text-sm text-gray-200 leading-relaxed py-1"
                   style={{ fontFamily: "var(--font-body)" }}
                 >
-                  <p className="leading-relaxed">
-                    ① <strong className="text-yellow-300 font-semibold">&lsquo;수식 피라미드&rsquo;</strong>는
-                    문제 판에서 3개의 칸을 선택하여 타깃 넘버가 될 수 있도록 수식을 만드는 게임입니다.
-                  </p>
-
-                  <p className="leading-relaxed">
-                    ② 라운드가 시작되면 피라미드 모양의 문제판과 타깃 넘버가 공개됩니다. 문제판은 총 10개의
-                    칸으로 이루어져 있으며, 각 칸에는 사칙연산 기호 중 하나와 숫자가 한 쌍을 이루고
-                    있습니다.
-                  </p>
-
-                  <div className="flex flex-col gap-3 bg-teal-900/70 p-4.5 rounded-md border border-dashed border-yellow-500/40">
-                    <p className="font-medium text-yellow-200">
-                      ③ 문제판이 공개되면 이 중 3개의 칸을 조합해 타깃 넘버가 답이 되는 수식을 만들어야
-                      합니다.
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex-shrink-0 font-bold text-yellow-300 w-5">①</span>
+                    <p className="flex-1 leading-relaxed">
+                      <strong className="text-yellow-300 font-semibold">&lsquo;수식 피라미드&rsquo;</strong>는
+                      문제 판에서 3개의 칸을 선택하여 타깃 넘버가 될 수 있도록 수식을 만드는 게임입니다.
                     </p>
-                    <div className="flex items-start gap-2 text-xs text-yellow-300 mt-1">
-                      <AlertTriangle size={15} className="flex-shrink-0 mt-0.5 text-yellow-400" />
+                  </div>
+
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex-shrink-0 font-bold text-yellow-300 w-5">②</span>
+                    <p className="flex-1 leading-relaxed">
+                      라운드가 시작되면 피라미드 모양의 문제판과 타깃 넘버가 공개됩니다. 문제판은 총 10개의
+                      칸으로 이루어져 있으며, 각 칸에는 사칙연산 기호 중 하나와 숫자가 한 쌍을 이루고
+                      있습니다.
+                    </p>
+                  </div>
+
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex-shrink-0 font-bold text-yellow-300 w-5">③</span>
+                    <p className="flex-1 leading-relaxed">
+                      문제판이 공개되면 이 중 3개의 칸을 조합해 타깃 넘버가 답이 되는 수식을 만들어야 합니다.
+                    </p>
+                  </div>
+
+                  {/* [요구사항 7] ③번 하위 '주의' 표시 항목만 박스 처리 및 내부 공간(p-4.5) 확보 */}
+                  <div className="ml-7 my-1 p-4 sm:p-4.5 rounded-md border border-dashed border-yellow-500/50 bg-teal-900/60 flex flex-col gap-2.5">
+                    <div className="flex items-start gap-2 text-xs sm:text-sm text-yellow-300">
+                      <AlertTriangle size={16} className="flex-shrink-0 mt-0.5 text-yellow-400" />
                       <span>동일한 칸은 중복선택할 수 없습니다.</span>
                     </div>
-                    <div className="flex items-start gap-2 text-xs text-yellow-300">
-                      <AlertTriangle size={15} className="flex-shrink-0 mt-0.5 text-yellow-400" />
+                    <div className="flex items-start gap-2 text-xs sm:text-sm text-yellow-300">
+                      <AlertTriangle size={16} className="flex-shrink-0 mt-0.5 text-yellow-400" />
                       <span>수식의 맨 앞에 사용된 칸의 연산 기호는 무시합니다.</span>
                     </div>
-                    <div className="flex items-start gap-2 text-xs text-yellow-300">
-                      <AlertTriangle size={15} className="flex-shrink-0 mt-0.5 text-yellow-400" />
+                    <div className="flex items-start gap-2 text-xs sm:text-sm text-yellow-300">
+                      <AlertTriangle size={16} className="flex-shrink-0 mt-0.5 text-yellow-400" />
                       <span>완성된 수식은 사칙연산 순서에 따라 계산됩니다.</span>
                     </div>
                   </div>
 
-                  <p className="leading-relaxed">
-                    ④ 정답을 제출하면 1점을 획득하고, 오답을 제출하거나 이번 라운드에서 이미 제출된 정답을
-                    다시 제출하는 경우 1점이 감점됩니다.
-                  </p>
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex-shrink-0 font-bold text-yellow-300 w-5">④</span>
+                    <p className="flex-1 leading-relaxed">
+                      정답을 제출하면 1점을 획득하고, 오답을 제출하거나 이번 라운드에서 이미 제출된 정답을
+                      다시 제출하는 경우 1점이 감점됩니다.
+                    </p>
+                  </div>
 
-                  <p className="leading-relaxed">⑤ 라운드 진행 시간이 지났거나 모든 정답이 제출되면 라운드가 종료됩니다.</p>
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex-shrink-0 font-bold text-yellow-300 w-5">⑤</span>
+                    <p className="flex-1 leading-relaxed">
+                      라운드 진행 시간이 지났거나 모든 정답이 제출되면 라운드가 종료됩니다.
+                    </p>
+                  </div>
                 </div>
               </>
             ) : (
