@@ -1,4 +1,4 @@
 @echo off
 git add .
-git commit -m "style: apply generous padding and margins across all boxes, input fields, labels, and dashed borders"
+git commit --allow-empty -m "re-deploy: trigger Vercel deployment with latest padding and layout fixes"
 git push
