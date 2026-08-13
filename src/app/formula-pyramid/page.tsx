@@ -2,10 +2,10 @@
  * src/app/formula-pyramid/page.tsx
  * 수식 피라미드 게임 페이지
  *
- * [완벽한 UI 고정]
- * 1. 상단 타이틀 & 슬라이더 스위치 영역: h-[90px] 고정 (위치 절대 미동 없음)
- * 2. 하단 3분할 박스 영역: 플레이어 모드 & 딜러 모드 모두 동일한 3:6:3 컬럼 비율 유지
- *    (토글을 클릭해도 박스 외곽 위치, 높이, 화면 배치가 단 1px 도 덜컹거리지 않음)
+ * [상단 위치 완전 고정]
+ * - 수직 정중앙(justify-center) 제거 -> 상단 고정(justify-start pt-6) 적용
+ * - 플레이어 모드 ↔ 딜러 모드 전환 시 '수식 피라미드 (Formula Pyramid)' 텍스트 라인과
+ *   토글 스위치의 상단 위치(Y축)가 1px 도 움직이지 않고 100% 동일한 위치 유지
  */
 
 "use client";
@@ -208,13 +208,17 @@ export default function FormulaPyramidPage() {
   };
 
   return (
-    <div className="w-full flex-1 flex flex-col items-center justify-center px-4 sm:px-8 py-8 my-auto">
+    /*
+     * [최상위 래퍼 수직 고정]
+     * justify-start pt-6 pb-12 적용으로 상단 텍스트 라인이 수직 정중앙 정렬 때문에 내려가는 현상 100% 방지
+     */
+    <div className="w-full flex-1 flex flex-col items-center justify-start px-4 sm:px-8 pt-6 pb-12">
       <div className="w-full max-w-[1550px] flex flex-col mx-auto">
         {/* ───────────────────────────────────────────────────────────────────
            [상단 고정 영역]
-           h-[90px] min-h-[90px] flex-shrink-0 으로 고정되어 모드 전환 시 절대 미동 없음
+           상단 수직 위치(Y축)가 모드 전환 시 단 1px 도 안 움직이도록 완벽 고정
            ─────────────────────────────────────────────────────────────────── */}
-        <div className="h-[90px] min-h-[90px] flex-shrink-0 flex items-center justify-between pb-4 border-b-2 border-dashed border-teal-800 w-full mb-8">
+        <div className="h-[80px] min-h-[80px] flex-shrink-0 flex items-center justify-between pb-4 border-b-2 border-dashed border-teal-800 w-full mb-8">
           <div>
             <h1
               className="text-3xl sm:text-4xl text-yellow-300 flex items-center gap-2"
@@ -280,13 +284,11 @@ export default function FormulaPyramidPage() {
         </div>
 
         {/* ───────────────────────────────────────────────────────────────────
-           [하단 3분할 영역 — 3:6:3 동일 컬럼 틀 및 고정 높이 적용]
-           플레이어 모드 & 딜러 모드 모두 동일한 xl:col-span-3, 6, 3 틀을 사용하므로
-           모드를 전환해도 박스 외곽 위치, 높이, 화면 배치가 1px 도 안 덜컹거림!
+           [하단 3분할 영역]
            ─────────────────────────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch w-full mx-auto min-h-[640px]">
           {/* ── [좌측 박스] xl:col-span-3 (3/12 컬럼) ───────────────────────── */}
-          <div className="xl:col-span-3 chalk-box content-box flex flex-col gap-6 bg-teal-950/75 backdrop-blur-md h-full min-h-[620px]">
+          <div className="xl:col-span-3 chalk-box content-box flex flex-col gap-6 bg-teal-950/75 backdrop-blur-md h-full min-h-[640px]">
             {mode === "player" ? (
               <>
                 <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-3">
@@ -352,7 +354,6 @@ export default function FormulaPyramidPage() {
                 </form>
               </>
             ) : (
-              /* 딜러 모드일 때의 좌측 박스 */
               <>
                 <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-3">
                   <Monitor className="text-yellow-400" size={24} />
@@ -381,7 +382,7 @@ export default function FormulaPyramidPage() {
           </div>
 
           {/* ── [중앙 박스] xl:col-span-6 (6/12 컬럼) ───────────────────────── */}
-          <div className="xl:col-span-6 chalk-box content-box flex flex-col items-center gap-5 bg-teal-950/85 backdrop-blur-md h-full min-h-[620px]">
+          <div className="xl:col-span-6 chalk-box content-box flex flex-col items-center gap-5 bg-teal-950/85 backdrop-blur-md h-full min-h-[640px]">
             {mode === "player" ? (
               <>
                 <div className="text-center w-full border-b border-dashed border-teal-700 pb-3">
@@ -513,7 +514,6 @@ export default function FormulaPyramidPage() {
                 </div>
               </>
             ) : (
-              /* 딜러 모드일 때의 중앙 메인 박스 (개발중입니다) */
               <div className="flex flex-col items-center justify-center h-full my-auto text-center py-12">
                 <Pencil size={56} className="text-yellow-400/60 mb-4 animate-bounce" />
                 <h2
@@ -530,7 +530,7 @@ export default function FormulaPyramidPage() {
           </div>
 
           {/* ── [우측 박스] xl:col-span-3 (3/12 컬럼) ───────────────────────── */}
-          <div className="xl:col-span-3 chalk-box content-box flex flex-col gap-5 bg-teal-950/80 backdrop-blur-md h-full min-h-[620px]">
+          <div className="xl:col-span-3 chalk-box content-box flex flex-col gap-5 bg-teal-950/80 backdrop-blur-md h-full min-h-[640px]">
             {mode === "player" ? (
               <>
                 <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-3">
@@ -583,7 +583,6 @@ export default function FormulaPyramidPage() {
                 </div>
               </>
             ) : (
-              /* 딜러 모드일 때의 우측 박스 (세팅 & 방 생성) */
               <>
                 <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-3">
                   <Settings className="text-yellow-400" size={24} />
@@ -594,7 +593,6 @@ export default function FormulaPyramidPage() {
 
                 <div className="flex flex-col gap-5 flex-1 justify-between">
                   <div className="flex flex-col gap-4">
-                    {/* 1. 라운드 설정 */}
                     <div className="flex flex-col gap-2">
                       <label className="text-sm text-gray-200 font-medium" style={{ fontFamily: "var(--font-chalk)" }}>
                         라운드 설정 ({selectedRound}라운드)
@@ -618,7 +616,6 @@ export default function FormulaPyramidPage() {
                       </div>
                     </div>
 
-                    {/* 2. 라운드 별 시간 */}
                     <div className="flex flex-col gap-2">
                       <label className="text-sm text-gray-200 font-medium" style={{ fontFamily: "var(--font-chalk)" }}>
                         라운드 별 시간 ({selectedTime}분)
@@ -642,7 +639,6 @@ export default function FormulaPyramidPage() {
                       </div>
                     </div>
 
-                    {/* 3. 오답 패널티 */}
                     <div className="flex flex-col gap-2">
                       <label className="text-sm text-gray-200 font-medium" style={{ fontFamily: "var(--font-chalk)" }}>
                         오답 패널티 ({selectedPenalty})
