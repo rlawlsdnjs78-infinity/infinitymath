@@ -212,10 +212,10 @@ export default function FormulaPyramidPage() {
     const TARGET = 9;
     if (currentResult === TARGET) {
       // 정답 선택 시 1초 간 정답 표출 후 원복
-      triggerNotice("🎉 정답입니다! (1점)", "success", 1000);
+      triggerNotice("정답입니다! (1점)", "success", 1000);
     } else {
       // 오답 선택 시 1초 간 오답 표출 후 원복
-      triggerNotice("❌ 오답입니다! (-1점)", "error", 1000);
+      triggerNotice("오답입니다! (-1점)", "error", 1000);
     }
 
     // 제출 시 선택 칸 바로 초기화
