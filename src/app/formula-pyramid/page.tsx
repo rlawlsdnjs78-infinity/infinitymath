@@ -443,81 +443,79 @@ export default function FormulaPyramidPage() {
           </div>
 
           {/* ── [중앙 박스] xl:col-span-6 ─────────────────────────────────── */}
-          <div className="xl:col-span-6 chalk-box content-box flex flex-col items-center bg-teal-950/85 backdrop-blur-md h-full min-h-[640px] p-6 sm:p-7">
+          <div className="xl:col-span-6 chalk-box content-box flex flex-col bg-teal-950/85 backdrop-blur-md h-full min-h-[640px] p-6 sm:p-7">
             {mode === "player" ? (
               <>
-                {/* [요구사항 1 & 2] 연습 문구 & 정답 확인 버튼 중앙 정렬 및 가로 길이 일치 */}
-                <div className="w-full flex flex-col items-center justify-center gap-2.5 mb-4">
-                  <div className="flex items-center gap-2 text-base sm:text-lg text-gray-200 font-semibold" style={{ fontFamily: "var(--font-chalk)" }}>
-                    <Pencil size={20} className="text-yellow-400 flex-shrink-0" />
-                    <span>게임 시작을 기다리는 동안 연습해 보세요.</span>
+                {/* [요구사항] 한 블록 안에서 좌측: 피라미드, 우측: 설명글 & 정답보기 */}
+                <div className="w-full flex flex-col xl:flex-row items-center xl:items-start justify-between gap-6 mb-4">
+                  {/* [좌측] 대칭 피라미드 */}
+                  <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0">
+                    {PYRAMID_DATA.map((row, rowIndex) => (
+                      <div
+                        key={rowIndex}
+                        className="flex justify-center gap-2 sm:gap-2.5"
+                        style={{ marginTop: rowIndex === 0 ? "0px" : "-10px" }}
+                      >
+                        {row.map((node) => (
+                          <HexagonCell
+                            key={node.id}
+                            node={node}
+                            isSelected={selectedNodes.includes(node.id)}
+                            onClick={() => handleNodeClick(node.id)}
+                          />
+                        ))}
+                      </div>
+                    ))}
                   </div>
 
-                  {/* [요구사항 2] 연습해 보세요 문구와 가로 길이를 일치시키고 큼직한 글씨로 가독성 확보 */}
-                  <button
-                    type="button"
-                    onClick={() => setShowSolutions(!showSolutions)}
-                    className="w-full max-w-[420px] flex items-center justify-between px-5 py-2.5 rounded-full bg-teal-900/90 hover:bg-teal-800 border-2 border-dashed border-yellow-400/80 text-yellow-300 text-base sm:text-lg font-bold transition-all cursor-pointer shadow-md"
-                    style={{ fontFamily: "var(--font-chalk)" }}
-                  >
-                    <div className="flex items-center gap-2">
+                  {/* [우측] 연습 설명글 & 정답확인 버튼 (문구 가운데 정렬) & 정답 목록 펼침 */}
+                  <div className="flex-1 w-full flex flex-col items-center xl:items-stretch gap-4">
+                    <div className="flex items-center gap-2 text-base sm:text-lg text-gray-200 font-semibold justify-center xl:justify-start" style={{ fontFamily: "var(--font-chalk)" }}>
+                      <Pencil size={20} className="text-yellow-400 flex-shrink-0" />
+                      <span>게임 시작을 기다리는 동안 연습해 보세요.</span>
+                    </div>
+
+                    {/* '정답 확인' 버튼 - 박스 가운데 정렬 */}
+                    <button
+                      type="button"
+                      onClick={() => setShowSolutions(!showSolutions)}
+                      className="w-full flex items-center justify-center gap-3 px-5 py-3 rounded-full bg-teal-900/90 hover:bg-teal-800 border-2 border-dashed border-yellow-400/80 text-yellow-300 text-base sm:text-lg font-bold transition-all cursor-pointer shadow-md text-center"
+                      style={{ fontFamily: "var(--font-chalk)" }}
+                    >
                       <Sparkles size={18} className="text-yellow-400 animate-pulse" />
                       <span>정답 확인 ({validSolutions.length}개 조합)</span>
-                    </div>
-                    {showSolutions ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                  </button>
-                </div>
+                      {showSolutions ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                    </button>
 
-                {/* [요구사항 3] 정답 확인 클릭 시 바로 아래쪽으로만 창이 펼쳐지고, 계산식 없이 답만 4개씩 표출 */}
-                {showSolutions && (
-                  <div className="w-full max-w-[420px] bg-teal-900/95 rounded-xl p-4 mb-4 border-2 border-dashed border-yellow-400/80 shadow-2xl flex flex-col gap-3 mx-auto">
-                    <div className="flex items-center justify-between border-b border-teal-700 pb-2">
-                      <span className="text-sm font-bold text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
-                        💡 TARGET 9 정답 목록
-                      </span>
-                      <span className="text-xs text-gray-300">클릭 시 자동 선택</span>
-                    </div>
+                    {/* 바로 아래쪽으로만 펼쳐지는 정답 목록 창 */}
+                    {showSolutions && (
+                      <div className="w-full bg-teal-900/95 rounded-xl p-4 border-2 border-dashed border-yellow-400/80 shadow-2xl flex flex-col gap-3">
+                        <div className="flex items-center justify-between border-b border-teal-700 pb-2">
+                          <span className="text-sm font-bold text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
+                            💡 TARGET 9 정답 목록
+                          </span>
+                          <span className="text-xs text-gray-300">클릭 시 자동 선택</span>
+                        </div>
 
-                    <div className="grid grid-cols-4 gap-2 max-h-[160px] overflow-y-auto pr-1">
-                      {validSolutions.map((sol, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => {
-                            setSelectedNodes(sol.nodes);
-                            setTempNotice(null);
-                          }}
-                          className="py-2 px-1 rounded-md bg-teal-950/90 hover:bg-yellow-400 hover:text-teal-950 text-yellow-300 font-extrabold text-base sm:text-lg transition-all border border-teal-600 cursor-pointer text-center tracking-widest shadow-sm"
-                          style={{ fontFamily: "var(--font-chalk)" }}
-                        >
-                          {sol.nodes.join(" ")}
-                        </button>
-                      ))}
-                    </div>
+                        <div className="grid grid-cols-4 gap-2 max-h-[160px] overflow-y-auto pr-1">
+                          {validSolutions.map((sol, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => {
+                                setSelectedNodes(sol.nodes);
+                                setTempNotice(null);
+                              }}
+                              className="py-2 px-1 rounded-md bg-teal-950/90 hover:bg-yellow-400 hover:text-teal-950 text-yellow-300 font-extrabold text-base sm:text-lg transition-all border border-teal-600 cursor-pointer text-center tracking-widest shadow-sm"
+                              style={{ fontFamily: "var(--font-chalk)" }}
+                            >
+                              {sol.nodes.join(" ")}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-
-                {/* [요구사항 1] 피라미드 모양 대칭 복구 및 중앙 정렬 */}
-                <div
-                  className="py-3 my-1 flex flex-col items-center justify-center w-full overflow-visible"
-                  style={{ marginBottom: "1rem" }}
-                >
-                  {PYRAMID_DATA.map((row, rowIndex) => (
-                    <div
-                      key={rowIndex}
-                      className="flex justify-center gap-2 sm:gap-2.5"
-                      style={{ marginTop: rowIndex === 0 ? "0px" : "-10px" }}
-                    >
-                      {row.map((node) => (
-                        <HexagonCell
-                          key={node.id}
-                          node={node}
-                          isSelected={selectedNodes.includes(node.id)}
-                          onClick={() => handleNodeClick(node.id)}
-                        />
-                      ))}
-                    </div>
-                  ))}
                 </div>
 
                 {/* [요구사항 2, 3, 4, 5] 정답 입력 박스 레이아웃 & 고정 높이 안내창 변신 */}
