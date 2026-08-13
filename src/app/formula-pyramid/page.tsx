@@ -719,26 +719,26 @@ export default function FormulaPyramidPage() {
                       }}
                     >
                       <div
-                        className="flex items-start gap-3.5 text-yellow-200 font-medium"
-                        style={{ fontSize: "0.95rem", lineHeight: "1.5", wordBreak: "keep-all" }}
+                        className="flex items-start gap-3 text-yellow-200 text-sm font-medium"
+                        style={{ lineHeight: "1.5", wordBreak: "keep-all" }}
                       >
-                        <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-0.5" />
+                        <AlertTriangle size={16} className="flex-shrink-0 text-yellow-400 mt-0.5" />
                         <span>동일한 칸은 중복선택할 수 없습니다.</span>
                       </div>
 
                       <div
-                        className="flex items-start gap-3.5 text-yellow-200 font-medium"
-                        style={{ fontSize: "0.95rem", lineHeight: "1.5", wordBreak: "keep-all" }}
+                        className="flex items-start gap-3 text-yellow-200 text-sm font-medium"
+                        style={{ lineHeight: "1.5", wordBreak: "keep-all" }}
                       >
-                        <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-0.5" />
+                        <AlertTriangle size={16} className="flex-shrink-0 text-yellow-400 mt-0.5" />
                         <span>수식의 맨 앞에 사용된 칸의 연산 기호는 무시합니다.</span>
                       </div>
 
                       <div
-                        className="flex items-start gap-3.5 text-yellow-200 font-medium"
-                        style={{ fontSize: "0.95rem", lineHeight: "1.5", wordBreak: "keep-all" }}
+                        className="flex items-start gap-3 text-yellow-200 text-sm font-medium"
+                        style={{ lineHeight: "1.5", wordBreak: "keep-all" }}
                       >
-                        <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-0.5" />
+                        <AlertTriangle size={16} className="flex-shrink-0 text-yellow-400 mt-0.5" />
                         <span>완성된 수식은 사칙연산 순서에 따라 계산됩니다.</span>
                       </div>
                     </div>
