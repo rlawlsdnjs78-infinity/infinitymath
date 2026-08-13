@@ -675,14 +675,14 @@ export default function FormulaPyramidPage() {
                 />
 
                 {/* [요구사항 6 & 7] 번호 기준 들여쓰기 & ③번 '주의' 표시 항목 전용 박스 */}
-                {/* [요구사항] 우측 여백이 비지 않도록 양쪽 정렬(textAlign: justify) & 단어 보정(keep-all) 혼합 적용 */}
+                {/* [요구사항] 넘어가는 문자가 이전 줄의 우측 빈 공간으로 당겨오도록 wordBreak: break-all 적용 */}
                 <div
                   className="flex flex-col gap-4 text-sm text-gray-200 leading-relaxed py-1"
-                  style={{ fontFamily: "var(--font-body)", wordBreak: "keep-all", textAlign: "justify", textJustify: "inter-word" }}
+                  style={{ fontFamily: "var(--font-body)", wordBreak: "break-all", letterSpacing: "-0.015em" }}
                 >
                   <div className="flex items-start gap-2.5">
                     <span className="flex-shrink-0 font-bold text-yellow-300 w-5">①</span>
-                    <p className="flex-1 leading-relaxed break-keep" style={{ wordBreak: "keep-all", textAlign: "justify", textJustify: "inter-word" }}>
+                    <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
                       <strong className="text-yellow-300 font-semibold">&lsquo;수식 피라미드&rsquo;</strong>는
                       문제 판에서 3개의 칸을 선택하여 타깃 넘버가 될 수 있도록 수식을 만드는 게임입니다.
                     </p>
@@ -690,7 +690,7 @@ export default function FormulaPyramidPage() {
 
                   <div className="flex items-start gap-2.5">
                     <span className="flex-shrink-0 font-bold text-yellow-300 w-5">②</span>
-                    <p className="flex-1 leading-relaxed break-keep" style={{ wordBreak: "keep-all", textAlign: "justify", textJustify: "inter-word" }}>
+                    <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
                       라운드가 시작되면 피라미드 모양의 문제판과 타깃 넘버가 공개됩니다. 문제판은 총 10개의
                       칸으로 이루어져 있으며, 각 칸에는 사칙연산 기호 중 하나와 숫자가 한 쌍을 이루고
                       있습니다.
@@ -701,7 +701,7 @@ export default function FormulaPyramidPage() {
                   <div className="flex flex-col gap-2">
                     <div className="flex items-start gap-2.5">
                       <span className="flex-shrink-0 font-bold text-yellow-300 w-5">③</span>
-                      <p className="flex-1 leading-relaxed break-keep" style={{ wordBreak: "keep-all", textAlign: "justify", textJustify: "inter-word" }}>
+                      <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
                         문제판이 공개되면 이 중 3개의 칸을 조합해 타깃 넘버가 답이 되는 수식을 만들어야 합니다.
                       </p>
                     </div>
@@ -721,33 +721,33 @@ export default function FormulaPyramidPage() {
                     >
                       <div
                         className="flex items-start gap-3 text-yellow-200 text-sm font-medium"
-                        style={{ lineHeight: "1.5", wordBreak: "keep-all", textAlign: "justify", textJustify: "inter-word" }}
+                        style={{ lineHeight: "1.5", wordBreak: "break-all", letterSpacing: "-0.015em" }}
                       >
                         <AlertTriangle size={16} className="flex-shrink-0 text-yellow-400 mt-0.5" />
-                        <span style={{ wordBreak: "keep-all" }}>동일한 칸은 중복선택할 수 없습니다.</span>
+                        <span style={{ wordBreak: "break-all" }}>동일한 칸은 중복선택할 수 없습니다.</span>
                       </div>
 
                       <div
                         className="flex items-start gap-3 text-yellow-200 text-sm font-medium"
-                        style={{ lineHeight: "1.5", wordBreak: "keep-all", textAlign: "justify", textJustify: "inter-word" }}
+                        style={{ lineHeight: "1.5", wordBreak: "break-all", letterSpacing: "-0.015em" }}
                       >
                         <AlertTriangle size={16} className="flex-shrink-0 text-yellow-400 mt-0.5" />
-                        <span style={{ wordBreak: "keep-all" }}>수식의 맨 앞에 사용된 칸의 연산 기호는 무시합니다.</span>
+                        <span style={{ wordBreak: "break-all" }}>수식의 맨 앞에 사용된 칸의 연산 기호는 무시합니다.</span>
                       </div>
 
                       <div
                         className="flex items-start gap-3 text-yellow-200 text-sm font-medium"
-                        style={{ lineHeight: "1.5", wordBreak: "keep-all", textAlign: "justify", textJustify: "inter-word" }}
+                        style={{ lineHeight: "1.5", wordBreak: "break-all", letterSpacing: "-0.015em" }}
                       >
                         <AlertTriangle size={16} className="flex-shrink-0 text-yellow-400 mt-0.5" />
-                        <span style={{ wordBreak: "keep-all" }}>완성된 수식은 사칙연산 순서에 따라 계산됩니다.</span>
+                        <span style={{ wordBreak: "break-all" }}>완성된 수식은 사칙연산 순서에 따라 계산됩니다.</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-2.5">
                     <span className="flex-shrink-0 font-bold text-yellow-300 w-5">④</span>
-                    <p className="flex-1 leading-relaxed break-keep" style={{ wordBreak: "keep-all", textAlign: "justify", textJustify: "inter-word" }}>
+                    <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
                       정답을 제출하면 1점을 획득하고, 오답을 제출하거나 이번 라운드에서 이미 제출된 정답을
                       다시 제출하는 경우 1점이 감점됩니다.
                     </p>
@@ -755,7 +755,7 @@ export default function FormulaPyramidPage() {
 
                   <div className="flex items-start gap-2.5">
                     <span className="flex-shrink-0 font-bold text-yellow-300 w-5">⑤</span>
-                    <p className="flex-1 leading-relaxed break-keep" style={{ wordBreak: "keep-all", textAlign: "justify", textJustify: "inter-word" }}>
+                    <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
                       라운드 진행 시간이 지났거나 모든 정답이 제출되면 라운드가 종료됩니다.
                     </p>
                   </div>
