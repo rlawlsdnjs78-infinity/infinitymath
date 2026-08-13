@@ -161,10 +161,8 @@ export default function FormulaPyramidPage() {
     if (nodeIds.length === 0) return { exprStr: "", result: null };
     const nodes = nodeIds.map((id) => ALL_NODES[id]);
 
-    let exprStr = `${nodes[0].id}(${nodes[0].num})`;
-    for (let i = 1; i < nodes.length; i++) {
-      exprStr += ` ${nodes[i].op} ${nodes[i].id}(${nodes[i].num})`;
-    }
+    // [요구사항 2] A(1) ÷ B(4) 형태가 아니라 A B C 형태 (공백으로 노드 ID만 연결)
+    const exprStr = nodeIds.join(" ");
 
     if (nodeIds.length < 3) return { exprStr, result: null };
 
@@ -278,8 +276,8 @@ export default function FormulaPyramidPage() {
               style={{ marginTop: "1.1rem", marginBottom: "1.5rem" }}
             />
 
-            {/* [요구사항 1] 모드 선택 버튼과 '닉네임' 사이 간격 넓힘 (mb-10) */}
-            <div className="w-full flex justify-center mb-10">
+            {/* [요구사항 1] 모드 선택 버튼과 '닉네임' 사이 간격을 명시적 2.5rem(40px)으로 확장 */}
+            <div className="w-full flex justify-center" style={{ marginTop: "0.5rem", marginBottom: "2.5rem" }}>
               <div className="flex items-center rounded-full select-none bg-teal-950/95 border-2 border-yellow-400/70 shadow-lg w-full p-1.5 gap-2">
                 <button
                   type="button"
@@ -451,31 +449,27 @@ export default function FormulaPyramidPage() {
                   className="w-full chalk-box-straight bg-teal-900/60 rounded-md flex flex-col gap-6"
                   style={{ padding: "1.75rem 1.5rem", marginTop: "1.25rem" }}
                 >
+                  {/* [요구사항 2] '선택한 수식:' 라벨과 A B C 수식 글자 크기 대폭 확대 및 자동 실시간 계산(=) 표시 제거 */}
                   <div
                     className="w-full bg-teal-950 rounded-md border border-dashed border-teal-600 flex items-center justify-between"
                     style={{
-                      padding: "18px 28px",
+                      padding: "22px 32px",
                     }}
                   >
-                    <div className="flex items-center gap-4" style={{ paddingLeft: "1.25rem" }}>
+                    <div className="flex items-center gap-5" style={{ paddingLeft: "1.5rem" }}>
                       <span
-                        className="text-lg text-teal-300 font-bold"
+                        className="text-2xl sm:text-3xl text-teal-300 font-extrabold"
                         style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.02em" }}
                       >
                         선택한 수식:
                       </span>
                       <span
-                        className="text-2.5xl font-bold text-yellow-300 tracking-widest"
-                        style={{ fontFamily: "var(--font-chalk)", paddingLeft: "0.75rem" }}
+                        className="text-3xl sm:text-4xl font-black text-yellow-300 tracking-widest"
+                        style={{ fontFamily: "var(--font-chalk)", paddingLeft: "1rem" }}
                       >
                         {exprStr}
                       </span>
                     </div>
-                    {currentResult !== null && (
-                      <span className="text-2xl font-bold text-emerald-400 pr-2">
-                        = {currentResult}
-                      </span>
-                    )}
                   </div>
 
                   <div className="flex flex-col sm:flex-row items-stretch gap-4">
