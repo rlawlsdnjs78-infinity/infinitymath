@@ -469,27 +469,43 @@ export default function FormulaPyramidPage() {
                   </div>
 
                   {/* [우측] 연습 설명글 & 정답확인 버튼 (문구 가운데 정렬) & 정답 목록 펼침 */}
-                  <div className="flex-1 w-full flex flex-col items-center xl:items-stretch gap-4">
-                    <div className="flex items-center gap-2 text-base sm:text-lg text-gray-200 font-semibold justify-center xl:justify-start" style={{ fontFamily: "var(--font-chalk)" }}>
+                  <div className="flex-1 w-full flex flex-col items-center xl:items-stretch gap-5">
+                    <div
+                      className="flex items-center gap-2 text-base sm:text-lg text-gray-200 font-semibold justify-center xl:justify-start"
+                      style={{ fontFamily: "var(--font-chalk)", marginTop: "0.5rem", marginBottom: "0.25rem" }}
+                    >
                       <Pencil size={20} className="text-yellow-400 flex-shrink-0" />
                       <span>게임 시작을 기다리는 동안 연습해 보세요.</span>
                     </div>
 
-                    {/* '정답 확인' 버튼 - 박스 가운데 정렬 */}
+                    {/* '정답 확인' 버튼 - 시원한 내부 패딩과 박스 가운데 정렬 */}
                     <button
                       type="button"
                       onClick={() => setShowSolutions(!showSolutions)}
-                      className="w-full flex items-center justify-center gap-3 px-5 py-3 rounded-full bg-teal-900/90 hover:bg-teal-800 border-2 border-dashed border-yellow-400/80 text-yellow-300 text-base sm:text-lg font-bold transition-all cursor-pointer shadow-md text-center"
-                      style={{ fontFamily: "var(--font-chalk)" }}
+                      className="w-full flex items-center justify-center gap-3 rounded-full bg-teal-900/90 hover:bg-teal-800 border-2 border-dashed border-yellow-400/80 text-yellow-300 text-base sm:text-lg font-bold transition-all cursor-pointer shadow-md text-center"
+                      style={{
+                        padding: "1rem 1.75rem",
+                        marginTop: "0.25rem",
+                        marginBottom: "0.5rem",
+                        fontFamily: "var(--font-chalk)",
+                      }}
                     >
                       <Sparkles size={18} className="text-yellow-400 animate-pulse" />
                       <span>정답 확인 ({validSolutions.length}개 조합)</span>
                       {showSolutions ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                     </button>
 
-                    {/* [요구사항] 바로 아래쪽으로 펼쳐지며 4줄로 왼쪽(정답), 오른쪽(계산식) 표출 */}
+                    {/* [여백 최우선 원칙] 바로 아래쪽으로 펼쳐지며 넉넉한 패딩(1.5rem)과 4줄로 왼쪽(정답), 오른쪽(계산식) 표출 */}
                     {showSolutions && (
-                      <div className="w-full bg-teal-900/95 rounded-xl p-3.5 border-2 border-dashed border-yellow-400/80 shadow-2xl flex flex-col gap-2.5">
+                      <div
+                        className="w-full bg-teal-900/95 rounded-xl border-2 border-dashed border-yellow-400/80 shadow-2xl flex flex-col"
+                        style={{
+                          padding: "1.5rem 1.5rem",
+                          marginTop: "0.5rem",
+                          marginBottom: "1.5rem",
+                          gap: "1rem",
+                        }}
+                      >
                         {validSolutions.slice(0, 4).map((sol, idx) => (
                           <button
                             key={idx}
@@ -498,8 +514,11 @@ export default function FormulaPyramidPage() {
                               setSelectedNodes(sol.nodes);
                               setTempNotice(null);
                             }}
-                            className="w-full flex items-center justify-between px-4 py-2.5 rounded-lg bg-teal-950/90 hover:bg-yellow-400 hover:text-teal-950 text-white transition-all border border-teal-700/80 cursor-pointer shadow-md group"
-                            style={{ fontFamily: "var(--font-chalk)" }}
+                            className="w-full flex items-center justify-between rounded-lg bg-teal-950/90 hover:bg-yellow-400 hover:text-teal-950 text-white transition-all border border-teal-700/80 cursor-pointer shadow-md group"
+                            style={{
+                              padding: "1rem 1.5rem",
+                              fontFamily: "var(--font-chalk)",
+                            }}
                           >
                             {/* 왼쪽: 정답 (예: A C F) */}
                             <span className="text-xl sm:text-2xl font-black text-yellow-300 group-hover:text-teal-950 tracking-widest">
@@ -684,50 +703,51 @@ export default function FormulaPyramidPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex-shrink-0 font-bold text-yellow-300 w-5">③</span>
-                    <p className="flex-1 leading-relaxed">
-                      문제판이 공개되면 이 중 3개의 칸을 조합해 타깃 넘버가 답이 되는 수식을 만들어야 합니다.
-                    </p>
-                  </div>
-
-                  {/* [요구사항] ③번 설명 바로 아래 밀착 배치 & ④번 항목과의 간격(1rem) 조율 */}
-                  <div
-                    className="w-full rounded-lg shadow-md"
-                    style={{
-                      border: "2px dashed #f5e642",
-                      backgroundColor: "rgba(15, 45, 45, 0.9)",
-                      padding: "16px 18px",
-                      marginTop: "0.5rem",
-                      marginBottom: "1rem",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "12px",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    <div
-                      className="flex items-start gap-3.5 text-yellow-200 font-medium"
-                      style={{ fontSize: "0.95rem", lineHeight: "1.6", wordBreak: "keep-all" }}
-                    >
-                      <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-1" />
-                      <span>동일한 칸은 중복선택할 수 없습니다.</span>
+                  {/* ③번 설명 항목 바로 밑에 '주의' 표시 박스 밀착 연결 */}
+                  <div className="flex flex-col gap-2.5">
+                    <div className="flex items-start gap-2.5">
+                      <span className="flex-shrink-0 font-bold text-yellow-300 w-5">③</span>
+                      <p className="flex-1 leading-relaxed">
+                        문제판이 공개되면 이 중 3개의 칸을 조합해 타깃 넘버가 답이 되는 수식을 만들어야 합니다.
+                      </p>
                     </div>
 
+                    {/* [주의 박스] ③번 항목 바로 아래에 넉넉한 패딩(1.25rem 1.5rem)으로 밀착 배치 */}
                     <div
-                      className="flex items-start gap-3.5 text-yellow-200 font-medium"
-                      style={{ fontSize: "0.95rem", lineHeight: "1.6", wordBreak: "keep-all" }}
+                      className="w-full rounded-xl shadow-lg border-2 border-dashed border-yellow-400/90 bg-teal-900/95"
+                      style={{
+                        padding: "1.25rem 1.5rem",
+                        marginTop: "0.25rem",
+                        marginBottom: "1.25rem",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "1rem",
+                        boxSizing: "border-box",
+                      }}
                     >
-                      <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-1" />
-                      <span>수식의 맨 앞에 사용된 칸의 연산 기호는 무시합니다.</span>
-                    </div>
+                      <div
+                        className="flex items-start gap-3.5 text-yellow-200 font-medium"
+                        style={{ fontSize: "0.95rem", lineHeight: "1.6", wordBreak: "keep-all" }}
+                      >
+                        <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-1" />
+                        <span>동일한 칸은 중복선택할 수 없습니다.</span>
+                      </div>
 
-                    <div
-                      className="flex items-start gap-3.5 text-yellow-200 font-medium"
-                      style={{ fontSize: "0.95rem", lineHeight: "1.6", wordBreak: "keep-all" }}
-                    >
-                      <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-1" />
-                      <span>완성된 수식은 사칙연산 순서에 따라 계산됩니다.</span>
+                      <div
+                        className="flex items-start gap-3.5 text-yellow-200 font-medium"
+                        style={{ fontSize: "0.95rem", lineHeight: "1.6", wordBreak: "keep-all" }}
+                      >
+                        <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-1" />
+                        <span>수식의 맨 앞에 사용된 칸의 연산 기호는 무시합니다.</span>
+                      </div>
+
+                      <div
+                        className="flex items-start gap-3.5 text-yellow-200 font-medium"
+                        style={{ fontSize: "0.95rem", lineHeight: "1.6", wordBreak: "keep-all" }}
+                      >
+                        <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-1" />
+                        <span>완성된 수식은 사칙연산 순서에 따라 계산됩니다.</span>
+                      </div>
                     </div>
                   </div>
 
