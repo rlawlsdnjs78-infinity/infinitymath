@@ -25,6 +25,8 @@ import {
   Sparkles,
   Monitor,
   Pyramid,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 /* ─── 피라미드 칸 데이터 (A ~ J) ─────────────────────────────────────────── */
@@ -58,6 +60,42 @@ const ALL_NODES: Record<string, PyramidNode> = {};
 PYRAMID_DATA.flat().forEach((node) => {
   ALL_NODES[node.id] = node;
 });
+
+/* ─── TARGET 9를 만드는 모든 수학적 정답 조합 구하기 ───────────────────────────── */
+const getAllValidSolutions = (target: number = 9): { nodes: string[]; formulaStr: string; val: number }[] => {
+  const nodeKeys = Object.keys(ALL_NODES);
+  const solutions: { nodes: string[]; formulaStr: string; val: number }[] = [];
+
+  for (let i = 0; i < nodeKeys.length; i++) {
+    for (let j = 0; j < nodeKeys.length; j++) {
+      if (i === j) continue;
+      for (let k = 0; k < nodeKeys.length; k++) {
+        if (i === k || j === k) continue;
+        const n1 = ALL_NODES[nodeKeys[i]];
+        const n2 = ALL_NODES[nodeKeys[j]];
+        const n3 = ALL_NODES[nodeKeys[k]];
+
+        const op2 = n2.op === "×" ? "*" : n2.op === "÷" ? "/" : n2.op;
+        const op3 = n3.op === "×" ? "*" : n3.op === "÷" ? "/" : n3.op;
+
+        const calcExpr = `${n1.num} ${op2} ${n2.num} ${op3} ${n3.num}`;
+        try {
+          // eslint-disable-next-line no-eval
+          const val = Function(`"use strict"; return (${calcExpr})`)();
+          if (val === target) {
+            const formulaStr = `${n1.id} ${n2.id} ${n3.id} ( ${n1.num} ${n2.op}${n2.num} ${n3.op}${n3.num} = ${target} )`;
+            solutions.push({
+              nodes: [n1.id, n2.id, n3.id],
+              formulaStr,
+              val,
+            });
+          }
+        } catch {}
+      }
+    }
+  }
+  return solutions;
+};
 
 /* ─── 정육각형(Hexagon) SVG 컴포넌트 ────────────────────────────────────── */
 function HexagonCell({
@@ -141,7 +179,8 @@ export default function FormulaPyramidPage() {
     calcValue?: number;
   } | null>(null);
 
-  /* ── 딜러 모드 상태 ── */
+  const [showSolutions, setShowSolutions] = useState(false);
+  const validSolutions = getAllValidSolutions(9);
   const [selectedRound, setSelectedRound] = useState<number>(1);
   const [selectedTime, setSelectedTime] = useState<number>(1);
   const [selectedPenalty, setSelectedPenalty] = useState<string>("없음");
@@ -240,7 +279,7 @@ export default function FormulaPyramidPage() {
     >
       <div className="w-full max-w-[1550px] flex flex-col mx-auto">
         {/* ───────────────────────────────────────────────────────────────────
-           [상단 고정 타이틀 - 여백 축소]
+           [상단 고정 타이틀]
            ─────────────────────────────────────────────────────────────────── */}
         <div
           className="flex items-center justify-between w-full"
@@ -248,10 +287,10 @@ export default function FormulaPyramidPage() {
         >
           <div>
             <h1
-              className="text-3xl sm:text-4xl text-yellow-300 flex items-center gap-2"
+              className="text-3xl sm:text-4xl text-yellow-300 flex items-center gap-4"
               style={{ fontFamily: "var(--font-chalk)" }}
             >
-              <Pyramid className="text-yellow-400 flex-shrink-0" size={32} />
+              <Pyramid className="text-yellow-400 flex-shrink-0" size={34} />
               수식 피라미드 (Formula Pyramid)
             </h1>
           </div>
@@ -404,43 +443,69 @@ export default function FormulaPyramidPage() {
           </div>
 
           {/* ── [중앙 박스] xl:col-span-6 ─────────────────────────────────── */}
-          <div className="xl:col-span-6 chalk-box content-box flex flex-col items-center bg-teal-950/85 backdrop-blur-md h-full min-h-[640px] p-6 sm:p-7">
+          <div className="xl:col-span-6 chalk-box content-box flex flex-col items-start bg-teal-950/85 backdrop-blur-md h-full min-h-[640px] p-6 sm:p-7">
             {mode === "player" ? (
               <>
-                {/* [요구사항 3] 좌측: 로고 + 수식 피라미드 (2.5rem), 우측: 연필 + 연습 설명 문구 */}
-                <div className="flex items-center justify-between w-full min-h-[44px]">
-                  <div className="flex items-center gap-3">
-                    <Pyramid className="text-yellow-400 flex-shrink-0" size={28} />
-                    <h2
-                      className="text-yellow-300 font-bold"
-                      style={{ fontFamily: "var(--font-chalk)", fontSize: "2.5rem", lineHeight: 1.1 }}
-                    >
-                      수식 피라미드
-                    </h2>
-                  </div>
-
+                {/* [요구사항 3] 상단 우측: 연필 + 연습 설명 문구 & 예시 답안 아코디언 토글 */}
+                <div className="w-full flex flex-col items-end gap-2 mb-2">
                   <div className="flex items-center gap-2 text-sm text-gray-300">
                     <Pencil size={16} className="text-yellow-400 flex-shrink-0" />
                     <span style={{ fontFamily: "var(--font-body)" }}>
                       게임 시작을 기다리는 동안 연습해 보세요.
                     </span>
                   </div>
+
+                  {/* [요구사항 3] 예시 답안 아코디언 토글 버튼 */}
+                  <button
+                    type="button"
+                    onClick={() => setShowSolutions(!showSolutions)}
+                    className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-900/90 hover:bg-teal-800 border border-dashed border-yellow-400/60 text-yellow-300 text-xs sm:text-sm font-bold transition-all cursor-pointer shadow-sm"
+                    style={{ fontFamily: "var(--font-chalk)" }}
+                  >
+                    <Sparkles size={14} className="text-yellow-400 animate-pulse" />
+                    <span>가능한 모든 정답 보기 ({validSolutions.length}개)</span>
+                    {showSolutions ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </button>
                 </div>
 
-                <div
-                  className="w-full border-t border-dashed border-teal-700"
-                  style={{ marginTop: "1.1rem", marginBottom: "1.1rem" }}
-                />
+                {/* [요구사항 3] 예시 답안 펼쳐진 아코디언 컨텐츠 */}
+                {showSolutions && (
+                  <div className="w-full bg-teal-900/90 rounded-lg p-4 mb-4 border border-dashed border-yellow-400/70 shadow-inner flex flex-col gap-3">
+                    <div className="flex items-center justify-between border-b border-teal-700 pb-2">
+                      <span className="text-sm font-bold text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
+                        💡 TARGET 9를 만드는 모든 정답 조합 ({validSolutions.length}가지)
+                      </span>
+                      <span className="text-xs text-gray-300">클릭 시 자동 선택</span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[160px] overflow-y-auto pr-1">
+                      {validSolutions.map((sol, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            setSelectedNodes(sol.nodes);
+                            setTempNotice(null);
+                          }}
+                          className="flex items-center justify-between px-3 py-2 rounded bg-teal-950/80 hover:bg-yellow-400 hover:text-teal-950 text-white text-xs font-bold transition-all border border-teal-700 cursor-pointer"
+                          style={{ fontFamily: "var(--font-chalk)" }}
+                        >
+                          <span className="text-yellow-300 hover:text-teal-950 tracking-wider font-extrabold">{sol.nodes.join(" ")}</span>
+                          <span className="text-[11px] opacity-80">{sol.formulaStr.split(" ( ")[1]?.replace(" )", "")}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-                {/* [요구사항 1] 피라미드 호버 시 스크롤 생기지 않도록 overflow-visible 및 여백 조정 */}
+                {/* [요구사항 2] 중앙 박스 좌측 상단에 배치된 A~J 피라미드 영역 */}
                 <div
-                  className="py-3 my-1 flex flex-col items-center justify-center w-full overflow-visible"
-                  style={{ marginBottom: "1rem" }}
+                  className="py-2 flex flex-col items-start justify-start w-full overflow-visible"
+                  style={{ marginBottom: "0.75rem" }}
                 >
                   {PYRAMID_DATA.map((row, rowIndex) => (
                     <div
                       key={rowIndex}
-                      className="flex justify-center gap-2 sm:gap-2.5"
+                      className="flex justify-start gap-2 sm:gap-2.5"
                       style={{ marginTop: rowIndex === 0 ? "0px" : "-10px" }}
                     >
                       {row.map((node) => (
