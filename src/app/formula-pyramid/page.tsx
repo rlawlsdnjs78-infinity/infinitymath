@@ -2,9 +2,9 @@
  * src/app/formula-pyramid/page.tsx
  * 수식 피라미드 게임 페이지
  *
- * - ON/OFF 모드 스위치 (플레이어 모드 / 딜러 모드)
- * - 플레이어 모드: 좌(게임 입장하기), 중(수식 피라미드 4층 정육각형), 우(게임 설명)
- * - 딜러 모드: 좌+중(개발중입니다), 우(라운드/시간/페널티 세팅 + 방 코드 생성)
+ * [레이아웃 수정사항]
+ * - max-w-7xl 의 폭 제한을 제거하고 max-w-[1750px] w-full 로 화면 전체에 꽉 차도록 확장
+ * - 좌/중/우 3분할 박스가 화면 전체에 시원하고 균등하게 배치되도록 레이아웃 개선
  */
 
 "use client";
@@ -74,8 +74,8 @@ function HexagonCell({
   return (
     <div
       onClick={onClick}
-      className={`relative cursor-pointer transition-all duration-200 hover:scale-105 select-none w-20 h-24 sm:w-24 sm:h-28 flex items-center justify-center ${
-        isSelected ? "drop-shadow-[0_0_12px_rgba(245,230,66,0.8)]" : ""
+      className={`relative cursor-pointer transition-all duration-200 hover:scale-105 select-none w-22 h-26 sm:w-26 sm:h-30 md:w-28 md:h-32 flex items-center justify-center ${
+        isSelected ? "drop-shadow-[0_0_15px_rgba(245,230,66,0.9)]" : ""
       }`}
     >
       <svg
@@ -85,28 +85,27 @@ function HexagonCell({
         {/* 외곽 큰 정육각형 */}
         <polygon
           points="50,2 95,28 95,87 50,113 5,87 5,28"
-          fill={isSelected ? "rgba(245, 230, 66, 0.25)" : "rgba(20, 50, 50, 0.85)"}
-          stroke={isSelected ? "#f5e642" : "rgba(240, 237, 232, 0.6)"}
-          strokeWidth="3"
+          fill={isSelected ? "rgba(245, 230, 66, 0.3)" : "rgba(20, 50, 50, 0.9)"}
+          stroke={isSelected ? "#f5e642" : "rgba(240, 237, 232, 0.65)"}
+          strokeWidth="3.5"
           strokeDasharray={isSelected ? "none" : "4 2"}
         />
 
         {/* 내부 상단에 두 변을 공유하는 작은 정육각형 (캡/헤더 디자인) */}
-        {/* 상단 윗변과 좌우 상단 두 변 일부 공유 */}
         <polygon
           points="50,2 95,28 73,42 50,28 27,42 5,28"
-          fill={isSelected ? "rgba(245, 230, 66, 0.5)" : "rgba(240, 237, 232, 0.15)"}
-          stroke={isSelected ? "#f5e642" : "rgba(240, 237, 232, 0.5)"}
+          fill={isSelected ? "rgba(245, 230, 66, 0.6)" : "rgba(240, 237, 232, 0.18)"}
+          stroke={isSelected ? "#f5e642" : "rgba(240, 237, 232, 0.55)"}
           strokeWidth="2"
         />
 
-        {/* 상단 ID (A~J) 텍스트 위치 */}
+        {/* 상단 ID (A~J) 텍스트 */}
         <text
           x="50"
           y="23"
           textAnchor="middle"
           fill={isSelected ? "#1a3a3a" : "var(--chalk-yellow)"}
-          fontSize="14"
+          fontSize="15"
           fontWeight="bold"
           fontFamily="var(--font-chalk)"
         >
@@ -119,7 +118,7 @@ function HexagonCell({
           y="75"
           textAnchor="middle"
           fill={isSelected ? "#f5e642" : "var(--chalk-white)"}
-          fontSize="22"
+          fontSize="23"
           fontWeight="bold"
           fontFamily="var(--font-chalk)"
         >
@@ -154,11 +153,9 @@ export default function FormulaPyramidPage() {
   /* ── 노드 클릭 처리 ── */
   const handleNodeClick = (nodeId: string) => {
     if (selectedNodes.includes(nodeId)) {
-      // 이미 선택되어 있으면 해제
       setSelectedNodes(selectedNodes.filter((id) => id !== nodeId));
     } else {
       if (selectedNodes.length >= 3) {
-        // 최대 3개 선택 제한
         return;
       }
       setSelectedNodes([...selectedNodes, nodeId]);
@@ -167,17 +164,11 @@ export default function FormulaPyramidPage() {
   };
 
   /* ── 수식 계산 로직 ── */
-  // 규칙:
-  // 1. 선택한 3개 노드 조합
-  // 2. 수식의 맨 앞에 사용된 칸의 연산 기호는 무시 (숫자만 사용)
-  // 3. 완성된 수식은 사칙연산 순서(×, ÷ 우선, +, - 나중)에 따라 계산됨
   const calculateFormula = (nodeIds: string[]): { exprStr: string; result: number | null } => {
     if (nodeIds.length === 0) return { exprStr: "", result: null };
 
     const nodes = nodeIds.map((id) => ALL_NODES[id]);
 
-    // 표시용 수식 표현 문자열
-    // 첫번째 노드는 연산자 무시되므로 숫자만 표시
     let exprStr = `${nodes[0].id}(${nodes[0].num})`;
     for (let i = 1; i < nodes.length; i++) {
       exprStr += ` ${nodes[i].op} ${nodes[i].id}(${nodes[i].num})`;
@@ -187,8 +178,6 @@ export default function FormulaPyramidPage() {
       return { exprStr, result: null };
     }
 
-    // 실제 계산식 문자열 생성
-    // 첫번째 숫자는 op 무시
     let calcExpr = `${nodes[0].num}`;
     for (let i = 1; i < nodes.length; i++) {
       const opSymbol = nodes[i].op === "×" ? "*" : nodes[i].op === "÷" ? "/" : nodes[i].op;
@@ -196,7 +185,6 @@ export default function FormulaPyramidPage() {
     }
 
     try {
-      // 사칙연산 표준 우선순위에 따른 계산
       // eslint-disable-next-line no-eval
       const evalRes = Function(`"use strict"; return (${calcExpr})`)();
       return { exprStr, result: Number(evalRes) };
@@ -241,7 +229,7 @@ export default function FormulaPyramidPage() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col gap-8">
+    <div className="w-full max-w-[1750px] mx-auto px-4 sm:px-8 py-6 flex flex-col gap-6">
       {/* ───────────────────────────────────────────────────────────────────
          상단 타이틀 & 모드 변경 토글 스위치
          ─────────────────────────────────────────────────────────────────── */}
@@ -263,23 +251,23 @@ export default function FormulaPyramidPage() {
         <div
           className="chalk-box-straight rounded-full p-1.5 flex items-center gap-2"
           style={{
-            background: "rgba(20, 48, 48, 0.9)",
+            background: "rgba(20, 48, 48, 0.95)",
             border: "2px solid var(--chalk-yellow)",
-            boxShadow: "0 0 15px rgba(245, 230, 66, 0.2)",
+            boxShadow: "0 0 15px rgba(245, 230, 66, 0.25)",
           }}
         >
           {/* 플레이어 모드 버튼 */}
           <button
             type="button"
             onClick={() => setMode("player")}
-            className={`px-5 py-2 rounded-full text-base font-semibold transition-all duration-200 flex items-center gap-2 ${
+            className={`px-6 py-2.5 rounded-full text-lg font-semibold transition-all duration-200 flex items-center gap-2 ${
               mode === "player"
                 ? "bg-yellow-400 text-teal-950 shadow-md scale-105"
                 : "text-gray-300 hover:text-white"
             }`}
             style={{ fontFamily: "var(--font-chalk)" }}
           >
-            <Play size={16} />
+            <Play size={18} />
             <span>플레이어 모드</span>
           </button>
 
@@ -287,29 +275,29 @@ export default function FormulaPyramidPage() {
           <button
             type="button"
             onClick={() => setMode("dealer")}
-            className={`px-5 py-2 rounded-full text-base font-semibold transition-all duration-200 flex items-center gap-2 ${
+            className={`px-6 py-2.5 rounded-full text-lg font-semibold transition-all duration-200 flex items-center gap-2 ${
               mode === "dealer"
                 ? "bg-yellow-400 text-teal-950 shadow-md scale-105"
                 : "text-gray-300 hover:text-white"
             }`}
             style={{ fontFamily: "var(--font-chalk)" }}
           >
-            <Settings size={16} />
+            <Settings size={18} />
             <span>딜러 모드</span>
           </button>
         </div>
       </div>
 
       {/* ───────────────────────────────────────────────────────────────────
-         1. 플레이어 모드 화면 (가로 3분할)
+         1. 플레이어 모드 화면 (가로 3분할 — 화면 전체를 시원하게 채움)
          ─────────────────────────────────────────────────────────────────── */}
       {mode === "player" && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* ── [좌측] 게임 입장하기 (3/12 컬럼) ───────────────────────── */}
-          <div className="lg:col-span-3 chalk-box content-box flex flex-col gap-5 bg-teal-950/60 backdrop-blur-md">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch w-full">
+          {/* ── [좌측] 게임 입장하기 (xl:col-span-3, 25% 폭) ───────────────────────── */}
+          <div className="xl:col-span-3 chalk-box content-box flex flex-col gap-6 bg-teal-950/70 backdrop-blur-md h-full">
             <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-3">
-              <LogIn className="text-yellow-400" size={22} />
-              <h2 className="text-2xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
+              <LogIn className="text-yellow-400" size={24} />
+              <h2 className="text-2.5xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
                 게임 입장하기
               </h2>
             </div>
@@ -319,68 +307,69 @@ export default function FormulaPyramidPage() {
                 e.preventDefault();
                 alert(`[${nickname || "손님"}] 님, 입장 코드 [${entryCode}] 로 입장을 시도합니다.`);
               }}
-              className="flex flex-col gap-4"
+              className="flex flex-col gap-5 flex-1 justify-between"
             >
-              {/* 닉네임 입력 */}
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="nickname-input"
-                  className="text-sm text-gray-200 font-medium"
-                  style={{ fontFamily: "var(--font-body)" }}
-                >
-                  닉네임
-                </label>
-                <input
-                  id="nickname-input"
-                  type="text"
-                  placeholder="닉네임을 입력해 주세요"
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded bg-teal-900/90 border border-dashed border-teal-600 text-white text-sm focus:outline-none focus:border-yellow-400"
-                  style={{ fontFamily: "var(--font-body)" }}
-                />
-              </div>
+              <div className="flex flex-col gap-4">
+                {/* 닉네임 입력 */}
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="nickname-input"
+                    className="text-base text-gray-200 font-medium"
+                    style={{ fontFamily: "var(--font-chalk)" }}
+                  >
+                    닉네임
+                  </label>
+                  <input
+                    id="nickname-input"
+                    type="text"
+                    placeholder="닉네임을 입력해 주세요"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    className="w-full px-4 py-3 rounded bg-teal-900/90 border border-dashed border-teal-600 text-white text-base focus:outline-none focus:border-yellow-400"
+                    style={{ fontFamily: "var(--font-body)" }}
+                  />
+                </div>
 
-              {/* 입장 코드 입력 */}
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="code-input"
-                  className="text-sm text-gray-200 font-medium"
-                  style={{ fontFamily: "var(--font-body)" }}
-                >
-                  입장 코드
-                </label>
-                <input
-                  id="code-input"
-                  type="text"
-                  placeholder="딜러에게 받은 코드 (예: PYRAMID-1234)"
-                  value={entryCode}
-                  onChange={(e) => setEntryCode(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded bg-teal-900/90 border border-dashed border-teal-600 text-white text-sm uppercase focus:outline-none focus:border-yellow-400"
-                  style={{ fontFamily: "var(--font-body)" }}
-                />
+                {/* 입장 코드 입력 */}
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="code-input"
+                    className="text-base text-gray-200 font-medium"
+                    style={{ fontFamily: "var(--font-chalk)" }}
+                  >
+                    입장 코드
+                  </label>
+                  <input
+                    id="code-input"
+                    type="text"
+                    placeholder="딜러에게 받은 코드 (예: PYRAMID-1234)"
+                    value={entryCode}
+                    onChange={(e) => setEntryCode(e.target.value)}
+                    className="w-full px-4 py-3 rounded bg-teal-900/90 border border-dashed border-teal-600 text-white text-base uppercase focus:outline-none focus:border-yellow-400"
+                    style={{ fontFamily: "var(--font-body)" }}
+                  />
+                </div>
               </div>
 
               {/* 입장 버튼 */}
               <button
                 type="submit"
-                className="btn-chalk w-full justify-center mt-2"
-                style={{ fontSize: "1.1rem" }}
+                className="btn-chalk w-full justify-center py-3.5 text-xl mt-4"
               >
                 게임 방 입장하기
               </button>
             </form>
           </div>
 
-          {/* ── [중앙] 수식 피라미드 연습/플레이 판 (6/12 컬럼) ──────────── */}
-          <div className="lg:col-span-6 chalk-box content-box flex flex-col items-center gap-6 bg-teal-950/70 backdrop-blur-md">
+          {/* ── [중앙] 수식 피라미드 (xl:col-span-6, 50% 폭) ──────────── */}
+          <div className="xl:col-span-6 chalk-box content-box flex flex-col items-center gap-6 bg-teal-950/80 backdrop-blur-md h-full">
             {/* 상단 타이틀 & 설명 */}
             <div className="text-center w-full border-b border-dashed border-teal-700 pb-3">
-              <h2 className="text-3xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
+              <h2 className="text-3.5xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
                 수식 피라미드
               </h2>
-              <div className="flex items-center justify-center gap-1.5 text-xs text-gray-300 mt-1">
-                <Pencil size={14} className="text-yellow-400" />
+              <div className="flex items-center justify-center gap-1.5 text-sm text-gray-300 mt-1">
+                <Pencil size={16} className="text-yellow-400" />
                 <span style={{ fontFamily: "var(--font-body)" }}>
                   게임 시작을 기다리는 동안 연습해 보세요.
                 </span>
@@ -388,7 +377,7 @@ export default function FormulaPyramidPage() {
             </div>
 
             {/* 4층짜리 정육각형 피라미드 (A~J) */}
-            <div className="py-4 flex flex-col items-center gap-2 sm:gap-3 my-2 w-full overflow-x-auto">
+            <div className="py-2 flex flex-col items-center gap-2 sm:gap-3 my-auto w-full overflow-x-auto">
               {PYRAMID_DATA.map((row, rowIndex) => (
                 <div key={rowIndex} className="flex justify-center gap-2 sm:gap-4">
                   {row.map((node) => (
@@ -404,20 +393,20 @@ export default function FormulaPyramidPage() {
             </div>
 
             {/* 피라미드 밑 하단 조작 컨트롤 박스 */}
-            <div className="w-full chalk-box-straight p-4 bg-teal-900/50 rounded flex flex-col gap-4">
+            <div className="w-full chalk-box-straight p-4 sm:p-5 bg-teal-900/60 rounded flex flex-col gap-4 mt-auto">
               {/* 보드: 현재 선택 수식 렌더링 */}
-              <div className="w-full bg-teal-950 p-3 rounded border border-dashed border-teal-600 flex items-center justify-between">
-                <span className="text-xs text-teal-400" style={{ fontFamily: "var(--font-body)" }}>
+              <div className="w-full bg-teal-950 p-3.5 rounded border border-dashed border-teal-600 flex items-center justify-between">
+                <span className="text-sm text-teal-400 font-semibold" style={{ fontFamily: "var(--font-chalk)" }}>
                   선택된 수식 보드:
                 </span>
                 <span
-                  className="text-xl font-bold text-yellow-300 tracking-widest"
+                  className="text-2xl font-bold text-yellow-300 tracking-widest"
                   style={{ fontFamily: "var(--font-chalk)" }}
                 >
                   {exprStr || "(칸 3개를 클릭하세요)"}
                 </span>
                 {currentResult !== null && (
-                  <span className="text-lg font-bold text-emerald-400 ml-2">
+                  <span className="text-xl font-bold text-emerald-400 ml-2">
                     = {currentResult}
                   </span>
                 )}
@@ -426,15 +415,15 @@ export default function FormulaPyramidPage() {
               {/* TARGET & A~J 클릭 입력 버튼 박스 */}
               <div className="flex flex-col sm:flex-row items-stretch gap-4">
                 {/* 좌측: TARGET / 9 */}
-                <div className="chalk-box-straight bg-teal-950 px-4 py-3 flex flex-col items-center justify-center min-w-[90px] border-yellow-400/60">
+                <div className="chalk-box-straight bg-teal-950 px-5 py-4 flex flex-col items-center justify-center min-w-[100px] border-yellow-400/80">
                   <span
-                    className="text-xs text-yellow-400 font-bold tracking-wider"
+                    className="text-sm text-yellow-400 font-bold tracking-wider"
                     style={{ fontFamily: "var(--font-chalk)" }}
                   >
                     TARGET
                   </span>
                   <span
-                    className="text-3xl text-white font-black"
+                    className="text-4xl text-white font-black"
                     style={{ fontFamily: "var(--font-chalk)" }}
                   >
                     9
@@ -443,10 +432,10 @@ export default function FormulaPyramidPage() {
 
                 {/* 우측: A~J 선택 클릭 박스 목록 */}
                 <div className="flex-1 flex flex-col gap-2">
-                  <div className="text-xs text-gray-300" style={{ fontFamily: "var(--font-body)" }}>
+                  <div className="text-sm text-gray-300 font-semibold" style={{ fontFamily: "var(--font-chalk)" }}>
                     칸 클릭 선택 (최대 3개):
                   </div>
-                  <div className="grid grid-cols-5 gap-1.5">
+                  <div className="grid grid-cols-5 gap-2">
                     {Object.values(ALL_NODES).map((node) => {
                       const isSel = selectedNodes.includes(node.id);
                       return (
@@ -454,10 +443,10 @@ export default function FormulaPyramidPage() {
                           key={node.id}
                           type="button"
                           onClick={() => handleNodeClick(node.id)}
-                          className={`py-1.5 px-2 rounded text-sm font-bold transition-all ${
+                          className={`py-2 px-2 rounded text-base font-bold transition-all ${
                             isSel
-                              ? "bg-yellow-400 text-teal-950 scale-105 shadow"
-                              : "bg-teal-800/80 text-white hover:bg-teal-700"
+                              ? "bg-yellow-400 text-teal-950 scale-105 shadow-md"
+                              : "bg-teal-800/90 text-white hover:bg-teal-700"
                           }`}
                           style={{ fontFamily: "var(--font-chalk)" }}
                         >
@@ -474,7 +463,7 @@ export default function FormulaPyramidPage() {
                 <button
                   type="button"
                   onClick={handleSubmitAnswer}
-                  className="btn-chalk flex-1 justify-center py-2.5 text-lg"
+                  className="btn-chalk flex-1 justify-center py-3 text-xl"
                 >
                   제출하기
                 </button>
@@ -484,27 +473,27 @@ export default function FormulaPyramidPage() {
                     setSelectedNodes([]);
                     setSubmissionResult(null);
                   }}
-                  className="p-2.5 text-gray-300 hover:text-white rounded border border-dashed border-teal-600 hover:border-yellow-400 transition-colors"
+                  className="p-3 text-gray-300 hover:text-white rounded border border-dashed border-teal-600 hover:border-yellow-400 transition-colors"
                   title="선택 초기화"
                 >
-                  <RefreshCw size={20} />
+                  <RefreshCw size={22} />
                 </button>
               </div>
 
               {/* 제출 결과 메시지 피드백 */}
               {submissionResult && (
                 <div
-                  className={`p-3 rounded border text-sm flex items-center gap-2 ${
+                  className={`p-3.5 rounded border text-base flex items-center gap-2.5 ${
                     submissionResult.success
-                      ? "bg-emerald-950/80 border-emerald-500 text-emerald-300"
-                      : "bg-rose-950/80 border-rose-500 text-rose-300"
+                      ? "bg-emerald-950/90 border-emerald-500 text-emerald-300"
+                      : "bg-rose-950/90 border-rose-500 text-rose-300"
                   }`}
                   style={{ fontFamily: "var(--font-body)" }}
                 >
                   {submissionResult.success ? (
-                    <CheckCircle2 size={18} />
+                    <CheckCircle2 size={22} className="flex-shrink-0" />
                   ) : (
-                    <XCircle size={18} />
+                    <XCircle size={22} className="flex-shrink-0" />
                   )}
                   <span>{submissionResult.msg}</span>
                 </div>
@@ -512,17 +501,17 @@ export default function FormulaPyramidPage() {
             </div>
           </div>
 
-          {/* ── [우측] 게임 설명 (3/12 컬럼) ───────────────────────────── */}
-          <div className="lg:col-span-3 chalk-box content-box flex flex-col gap-4 bg-teal-950/60 backdrop-blur-md">
+          {/* ── [우측] 게임 설명 (xl:col-span-3, 25% 폭) ───────────────────────────── */}
+          <div className="xl:col-span-3 chalk-box content-box flex flex-col gap-4 bg-teal-950/70 backdrop-blur-md h-full">
             <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-3">
-              <HelpCircle className="text-yellow-400" size={22} />
-              <h2 className="text-2xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
+              <HelpCircle className="text-yellow-400" size={24} />
+              <h2 className="text-2.5xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
                 게임 설명
               </h2>
             </div>
 
             <div
-              className="flex flex-col gap-3.5 text-sm text-gray-200 leading-relaxed"
+              className="flex flex-col gap-4 text-sm text-gray-200 leading-relaxed"
               style={{ fontFamily: "var(--font-body)" }}
             >
               <p>
@@ -536,21 +525,21 @@ export default function FormulaPyramidPage() {
                 있습니다.
               </p>
 
-              <div className="flex flex-col gap-2 bg-teal-900/60 p-3 rounded border border-dashed border-yellow-500/40">
+              <div className="flex flex-col gap-2.5 bg-teal-900/60 p-3.5 rounded border border-dashed border-yellow-500/40">
                 <p>
                   ③ 문제판이 공개되면 이 중 3개의 칸을 조합해 타깃 넘버가 답이 되는 수식을 만들어야
                   합니다.
                 </p>
                 <div className="flex items-start gap-1.5 text-xs text-yellow-300 mt-1">
-                  <AlertTriangle size={14} className="flex-shrink-0 mt-0.5 text-yellow-400" />
+                  <AlertTriangle size={15} className="flex-shrink-0 mt-0.5 text-yellow-400" />
                   <span>동일한 칸은 중복선택할 수 없습니다.</span>
                 </div>
                 <div className="flex items-start gap-1.5 text-xs text-yellow-300">
-                  <AlertTriangle size={14} className="flex-shrink-0 mt-0.5 text-yellow-400" />
+                  <AlertTriangle size={15} className="flex-shrink-0 mt-0.5 text-yellow-400" />
                   <span>수식의 맨 앞에 사용된 칸의 연산 기호는 무시합니다.</span>
                 </div>
                 <div className="flex items-start gap-1.5 text-xs text-yellow-300">
-                  <AlertTriangle size={14} className="flex-shrink-0 mt-0.5 text-yellow-400" />
+                  <AlertTriangle size={15} className="flex-shrink-0 mt-0.5 text-yellow-400" />
                   <span>완성된 수식은 사칙연산 순서에 따라 계산됩니다.</span>
                 </div>
               </div>
@@ -570,26 +559,26 @@ export default function FormulaPyramidPage() {
          2. 딜러 모드 화면 (가로 3분할 중 좌+중 통합 / 우측 개별)
          ─────────────────────────────────────────────────────────────────── */}
       {mode === "dealer" && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* ── [좌측/중앙] 개발중입니다 (8/12 컬럼) ────────────────────── */}
-          <div className="lg:col-span-8 chalk-box content-box flex flex-col items-center justify-center min-h-[380px] bg-teal-950/40 border-dashed border-teal-700/60 text-center">
-            <Pencil size={48} className="text-yellow-400/50 mb-3 animate-bounce" />
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch w-full">
+          {/* ── [좌측/중앙] 개발중입니다 (xl:col-span-8) ────────────────────── */}
+          <div className="xl:col-span-8 chalk-box content-box flex flex-col items-center justify-center min-h-[450px] bg-teal-950/50 border-dashed border-teal-700/60 text-center h-full">
+            <Pencil size={56} className="text-yellow-400/60 mb-4 animate-bounce" />
             <h2
-              className="text-3xl text-yellow-300/80 mb-2"
+              className="text-4xl text-yellow-300 mb-3"
               style={{ fontFamily: "var(--font-chalk)" }}
             >
               개발중입니다.
             </h2>
-            <p className="text-sm text-gray-400" style={{ fontFamily: "var(--font-body)" }}>
-              딜러 진행용 모니터링 화면 및 진행 컨트롤러 기능이 준비 중입니다.
+            <p className="text-base text-gray-300" style={{ fontFamily: "var(--font-body)" }}>
+              딜러 진행용 모니터링 화면 및 실시간 진행 컨트롤러 기능이 준비 중입니다.
             </p>
           </div>
 
-          {/* ── [우측] 세팅 및 방 생성 (4/12 컬럼) ───────────────────────── */}
-          <div className="lg:col-span-4 chalk-box content-box flex flex-col gap-6 bg-teal-950/70 backdrop-blur-md">
+          {/* ── [우측] 세팅 및 방 생성 (xl:col-span-4) ───────────────────────── */}
+          <div className="xl:col-span-4 chalk-box content-box flex flex-col gap-6 bg-teal-950/80 backdrop-blur-md h-full">
             <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-3">
-              <Settings className="text-yellow-400" size={22} />
-              <h2 className="text-2xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
+              <Settings className="text-yellow-400" size={24} />
+              <h2 className="text-2.5xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
                 게임 세팅 & 방 생성
               </h2>
             </div>
@@ -597,21 +586,21 @@ export default function FormulaPyramidPage() {
             {/* 1. 라운드 설정 (1~15 라운드, 5열 버튼 배열) */}
             <div className="flex flex-col gap-2">
               <label
-                className="text-sm text-gray-200 font-medium"
-                style={{ fontFamily: "var(--font-body)" }}
+                className="text-base text-gray-200 font-medium"
+                style={{ fontFamily: "var(--font-chalk)" }}
               >
                 라운드 설정 (총 {selectedRound}라운드)
               </label>
-              <div className="grid grid-cols-5 gap-1.5">
+              <div className="grid grid-cols-5 gap-2">
                 {Array.from({ length: 15 }, (_, i) => i + 1).map((r) => (
                   <button
                     key={r}
                     type="button"
                     onClick={() => setSelectedRound(r)}
-                    className={`py-1.5 text-xs font-bold rounded transition-all ${
+                    className={`py-2 text-sm font-bold rounded transition-all ${
                       selectedRound === r
                         ? "bg-yellow-400 text-teal-950 shadow scale-105"
-                        : "bg-teal-900/80 text-gray-300 hover:bg-teal-800"
+                        : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
                     }`}
                     style={{ fontFamily: "var(--font-chalk)" }}
                   >
@@ -624,21 +613,21 @@ export default function FormulaPyramidPage() {
             {/* 2. 라운드 별 시간 (1분~5분, 3열 버튼 배열) */}
             <div className="flex flex-col gap-2">
               <label
-                className="text-sm text-gray-200 font-medium"
-                style={{ fontFamily: "var(--font-body)" }}
+                className="text-base text-gray-200 font-medium"
+                style={{ fontFamily: "var(--font-chalk)" }}
               >
                 라운드 별 시간 ({selectedTime}분)
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2.5">
                 {[1, 2, 3, 4, 5].map((t) => (
                   <button
                     key={t}
                     type="button"
                     onClick={() => setSelectedTime(t)}
-                    className={`py-2 text-sm font-bold rounded transition-all ${
+                    className={`py-2.5 text-base font-bold rounded transition-all ${
                       selectedTime === t
                         ? "bg-yellow-400 text-teal-950 shadow scale-105"
-                        : "bg-teal-900/80 text-gray-300 hover:bg-teal-800"
+                        : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
                     }`}
                     style={{ fontFamily: "var(--font-chalk)" }}
                   >
@@ -651,21 +640,21 @@ export default function FormulaPyramidPage() {
             {/* 3. 오답 패널티 (없음, 1초~5초, 3열 버튼 배열) */}
             <div className="flex flex-col gap-2">
               <label
-                className="text-sm text-gray-200 font-medium"
-                style={{ fontFamily: "var(--font-body)" }}
+                className="text-base text-gray-200 font-medium"
+                style={{ fontFamily: "var(--font-chalk)" }}
               >
                 오답 패널티 ({selectedPenalty})
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2.5">
                 {["없음", "1초", "2초", "3초", "4초", "5초"].map((p) => (
                   <button
                     key={p}
                     type="button"
                     onClick={() => setSelectedPenalty(p)}
-                    className={`py-2 text-xs font-bold rounded transition-all ${
+                    className={`py-2.5 text-sm font-bold rounded transition-all ${
                       selectedPenalty === p
                         ? "bg-yellow-400 text-teal-950 shadow scale-105"
-                        : "bg-teal-900/80 text-gray-300 hover:bg-teal-800"
+                        : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
                     }`}
                     style={{ fontFamily: "var(--font-chalk)" }}
                   >
@@ -679,20 +668,20 @@ export default function FormulaPyramidPage() {
             <button
               type="button"
               onClick={handleCreateGame}
-              className="btn-chalk w-full justify-center mt-2 py-3 text-xl"
+              className="btn-chalk w-full justify-center mt-3 py-3.5 text-xl"
             >
               게임 방 생성하기
             </button>
 
             {/* 생성된 방 코드 출력 */}
             {generatedRoomCode && (
-              <div className="chalk-box-straight bg-teal-950 p-4 flex flex-col items-center gap-2 border-yellow-400 text-center animate-fade-in">
+              <div className="chalk-box-straight bg-teal-950 p-4 flex flex-col items-center gap-2 border-yellow-400 text-center">
                 <span className="text-xs text-gray-300" style={{ fontFamily: "var(--font-body)" }}>
                   생성된 방 코드 (플레이어에게 전달하세요)
                 </span>
                 <div className="flex items-center gap-2">
                   <span
-                    className="text-2xl text-yellow-300 font-bold tracking-widest"
+                    className="text-3xl text-yellow-300 font-bold tracking-widest"
                     style={{ fontFamily: "var(--font-chalk)" }}
                   >
                     {generatedRoomCode}
@@ -706,7 +695,7 @@ export default function FormulaPyramidPage() {
                     className="p-1.5 text-yellow-400 hover:text-yellow-200"
                     title="코드 복사"
                   >
-                    <Copy size={18} />
+                    <Copy size={20} />
                   </button>
                 </div>
               </div>

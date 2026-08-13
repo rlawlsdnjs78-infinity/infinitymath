@@ -1,4 +1,4 @@
 @echo off
 git add .
-git commit -m "feat: update header nav with Brain Survival dropdown & add Formula Pyramid game page"
+git commit -m "fix: expand formula pyramid page max-width to 1750px and increase login/signup button padding"
 git push
