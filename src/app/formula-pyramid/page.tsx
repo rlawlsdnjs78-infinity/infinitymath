@@ -72,8 +72,8 @@ function HexagonCell({
   return (
     <div
       onClick={onClick}
-      className={`relative cursor-pointer transition-all duration-200 hover:scale-105 select-none w-[56px] h-[64.7px] sm:w-[64px] sm:h-[73.9px] flex items-center justify-center ${
-        isSelected ? "drop-shadow-[0_0_16px_rgba(245,230,66,0.95)]" : ""
+      className={`relative cursor-pointer transition-all duration-200 hover:scale-105 select-none w-[76px] h-[87.8px] flex items-center justify-center ${
+        isSelected ? "drop-shadow-[0_0_20px_rgba(245,230,66,0.95)]" : ""
       }`}
     >
       <svg
@@ -100,10 +100,10 @@ function HexagonCell({
         {/* 상단 A~J 칸 번호 */}
         <text
           x="50"
-          y="29.5"
+          y="33"
           textAnchor="middle"
           fill={isSelected ? "#1a3a3a" : "var(--chalk-yellow)"}
-          fontSize="20"
+          fontSize="34"
           fontWeight="bold"
           fontFamily="var(--font-chalk)"
         >
@@ -231,11 +231,11 @@ export default function FormulaPyramidPage() {
     >
       <div className="w-full max-w-[1550px] flex flex-col mx-auto">
         {/* ───────────────────────────────────────────────────────────────────
-           [상단 고정 타이틀 & 모드 설정 통합 버튼 - 글로벌 헤더 구분선과 넉넉한 상단 여백 확보]
+           [상단 고정 타이틀]
            ─────────────────────────────────────────────────────────────────── */}
         <div
-          className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-6"
-          style={{ marginTop: "1.25rem", marginBottom: "2.25rem" }}
+          className="flex items-center justify-between w-full"
+          style={{ marginTop: "1rem", marginBottom: "1.75rem" }}
         >
           <div>
             <h1
@@ -246,55 +246,12 @@ export default function FormulaPyramidPage() {
               수식 피라미드 (Formula Pyramid)
             </h1>
           </div>
-
-          {/* 모드 설정 버튼 (요구사항 2: 테두리와 '~~모드' 사이 여백 & 버튼 간격 넉넉히 확보) */}
-          <div
-            className="flex items-center rounded-full select-none bg-teal-950/95 border-2 border-yellow-400/70 shadow-lg"
-            style={{
-              padding: "10px 14px",
-              gap: "16px",
-              backdropFilter: "blur(12px)",
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setMode("player")}
-              className={`rounded-full text-base sm:text-xl font-bold transition-all duration-200 cursor-pointer ${
-                mode === "player"
-                  ? "bg-yellow-400 text-teal-950 shadow-lg scale-102"
-                  : "text-gray-300 hover:text-white"
-              }`}
-              style={{
-                fontFamily: "var(--font-chalk)",
-                padding: "10px 28px",
-                letterSpacing: "0.03em",
-              }}
-            >
-              플레이어 모드
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("dealer")}
-              className={`rounded-full text-base sm:text-xl font-bold transition-all duration-200 cursor-pointer ${
-                mode === "dealer"
-                  ? "bg-yellow-400 text-teal-950 shadow-lg scale-102"
-                  : "text-gray-300 hover:text-white"
-              }`}
-              style={{
-                fontFamily: "var(--font-chalk)",
-                padding: "10px 28px",
-                letterSpacing: "0.03em",
-              }}
-            >
-              딜러 모드
-            </button>
-          </div>
         </div>
 
-        {/* [요구사항 1] 상단 제목/버튼과 구분선 사이의 여백 넉넉하게 확장 */}
+        {/* 상단 게임 소개와 UI 사이의 점선 구분선 */}
         <div
           className="w-full border-t border-dashed border-teal-700"
-          style={{ marginTop: "1.5rem", marginBottom: "2rem" }}
+          style={{ marginTop: "1rem", marginBottom: "2rem" }}
         />
 
         {/* ───────────────────────────────────────────────────────────────────
@@ -303,124 +260,137 @@ export default function FormulaPyramidPage() {
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start w-full mx-auto">
           {/* ── [좌측 박스] xl:col-span-3 ─────────────────────────────────── */}
           <div className="xl:col-span-3 chalk-box content-box flex flex-col bg-teal-950/75 backdrop-blur-md h-full min-h-[640px] p-6 sm:p-7">
+            {/* [요구사항 3] 카드 헤더 높이 및 정렬 통일 */}
+            <div className="flex items-center justify-between w-full min-h-[44px]">
+              <div className="flex items-center gap-3">
+                <LogIn className="text-yellow-400 flex-shrink-0" size={28} />
+                <h2
+                  className="text-yellow-300 font-bold"
+                  style={{ fontFamily: "var(--font-chalk)", fontSize: "2.5rem", lineHeight: 1.1 }}
+                >
+                  게임 입장하기
+                </h2>
+              </div>
+            </div>
+
+            <div
+              className="w-full border-t border-dashed border-teal-700"
+              style={{ marginTop: "1.1rem", marginBottom: "1.5rem" }}
+            />
+
+            {/* [요구사항 1] 모드 선택 버튼을 '게임 입장하기' 박스 내부 '닉네임' 윗부분에 배치 */}
+            <div className="w-full flex justify-center mb-6">
+              <div className="flex items-center rounded-full select-none bg-teal-950/95 border-2 border-yellow-400/70 shadow-lg w-full p-1.5 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMode("player")}
+                  className={`flex-1 py-2.5 rounded-full text-base sm:text-lg font-bold transition-all duration-200 cursor-pointer text-center ${
+                    mode === "player"
+                      ? "bg-yellow-400 text-teal-950 shadow-md scale-102"
+                      : "text-gray-300 hover:text-white"
+                  }`}
+                  style={{ fontFamily: "var(--font-chalk)" }}
+                >
+                  플레이어 모드
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode("dealer")}
+                  className={`flex-1 py-2.5 rounded-full text-base sm:text-lg font-bold transition-all duration-200 cursor-pointer text-center ${
+                    mode === "dealer"
+                      ? "bg-yellow-400 text-teal-950 shadow-md scale-102"
+                      : "text-gray-300 hover:text-white"
+                  }`}
+                  style={{ fontFamily: "var(--font-chalk)" }}
+                >
+                  딜러 모드
+                </button>
+              </div>
+            </div>
+
             {mode === "player" ? (
-              <>
-                {/* [요구사항 3] 카드 헤더 높이 및 정렬 통일 */}
-                <div className="flex items-center justify-between w-full min-h-[44px]">
-                  <div className="flex items-center gap-3">
-                    <LogIn className="text-yellow-400 flex-shrink-0" size={28} />
-                    <h2
-                      className="text-yellow-300 font-bold"
-                      style={{ fontFamily: "var(--font-chalk)", fontSize: "2.5rem", lineHeight: 1.1 }}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  alert(`[${nickname || "손님"}] 님, 입장 코드 [${entryCode}] 로 입장을 시도합니다.`);
+                }}
+                className="flex flex-col flex-1 justify-between gap-6"
+              >
+                <div className="flex flex-col gap-6">
+                  {/* [요구사항 2] '닉네임' 글씨 크기 확대 */}
+                  <div className="flex flex-col gap-2.5">
+                    <label
+                      htmlFor="nickname-input"
+                      className="text-2xl sm:text-3xl text-yellow-300 font-bold tracking-wide"
+                      style={{ fontFamily: "var(--font-chalk)" }}
                     >
-                      게임 입장하기
-                    </h2>
+                      닉네임
+                    </label>
+                    <input
+                      id="nickname-input"
+                      type="text"
+                      placeholder="닉네임을 입력해 주세요"
+                      value={nickname}
+                      onChange={(e) => setNickname(e.target.value)}
+                      className="w-full rounded-md bg-teal-900/90 border border-dashed border-teal-600 text-white text-lg focus:outline-none focus:border-yellow-400 placeholder:text-gray-400/80"
+                      style={{
+                        padding: "14px 20px",
+                        fontFamily: "var(--font-body)",
+                        lineHeight: "1.5",
+                      }}
+                    />
+                  </div>
+
+                  {/* [요구사항 2] '입장 코드' 글씨 크기 확대 */}
+                  <div className="flex flex-col gap-2.5">
+                    <label
+                      htmlFor="code-input"
+                      className="text-2xl sm:text-3xl text-yellow-300 font-bold tracking-wide"
+                      style={{ fontFamily: "var(--font-chalk)" }}
+                    >
+                      입장 코드
+                    </label>
+                    <input
+                      id="code-input"
+                      type="text"
+                      placeholder="딜러에게 받은 코드 (예: PYRAMID-1234)"
+                      value={entryCode}
+                      onChange={(e) => setEntryCode(e.target.value)}
+                      className="w-full rounded-md bg-teal-900/90 border border-dashed border-teal-600 text-white text-lg uppercase focus:outline-none focus:border-yellow-400 placeholder:text-gray-400/80"
+                      style={{
+                        padding: "14px 20px",
+                        fontFamily: "var(--font-body)",
+                        lineHeight: "1.5",
+                      }}
+                    />
                   </div>
                 </div>
 
-                <div
-                  className="w-full border-t border-dashed border-teal-700"
-                  style={{ marginTop: "1.1rem", marginBottom: "1.1rem" }}
-                />
-
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    alert(`[${nickname || "손님"}] 님, 입장 코드 [${entryCode}] 로 입장을 시도합니다.`);
-                  }}
-                  className="flex flex-col flex-1 justify-between"
+                <button
+                  type="submit"
+                  className="btn-chalk w-full justify-center text-2xl mt-6"
+                  style={{ padding: "16px 24px" }}
                 >
-                  <div className="flex flex-col gap-5">
-                    <div className="flex flex-col gap-2">
-                      <label
-                        htmlFor="nickname-input"
-                        className="text-lg text-gray-200 font-medium tracking-wide"
-                        style={{ fontFamily: "var(--font-chalk)" }}
-                      >
-                        닉네임
-                      </label>
-                      <input
-                        id="nickname-input"
-                        type="text"
-                        placeholder="닉네임을 입력해 주세요"
-                        value={nickname}
-                        onChange={(e) => setNickname(e.target.value)}
-                        className="w-full rounded-md bg-teal-900/90 border border-dashed border-teal-600 text-white text-base focus:outline-none focus:border-yellow-400 placeholder:text-gray-400/80"
-                        style={{
-                          padding: "12px 18px",
-                          fontFamily: "var(--font-body)",
-                          lineHeight: "1.5",
-                        }}
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                      <label
-                        htmlFor="code-input"
-                        className="text-lg text-gray-200 font-medium tracking-wide"
-                        style={{ fontFamily: "var(--font-chalk)" }}
-                      >
-                        입장 코드
-                      </label>
-                      <input
-                        id="code-input"
-                        type="text"
-                        placeholder="딜러에게 받은 코드 (예: PYRAMID-1234)"
-                        value={entryCode}
-                        onChange={(e) => setEntryCode(e.target.value)}
-                        className="w-full rounded-md bg-teal-900/90 border border-dashed border-teal-600 text-white text-base uppercase focus:outline-none focus:border-yellow-400 placeholder:text-gray-400/80"
-                        style={{
-                          padding: "12px 18px",
-                          fontFamily: "var(--font-body)",
-                          lineHeight: "1.5",
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="btn-chalk w-full justify-center text-xl mt-6"
-                    style={{ padding: "14px 20px" }}
-                  >
-                    게임 방 입장하기
-                  </button>
-                </form>
-              </>
+                  게임 방 입장하기
+                </button>
+              </form>
             ) : (
-              <>
-                <div className="flex items-center gap-3">
-                  <Monitor className="text-yellow-400 flex-shrink-0" size={28} />
-                  <h2
-                    className="text-yellow-300 font-bold"
-                    style={{ fontFamily: "var(--font-chalk)", fontSize: "2.5rem", lineHeight: 1.1 }}
-                  >
-                    딜러 가이드
-                  </h2>
-                </div>
-
-                <div
-                  className="w-full border-t border-dashed border-teal-700"
-                  style={{ marginTop: "1.1rem", marginBottom: "1.1rem" }}
-                />
-
-                <div
-                  className="flex flex-col gap-5 text-sm text-gray-200 leading-relaxed flex-1 justify-between py-1"
-                  style={{ fontFamily: "var(--font-body)" }}
-                >
-                  <div className="flex flex-col gap-4">
-                    <p className="leading-loose">
-                      딜러 모드에서는 라운드 수, 제한 시간, 오답 패널티를 설정하여 방을 생성할 수 있습니다.
-                    </p>
-                    <div className="bg-teal-900/60 p-4.5 rounded-md border border-dashed border-yellow-400/50 text-xs text-yellow-300 leading-relaxed">
-                      💡 생성된 방 코드를 학생(플레이어)들에게 공유하세요.
-                    </div>
-                  </div>
-                  <div className="p-4 bg-teal-900/40 rounded-md text-center text-xs text-gray-400 border border-dashed border-teal-700">
-                    현재 모드: <span className="text-yellow-400 font-bold">딜러 진행 관리</span>
+              <div
+                className="flex flex-col gap-5 text-sm text-gray-200 leading-relaxed flex-1 justify-between py-1"
+                style={{ fontFamily: "var(--font-body)" }}
+              >
+                <div className="flex flex-col gap-4">
+                  <p className="leading-loose text-base">
+                    딜러 모드에서는 라운드 수, 제한 시간, 오답 패널티를 설정하여 방을 생성할 수 있습니다.
+                  </p>
+                  <div className="bg-teal-900/60 p-4.5 rounded-md border border-dashed border-yellow-400/50 text-sm text-yellow-300 leading-relaxed">
+                    💡 생성된 방 코드를 학생(플레이어)들에게 공유하세요.
                   </div>
                 </div>
-              </>
+                <div className="p-4 bg-teal-900/40 rounded-md text-center text-sm text-gray-300 border border-dashed border-teal-700">
+                  현재 모드: <span className="text-yellow-400 font-bold">딜러 진행 관리</span>
+                </div>
+              </div>
             )}
           </div>
 
