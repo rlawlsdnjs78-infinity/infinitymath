@@ -220,7 +220,13 @@ export default function FormulaPyramidPage() {
   };
 
   return (
-    <div className="w-full flex-1 flex flex-col items-center justify-start px-4 sm:px-8 pt-6 pb-12">
+    <div
+      className="w-full flex-1 flex flex-col items-center justify-start pt-6 pb-12"
+      style={{
+        paddingLeft: "clamp(1.5rem, 5vw, 5rem)",
+        paddingRight: "clamp(1.5rem, 5vw, 5rem)",
+      }}
+    >
       <div className="w-full max-w-[1550px] flex flex-col mx-auto">
         {/* ───────────────────────────────────────────────────────────────────
            [상단 고정 타이틀 & 모드 설정 통합 버튼]
