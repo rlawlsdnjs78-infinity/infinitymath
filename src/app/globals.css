@@ -64,10 +64,14 @@ body {
   color: var(--chalk-white);
   font-family: var(--font-body);
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  /*
+   * display:flex 는 제거합니다.
+   * flex 레이아웃은 layout.tsx 의 래퍼 div 가 담당합니다.
+   * body 에 flex 를 두면 자식 래퍼의 px-* 패딩이 제대로 동작하지 않습니다.
+   */
   line-height: 1.7;
 }
+
 
 /* =========================================
    분필 글씨 느낌 — 텍스트 렌더링 설정
