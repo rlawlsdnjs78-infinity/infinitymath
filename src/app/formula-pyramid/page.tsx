@@ -147,12 +147,19 @@ export default function FormulaPyramidPage() {
   const [selectedPenalty, setSelectedPenalty] = useState<string>("없음");
   const [generatedRoomCode, setGeneratedRoomCode] = useState<string>("");
 
-  const [tempNotice, setTempNotice] = useState<string | null>(null);
+  const [tempNotice, setTempNotice] = useState<{
+    msg: string;
+    type: "warning" | "success" | "error";
+  } | null>(null);
   const [noticeTimer, setNoticeTimer] = useState<NodeJS.Timeout | null>(null);
 
-  const triggerNotice = (msg: string, durationMs: number = 1000) => {
+  const triggerNotice = (
+    msg: string,
+    type: "warning" | "success" | "error" = "warning",
+    durationMs: number = 1000
+  ) => {
     if (noticeTimer) clearTimeout(noticeTimer);
-    setTempNotice(msg);
+    setTempNotice({ msg, type });
     const timer = setTimeout(() => {
       setTempNotice(null);
     }, durationMs);
@@ -166,7 +173,6 @@ export default function FormulaPyramidPage() {
       if (selectedNodes.length >= 3) return;
       setSelectedNodes([...selectedNodes, nodeId]);
     }
-    setSubmissionResult(null);
     setTempNotice(null);
   };
 
@@ -198,27 +204,21 @@ export default function FormulaPyramidPage() {
 
   const handleSubmitAnswer = () => {
     if (selectedNodes.length !== 3) {
-      // [요구사항 5] 3개 미만 선택 시 1초 동안 '선택한 수식:' 박스 위치에 경고 표출
-      triggerNotice("3개의 칸을 모두 선택해야 합니다!", 1000);
+      // 3개 미만 선택 시 1초 간 경고 표출 후 원복
+      triggerNotice("3개의 칸을 모두 선택해야 합니다!", "warning", 1000);
       return;
     }
 
     const TARGET = 9;
     if (currentResult === TARGET) {
-      setSubmissionResult({
-        success: true,
-        msg: `🎉 정답입니다! (+1점 획득) 결과 = ${currentResult}`,
-        calcValue: currentResult,
-      });
+      // 정답 선택 시 1초 간 정답 표출 후 원복
+      triggerNotice("🎉 정답입니다! (+1점 획득)", "success", 1000);
     } else {
-      setSubmissionResult({
-        success: false,
-        msg: `❌ 오답입니다! (-1점 감점) 계산 결과: ${currentResult} (목표: ${TARGET})`,
-        calcValue: currentResult ?? undefined,
-      });
+      // 오답 선택 시 1초 간 오답 표출 후 원복
+      triggerNotice(`❌ 오답입니다! (-1점 감점) 결과: ${currentResult}`, "error", 1000);
     }
 
-    // 제출 시 내가 클릭했던 칸들 바로 초기화 (요구사항 5)
+    // 제출 시 선택 칸 바로 초기화
     setSelectedNodes([]);
   };
 
@@ -460,40 +460,30 @@ export default function FormulaPyramidPage() {
                   className="w-full chalk-box-straight bg-teal-900/60 rounded-md flex flex-col gap-6"
                   style={{ padding: "1.5rem 1.5rem", marginTop: "1rem" }}
                 >
-                  {/* [요구사항 2 & 5] '선택한 수식:' 박스 - 고정 높이(h-[72px]) & 경고/결과 안내창 변신 */}
+                  {/* [요구사항 1 & 2] '선택한 수식:' 박스 - 1초 간 경고/정답/오답 안내 후 원복 */}
                   <div
                     className={`w-full rounded-md border border-dashed transition-all duration-200 flex items-center justify-between min-h-[72px] h-[72px] ${
                       tempNotice
-                        ? "bg-rose-950/90 border-rose-500 text-rose-200 px-6 py-4"
-                        : submissionResult
-                        ? submissionResult.success
+                        ? tempNotice.type === "success"
                           ? "bg-emerald-950/90 border-emerald-500 text-emerald-200 px-6 py-4"
                           : "bg-rose-950/90 border-rose-500 text-rose-200 px-6 py-4"
                         : "bg-teal-950 border-teal-600 text-yellow-300 px-6 py-4"
                     }`}
                   >
                     {tempNotice ? (
-                      <div className="flex items-center gap-3 w-full justify-center text-xl font-bold text-rose-300">
-                        <AlertTriangle size={24} className="text-rose-400 flex-shrink-0 animate-bounce" />
-                        <span style={{ fontFamily: "var(--font-chalk)" }}>{tempNotice}</span>
-                      </div>
-                    ) : submissionResult ? (
-                      <div className="flex items-center justify-between w-full px-2">
-                        <div className="flex items-center gap-3 text-xl font-bold">
-                          {submissionResult.success ? (
-                            <CheckCircle2 size={24} className="text-emerald-400 flex-shrink-0" />
-                          ) : (
-                            <XCircle size={24} className="text-rose-400 flex-shrink-0" />
-                          )}
-                          <span style={{ fontFamily: "var(--font-chalk)" }}>{submissionResult.msg}</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setSubmissionResult(null)}
-                          className="text-xs text-gray-400 hover:text-white underline cursor-pointer"
-                        >
-                          닫기
-                        </button>
+                      <div
+                        className={`flex items-center gap-3 w-full justify-center text-xl sm:text-2xl font-bold ${
+                          tempNotice.type === "success" ? "text-emerald-300" : "text-rose-300"
+                        }`}
+                      >
+                        {tempNotice.type === "success" ? (
+                          <CheckCircle2 size={26} className="text-emerald-400 flex-shrink-0 animate-bounce" />
+                        ) : tempNotice.type === "error" ? (
+                          <XCircle size={26} className="text-rose-400 flex-shrink-0 animate-bounce" />
+                        ) : (
+                          <AlertTriangle size={26} className="text-rose-400 flex-shrink-0 animate-bounce" />
+                        )}
+                        <span style={{ fontFamily: "var(--font-chalk)" }}>{tempNotice.msg}</span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-5" style={{ paddingLeft: "1.5rem" }}>
