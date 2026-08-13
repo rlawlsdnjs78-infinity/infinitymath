@@ -487,32 +487,31 @@ export default function FormulaPyramidPage() {
                       {showSolutions ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                     </button>
 
-                    {/* 바로 아래쪽으로만 펼쳐지는 정답 목록 창 */}
+                    {/* [요구사항] 바로 아래쪽으로 펼쳐지며 4줄로 왼쪽(정답), 오른쪽(계산식) 표출 */}
                     {showSolutions && (
-                      <div className="w-full bg-teal-900/95 rounded-xl p-4 border-2 border-dashed border-yellow-400/80 shadow-2xl flex flex-col gap-3">
-                        <div className="flex items-center justify-between border-b border-teal-700 pb-2">
-                          <span className="text-sm font-bold text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
-                            💡 TARGET 9 정답 목록
-                          </span>
-                          <span className="text-xs text-gray-300">클릭 시 자동 선택</span>
-                        </div>
-
-                        <div className="grid grid-cols-4 gap-2 max-h-[160px] overflow-y-auto pr-1">
-                          {validSolutions.map((sol, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() => {
-                                setSelectedNodes(sol.nodes);
-                                setTempNotice(null);
-                              }}
-                              className="py-2 px-1 rounded-md bg-teal-950/90 hover:bg-yellow-400 hover:text-teal-950 text-yellow-300 font-extrabold text-base sm:text-lg transition-all border border-teal-600 cursor-pointer text-center tracking-widest shadow-sm"
-                              style={{ fontFamily: "var(--font-chalk)" }}
-                            >
+                      <div className="w-full bg-teal-900/95 rounded-xl p-3.5 border-2 border-dashed border-yellow-400/80 shadow-2xl flex flex-col gap-2.5">
+                        {validSolutions.slice(0, 4).map((sol, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              setSelectedNodes(sol.nodes);
+                              setTempNotice(null);
+                            }}
+                            className="w-full flex items-center justify-between px-4 py-2.5 rounded-lg bg-teal-950/90 hover:bg-yellow-400 hover:text-teal-950 text-white transition-all border border-teal-700/80 cursor-pointer shadow-md group"
+                            style={{ fontFamily: "var(--font-chalk)" }}
+                          >
+                            {/* 왼쪽: 정답 (예: A C F) */}
+                            <span className="text-xl sm:text-2xl font-black text-yellow-300 group-hover:text-teal-950 tracking-widest">
                               {sol.nodes.join(" ")}
-                            </button>
-                          ))}
-                        </div>
+                            </span>
+
+                            {/* 오른쪽: 계산식 (예: 1 + 3 + 5 = 9) */}
+                            <span className="text-base sm:text-lg text-teal-200 group-hover:text-teal-950 font-bold opacity-90">
+                              {sol.formulaStr.split(" ( ")[1]?.replace(" )", "")}
+                            </span>
+                          </button>
+                        ))}
                       </div>
                     )}
                   </div>
