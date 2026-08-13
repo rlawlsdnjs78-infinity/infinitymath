@@ -231,7 +231,10 @@ export default function FormulaPyramidPage() {
         {/* ───────────────────────────────────────────────────────────────────
            [상단 고정 타이틀 & 모드 설정 통합 버튼]
            ─────────────────────────────────────────────────────────────────── */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-4">
+        <div
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-4"
+          style={{ marginBottom: "1.75rem" }}
+        >
           <div>
             <h1
               className="text-3xl sm:text-4xl text-yellow-300 flex items-center gap-2"
@@ -242,46 +245,54 @@ export default function FormulaPyramidPage() {
             </h1>
           </div>
 
-          {/* 모드 설정 버튼 (요구사항 2: 넓은 여백 & 버튼 간격 확보) */}
+          {/* 모드 설정 버튼 (요구사항 2: 테두리와 '~~모드' 사이 여백 & 버튼 간격 넉넉히 확보) */}
           <div
-            className="flex items-center rounded-full select-none bg-teal-950/90 border border-yellow-400/60 shadow-inner"
+            className="flex items-center rounded-full select-none bg-teal-950/95 border-2 border-yellow-400/70 shadow-lg"
             style={{
-              padding: "8px 12px",
-              gap: "12px",
-              backdropFilter: "blur(8px)",
+              padding: "10px 14px",
+              gap: "16px",
+              backdropFilter: "blur(12px)",
             }}
           >
             <button
               type="button"
               onClick={() => setMode("player")}
-              className={`px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-base sm:text-lg font-bold transition-all duration-200 cursor-pointer ${
+              className={`rounded-full text-base sm:text-xl font-bold transition-all duration-200 cursor-pointer ${
                 mode === "player"
-                  ? "bg-yellow-400 text-teal-950 shadow-md scale-102"
+                  ? "bg-yellow-400 text-teal-950 shadow-lg scale-102"
                   : "text-gray-300 hover:text-white"
               }`}
-              style={{ fontFamily: "var(--font-chalk)" }}
+              style={{
+                fontFamily: "var(--font-chalk)",
+                padding: "10px 28px",
+                letterSpacing: "0.03em",
+              }}
             >
               플레이어 모드
             </button>
             <button
               type="button"
               onClick={() => setMode("dealer")}
-              className={`px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-base sm:text-lg font-bold transition-all duration-200 cursor-pointer ${
+              className={`rounded-full text-base sm:text-xl font-bold transition-all duration-200 cursor-pointer ${
                 mode === "dealer"
-                  ? "bg-yellow-400 text-teal-950 shadow-md scale-102"
+                  ? "bg-yellow-400 text-teal-950 shadow-lg scale-102"
                   : "text-gray-300 hover:text-white"
               }`}
-              style={{ fontFamily: "var(--font-chalk)" }}
+              style={{
+                fontFamily: "var(--font-chalk)",
+                padding: "10px 28px",
+                letterSpacing: "0.03em",
+              }}
             >
               딜러 모드
             </button>
           </div>
         </div>
 
-        {/* [요구사항 1] 상단 게임 소개와 UI 사이의 점선 구분선 (박스 내부 점선 스타일 및 여백과 동일하게 적용) */}
+        {/* [요구사항 1] 상단 제목/버튼과 구분선 사이의 여백 넉넉하게 확장 */}
         <div
           className="w-full border-t border-dashed border-teal-700"
-          style={{ marginTop: "1.1rem", marginBottom: "1.1rem" }}
+          style={{ marginTop: "1.5rem", marginBottom: "2rem" }}
         />
 
         {/* ───────────────────────────────────────────────────────────────────
@@ -468,20 +479,28 @@ export default function FormulaPyramidPage() {
                   className="w-full chalk-box-straight bg-teal-900/60 rounded-md flex flex-col gap-6"
                   style={{ padding: "1.75rem 1.5rem", marginTop: "1.25rem" }}
                 >
-                  <div className="w-full bg-teal-950 px-6 py-4 rounded-md border border-dashed border-teal-600 flex items-center justify-between">
-                    <div className="flex items-center gap-3 ml-2">
-                      <span className="text-base text-teal-300 font-bold" style={{ fontFamily: "var(--font-chalk)" }}>
+                  <div
+                    className="w-full bg-teal-950 rounded-md border border-dashed border-teal-600 flex items-center justify-between"
+                    style={{
+                      padding: "18px 28px",
+                    }}
+                  >
+                    <div className="flex items-center gap-4" style={{ paddingLeft: "1.25rem" }}>
+                      <span
+                        className="text-lg text-teal-300 font-bold"
+                        style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.02em" }}
+                      >
                         선택한 수식:
                       </span>
                       <span
-                        className="text-2.5xl font-bold text-yellow-300 tracking-widest ml-3"
-                        style={{ fontFamily: "var(--font-chalk)" }}
+                        className="text-2.5xl font-bold text-yellow-300 tracking-widest"
+                        style={{ fontFamily: "var(--font-chalk)", paddingLeft: "0.75rem" }}
                       >
                         {exprStr}
                       </span>
                     </div>
                     {currentResult !== null && (
-                      <span className="text-2xl font-bold text-emerald-400 mr-2">
+                      <span className="text-2xl font-bold text-emerald-400 pr-2">
                         = {currentResult}
                       </span>
                     )}
