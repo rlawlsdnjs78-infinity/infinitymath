@@ -518,8 +518,8 @@ export default function FormulaPyramidPage() {
                               {sol.nodes.join(" ")}
                             </span>
 
-                            {/* 오른쪽: 계산식 (예: 1 + 3 + 5 = 9) */}
-                            <span className="text-xs sm:text-sm text-teal-200 group-hover:text-teal-950 font-bold opacity-90">
+                            {/* 오른쪽: 계산식 (예: 1 + 3 + 5 = 9) - 글씨 크기 키움 */}
+                            <span className="text-sm sm:text-base text-teal-200 group-hover:text-teal-950 font-extrabold tracking-wide">
                               {sol.formulaStr.split(" ( ")[1]?.replace(" )", "")}
                             </span>
                           </button>
@@ -697,7 +697,7 @@ export default function FormulaPyramidPage() {
                   </div>
 
                   {/* ③번 설명 항목 바로 밑에 '주의' 표시 박스 밀착 연결 */}
-                  <div className="flex flex-col gap-2.5">
+                  <div className="flex flex-col gap-2">
                     <div className="flex items-start gap-2.5">
                       <span className="flex-shrink-0 font-bold text-yellow-300 w-5">③</span>
                       <p className="flex-1 leading-relaxed">
@@ -705,40 +705,40 @@ export default function FormulaPyramidPage() {
                       </p>
                     </div>
 
-                    {/* [주의 박스] ③번 항목 바로 아래에 넉넉한 패딩(1.25rem 1.5rem)으로 밀착 배치 */}
+                    {/* [주의 박스] 안쪽 상하 여백 감축(0.8rem) 및 하단 간격을 ①-② 항목 간격(gap-4: 16px)과 일치 */}
                     <div
                       className="w-full rounded-xl shadow-lg border-2 border-dashed border-yellow-400/90 bg-teal-900/95"
                       style={{
-                        padding: "1.25rem 1.5rem",
+                        padding: "0.8rem 1.25rem",
                         marginTop: "0.25rem",
-                        marginBottom: "1.25rem",
+                        marginBottom: "0px",
                         display: "flex",
                         flexDirection: "column",
-                        gap: "1rem",
+                        gap: "0.75rem",
                         boxSizing: "border-box",
                       }}
                     >
                       <div
                         className="flex items-start gap-3.5 text-yellow-200 font-medium"
-                        style={{ fontSize: "0.95rem", lineHeight: "1.6", wordBreak: "keep-all" }}
+                        style={{ fontSize: "0.95rem", lineHeight: "1.5", wordBreak: "keep-all" }}
                       >
-                        <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-1" />
+                        <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-0.5" />
                         <span>동일한 칸은 중복선택할 수 없습니다.</span>
                       </div>
 
                       <div
                         className="flex items-start gap-3.5 text-yellow-200 font-medium"
-                        style={{ fontSize: "0.95rem", lineHeight: "1.6", wordBreak: "keep-all" }}
+                        style={{ fontSize: "0.95rem", lineHeight: "1.5", wordBreak: "keep-all" }}
                       >
-                        <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-1" />
+                        <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-0.5" />
                         <span>수식의 맨 앞에 사용된 칸의 연산 기호는 무시합니다.</span>
                       </div>
 
                       <div
                         className="flex items-start gap-3.5 text-yellow-200 font-medium"
-                        style={{ fontSize: "0.95rem", lineHeight: "1.6", wordBreak: "keep-all" }}
+                        style={{ fontSize: "0.95rem", lineHeight: "1.5", wordBreak: "keep-all" }}
                       >
-                        <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-1" />
+                        <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-0.5" />
                         <span>완성된 수식은 사칙연산 순서에 따라 계산됩니다.</span>
                       </div>
                     </div>
