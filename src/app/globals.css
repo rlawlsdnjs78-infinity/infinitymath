@@ -1,0 +1,264 @@
+/* =========================================
+   Google Fonts: 손글씨 느낌 폰트 로드
+   (반드시 tailwindcss import 보다 먼저 위치해야 합니다)
+   ========================================= */
+@import url("https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Gowun+Dodum&display=swap");
+
+/* =========================================
+   Tailwind CSS v4 import (절대 삭제 금지)
+   ========================================= */
+@import "tailwindcss";
+
+/* =========================================
+   디자인 토큰 (CSS 변수)
+   ========================================= */
+:root {
+  /* 칠판 색상 팔레트 */
+  --chalk-bg: #1a3a3a;          /* 짙은 칠판 녹색 */
+  --chalk-bg-light: #1f4040;    /* 약간 밝은 칠판 */
+  --chalk-white: #f0ede8;       /* 하얀 분필 */
+  --chalk-yellow: #f5e642;      /* 노란 분필 */
+  --chalk-blue: #7dd3fc;        /* 파란 분필 */
+  --chalk-pink: #f9a8d4;        /* 분홍 분필 */
+  --chalk-green: #86efac;       /* 초록 분필 */
+  --chalk-orange: #fdba74;      /* 주황 분필 */
+  --chalk-dim: rgba(240, 237, 232, 0.55); /* 흐린 분필 */
+  --chalk-border: rgba(240, 237, 232, 0.3);
+  --chalk-border-bright: rgba(240, 237, 232, 0.65);
+
+  /* 폰트 */
+  --font-chalk: "Nanum Pen Script", "Gowun Dodum", cursive;
+  --font-body: "Gowun Dodum", "Nanum Pen Script", sans-serif;
+}
+
+/* =========================================
+   기본 리셋 및 전역 스타일
+   ========================================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  /* 칠판 배경: 약간의 텍스처 그라디언트 */
+  background-color: var(--chalk-bg);
+  background-image:
+    /* 칠판 분필 번짐 효과 */
+    radial-gradient(ellipse at 20% 30%, rgba(255,255,255,0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 70%, rgba(255,255,255,0.02) 0%, transparent 50%),
+    /* 미세한 노이즈 패턴으로 칠판 질감 표현 */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255,255,255,0.005) 2px,
+      rgba(255,255,255,0.005) 4px
+    );
+  color: var(--chalk-white);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.7;
+}
+
+/* =========================================
+   분필 글씨 느낌 — 텍스트 렌더링 설정
+   ========================================= */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-chalk);
+  /* 분필 텍스트 특유의 약간 번진 느낌 */
+  text-shadow:
+    1px 1px 0 rgba(255,255,255,0.08),
+    -1px -1px 0 rgba(0,0,0,0.15);
+  letter-spacing: 0.02em;
+}
+
+/* =========================================
+   분필 선 애니메이션 (점선 테두리 깜빡임)
+   ========================================= */
+@keyframes chalkFlicker {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.85; }
+  94% { opacity: 1; }
+  97% { opacity: 0.9; }
+  98% { opacity: 1; }
+}
+
+@keyframes chalkWrite {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0% 0 0); }
+}
+
+@keyframes floatUp {
+  0%, 100% { transform: translateY(0px) rotate(-1deg); }
+  50%       { transform: translateY(-8px) rotate(1deg); }
+}
+
+@keyframes dustFloat {
+  0%   { transform: translateY(0) translateX(0) scale(1);   opacity: 0.6; }
+  50%  { transform: translateY(-20px) translateX(10px) scale(1.2); opacity: 0.3; }
+  100% { transform: translateY(-40px) translateX(-5px) scale(0.8); opacity: 0; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-30px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* =========================================
+   커스텀 유틸리티 클래스
+   ========================================= */
+
+/* 분필 텍스트 스타일 */
+.chalk-text {
+  font-family: var(--font-chalk);
+  color: var(--chalk-white);
+  text-shadow:
+    0 0 8px rgba(255,255,255,0.15),
+    1px 1px 0 rgba(0,0,0,0.2);
+}
+
+.chalk-yellow { color: var(--chalk-yellow); }
+.chalk-blue   { color: var(--chalk-blue);   }
+.chalk-pink   { color: var(--chalk-pink);   }
+.chalk-green  { color: var(--chalk-green);  }
+.chalk-orange { color: var(--chalk-orange); }
+.chalk-dim    { color: var(--chalk-dim);    }
+
+/* 분필 박스 (dashed 테두리) */
+.chalk-box {
+  border: 2px dashed var(--chalk-border-bright);
+  border-radius: 2px;
+  position: relative;
+  /* 모서리를 약간 삐뚤어 보이게 */
+  transform: rotate(-0.3deg);
+}
+
+.chalk-box-straight {
+  border: 2px dashed var(--chalk-border-bright);
+  border-radius: 2px;
+}
+
+/* 칠판 가로선 (밑줄) */
+.chalk-underline {
+  position: relative;
+  display: inline-block;
+}
+.chalk-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 2px;
+  background: var(--chalk-yellow);
+  opacity: 0.8;
+  border-radius: 1px;
+  /* 분필 특유의 불균일한 선 */
+  clip-path: polygon(0 0, 100% 20%, 100% 80%, 0 100%);
+}
+
+/* 칠판 줄 (노트 라인) */
+.notebook-lines {
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 31px,
+    rgba(240, 237, 232, 0.12) 31px,
+    rgba(240, 237, 232, 0.12) 32px
+  );
+  background-position: 0 8px;
+}
+
+/* 버튼 — 분필 스타일 */
+.btn-chalk {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-chalk);
+  font-size: 1.25rem;
+  color: var(--chalk-yellow);
+  background: transparent;
+  border: 2px dashed var(--chalk-yellow);
+  padding: 0.6rem 1.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  transform: rotate(-0.5deg);
+  letter-spacing: 0.05em;
+}
+
+.btn-chalk:hover {
+  background: rgba(245, 230, 66, 0.12);
+  border-color: var(--chalk-yellow);
+  box-shadow:
+    0 0 12px rgba(245, 230, 66, 0.25),
+    inset 0 0 8px rgba(245, 230, 66, 0.05);
+  transform: rotate(0deg) scale(1.03);
+}
+
+.btn-chalk:active {
+  transform: rotate(0deg) scale(0.97);
+}
+
+/* 칠판 테두리 프레임 */
+.chalkboard-frame {
+  border: 6px solid #3d2b1a;
+  box-shadow:
+    inset 0 0 60px rgba(0,0,0,0.25),
+    0 8px 32px rgba(0,0,0,0.4),
+    0 0 0 2px rgba(255,255,255,0.05);
+  border-radius: 4px;
+}
+
+/* 분필 번짐 효과 애니메이션 */
+.chalk-flicker {
+  animation: chalkFlicker 8s ease-in-out infinite;
+}
+
+.float-anim {
+  animation: floatUp 6s ease-in-out infinite;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.6s ease forwards;
+}
+
+.slide-in-up {
+  animation: slideInUp 0.5s ease forwards;
+}
+
+/* 칠판 지우개 먼지 (장식 요소) */
+.dust-particle {
+  animation: dustFloat 3s ease-in-out infinite;
+}
+
+/* =========================================
+   스크롤바 스타일 (칠판 느낌)
+   ========================================= */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--chalk-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(240, 237, 232, 0.25);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(240, 237, 232, 0.45);
+}
