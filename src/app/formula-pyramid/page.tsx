@@ -110,13 +110,13 @@ function HexagonCell({
           {node.id}
         </text>
 
-        {/* 중앙 사칙연산 값 텍스트 */}
+        {/* 중앙 사칙연산 값 텍스트 (크기 극대화: fontSize 60) */}
         <text
           x="50"
-          y="82"
+          y="88"
           textAnchor="middle"
           fill={isSelected ? "#f5e642" : "var(--chalk-white)"}
-          fontSize="26"
+          fontSize="60"
           fontWeight="bold"
           fontFamily="var(--font-chalk)"
         >
@@ -223,7 +223,7 @@ export default function FormulaPyramidPage() {
     <div
       className="w-full flex-1 flex flex-col items-center justify-start pb-12"
       style={{
-        paddingTop: "2.5rem",
+        paddingTop: "1.25rem",
         paddingBottom: "3rem",
         paddingLeft: "clamp(1.5rem, 5vw, 5rem)",
         paddingRight: "clamp(1.5rem, 5vw, 5rem)",
@@ -231,11 +231,11 @@ export default function FormulaPyramidPage() {
     >
       <div className="w-full max-w-[1550px] flex flex-col mx-auto">
         {/* ───────────────────────────────────────────────────────────────────
-           [상단 고정 타이틀]
+           [상단 고정 타이틀 - 여백 축소]
            ─────────────────────────────────────────────────────────────────── */}
         <div
           className="flex items-center justify-between w-full"
-          style={{ marginTop: "1rem", marginBottom: "1.75rem" }}
+          style={{ marginTop: "0.5rem", marginBottom: "0.75rem" }}
         >
           <div>
             <h1
@@ -251,7 +251,7 @@ export default function FormulaPyramidPage() {
         {/* 상단 게임 소개와 UI 사이의 점선 구분선 */}
         <div
           className="w-full border-t border-dashed border-teal-700"
-          style={{ marginTop: "1rem", marginBottom: "2rem" }}
+          style={{ marginTop: "0.5rem", marginBottom: "1.25rem" }}
         />
 
         {/* ───────────────────────────────────────────────────────────────────
@@ -278,8 +278,8 @@ export default function FormulaPyramidPage() {
               style={{ marginTop: "1.1rem", marginBottom: "1.5rem" }}
             />
 
-            {/* [요구사항 1] 모드 선택 버튼을 '게임 입장하기' 박스 내부 '닉네임' 윗부분에 배치 */}
-            <div className="w-full flex justify-center mb-6">
+            {/* [요구사항 1] 모드 선택 버튼과 '닉네임' 사이 간격 넓힘 (mb-10) */}
+            <div className="w-full flex justify-center mb-10">
               <div className="flex items-center rounded-full select-none bg-teal-950/95 border-2 border-yellow-400/70 shadow-lg w-full p-1.5 gap-2">
                 <button
                   type="button"
@@ -317,11 +317,11 @@ export default function FormulaPyramidPage() {
                 className="flex flex-col flex-1 justify-between gap-6"
               >
                 <div className="flex flex-col gap-6">
-                  {/* [요구사항 2] '닉네임' 글씨 크기 확대 */}
+                  {/* [요구사항 2] '닉네임' 글씨 색상을 흰색으로 변경 */}
                   <div className="flex flex-col gap-2.5">
                     <label
                       htmlFor="nickname-input"
-                      className="text-2xl sm:text-3xl text-yellow-300 font-bold tracking-wide"
+                      className="text-2xl sm:text-3xl text-white font-bold tracking-wide"
                       style={{ fontFamily: "var(--font-chalk)" }}
                     >
                       닉네임
@@ -341,11 +341,11 @@ export default function FormulaPyramidPage() {
                     />
                   </div>
 
-                  {/* [요구사항 2] '입장 코드' 글씨 크기 확대 */}
+                  {/* [요구사항 2 & 3] '입장 코드' 글씨 색상 흰색 & placeholder 변경 */}
                   <div className="flex flex-col gap-2.5">
                     <label
                       htmlFor="code-input"
-                      className="text-2xl sm:text-3xl text-yellow-300 font-bold tracking-wide"
+                      className="text-2xl sm:text-3xl text-white font-bold tracking-wide"
                       style={{ fontFamily: "var(--font-chalk)" }}
                     >
                       입장 코드
@@ -353,7 +353,7 @@ export default function FormulaPyramidPage() {
                     <input
                       id="code-input"
                       type="text"
-                      placeholder="딜러에게 받은 코드 (예: PYRAMID-1234)"
+                      placeholder="코드를 입력해주세요."
                       value={entryCode}
                       onChange={(e) => setEntryCode(e.target.value)}
                       className="w-full rounded-md bg-teal-900/90 border border-dashed border-teal-600 text-white text-lg uppercase focus:outline-none focus:border-yellow-400 placeholder:text-gray-400/80"
