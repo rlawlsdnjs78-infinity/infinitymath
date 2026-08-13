@@ -2,9 +2,10 @@
  * src/app/formula-pyramid/page.tsx
  * 수식 피라미드 게임 페이지
  *
- * [중앙 정렬 레이아웃 수정]
- * - 최상위 컨테이너에 flex flex-col items-center justify-center mx-auto 적용
- * - 모니터 해상도에 상관없이 3분할 대기창 덩어리가 화면 "정중앙(Center)"에 완벽 배치되도록 구조 개편
+ * [요구사항 반영]
+ * 1. 이미지와 동일한 타원형 ON/OFF 토글 스위치 (원형 노브 슬라이딩)
+ * 2. 모드 전환 시 상단 UI 영역 고정 (위치가 절대로 움직이지 않음)
+ * 3. 하단 3분할 영역만 모드에 따라 전환
  */
 
 "use client";
@@ -13,7 +14,6 @@ import { useState } from "react";
 import {
   Pencil,
   AlertTriangle,
-  Play,
   Settings,
   HelpCircle,
   LogIn,
@@ -229,17 +229,14 @@ export default function FormulaPyramidPage() {
   };
 
   return (
-    /*
-     * [최상위 래퍼]
-     * flex-1 flex flex-col items-center justify-center mx-auto
-     * 대형 화면이든 어떤 해상도이든 3분할 게임 화면 전체를 화면 "정중앙(Center)"에 배치합니다.
-     */
-    <div className="w-full flex-1 flex flex-col items-center justify-center px-4 sm:px-8 py-8 my-auto">
-      <div className="w-full max-w-[1550px] flex flex-col gap-6 mx-auto">
+    <div className="w-full flex-1 flex flex-col items-center justify-center px-4 sm:px-8 py-6 my-auto">
+      <div className="w-full max-w-[1550px] flex flex-col mx-auto">
         {/* ───────────────────────────────────────────────────────────────────
-           상단 타이틀 & 모드 변경 토글 스위치
+           [상단 고정 영역]
+           - 모드가 변경되더라도 이 상단 영역의 높이와 위치는 1px 도 안 움직임 고정!
+           - 이미지와 동일한 타원형 스위치 (ON/OFF 슬라이더)
            ─────────────────────────────────────────────────────────────────── */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b-2 border-dashed border-teal-800 w-full">
+        <div className="h-[90px] flex items-center justify-between pb-4 border-b-2 border-dashed border-teal-800 w-full mb-6 flex-shrink-0">
           <div>
             <h1
               className="text-3xl sm:text-4xl text-yellow-300 flex items-center gap-2"
@@ -253,52 +250,66 @@ export default function FormulaPyramidPage() {
             </p>
           </div>
 
-          {/* ── 타원형 ON/OFF 모드 스위치 버튼 ───────────────────────────── */}
-          <div
-            className="chalk-box-straight rounded-full p-1.5 flex items-center gap-2"
-            style={{
-              background: "rgba(20, 48, 48, 0.95)",
-              border: "2px solid var(--chalk-yellow)",
-              boxShadow: "0 0 15px rgba(245, 230, 66, 0.25)",
-            }}
-          >
-            {/* 플레이어 모드 버튼 */}
-            <button
-              type="button"
+          {/* ── 이미지와 똑같은 타원형 스위치 (ON/OFF 원형 노브 슬라이딩) ───────── */}
+          <div className="flex items-center gap-3 select-none">
+            {/* 플레이어 모드 라벨 */}
+            <span
               onClick={() => setMode("player")}
-              className={`px-6 py-2.5 rounded-full text-lg font-semibold transition-all duration-200 flex items-center gap-2 ${
-                mode === "player"
-                  ? "bg-yellow-400 text-teal-950 shadow-md scale-105"
-                  : "text-gray-300 hover:text-white"
+              className={`cursor-pointer text-lg font-semibold transition-colors duration-200 ${
+                mode === "player" ? "text-yellow-300 font-bold scale-105" : "text-gray-400 hover:text-gray-200"
               }`}
               style={{ fontFamily: "var(--font-chalk)" }}
             >
-              <Play size={18} />
-              <span>플레이어 모드</span>
+              플레이어 모드
+            </span>
+
+            {/* 타원형 슬라이더 스위치 트랙 */}
+            <button
+              type="button"
+              role="switch"
+              aria-checked={mode === "dealer"}
+              onClick={() => setMode(mode === "player" ? "dealer" : "player")}
+              className="relative inline-flex items-center justify-start h-9 w-16 rounded-full p-1 cursor-pointer transition-colors duration-300 focus:outline-none"
+              style={{
+                background: "rgba(10, 30, 30, 0.95)",
+                border: "2px solid rgba(245, 230, 66, 0.8)",
+                boxShadow: "inset 0 2px 4px rgba(0,0,0,0.6), 0 0 10px rgba(245, 230, 66, 0.2)",
+              }}
+              title="모드 전환 스위치"
+            >
+              {/* 슬라이딩 동그라미 노브 (Knob) */}
+              <span
+                className={`inline-block w-6 h-6 rounded-full transition-transform duration-300 ease-in-out shadow-lg ${
+                  mode === "dealer"
+                    ? "translate-x-7 bg-yellow-400"
+                    : "translate-x-0 bg-white"
+                }`}
+                style={{
+                  boxShadow: mode === "dealer"
+                    ? "0 0 8px rgba(245, 230, 66, 0.9)"
+                    : "0 0 8px rgba(255, 255, 255, 0.8)",
+                }}
+              />
             </button>
 
-            {/* 딜러 모드 버튼 */}
-            <button
-              type="button"
+            {/* 딜러 모드 라벨 */}
+            <span
               onClick={() => setMode("dealer")}
-              className={`px-6 py-2.5 rounded-full text-lg font-semibold transition-all duration-200 flex items-center gap-2 ${
-                mode === "dealer"
-                  ? "bg-yellow-400 text-teal-950 shadow-md scale-105"
-                  : "text-gray-300 hover:text-white"
+              className={`cursor-pointer text-lg font-semibold transition-colors duration-200 ${
+                mode === "dealer" ? "text-yellow-300 font-bold scale-105" : "text-gray-400 hover:text-gray-200"
               }`}
               style={{ fontFamily: "var(--font-chalk)" }}
             >
-              <Settings size={18} />
-              <span>딜러 모드</span>
-            </button>
+              딜러 모드
+            </span>
           </div>
         </div>
 
         {/* ───────────────────────────────────────────────────────────────────
-           1. 플레이어 모드 화면 (가로 3분할 — 화면 정중앙에 균형 있게 배치)
+           1. 플레이어 모드 화면 (가로 3분할)
            ─────────────────────────────────────────────────────────────────── */}
         {mode === "player" && (
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch w-full mx-auto">
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch w-full mx-auto animate-fade-in">
             {/* ── [좌측] 게임 입장하기 (xl:col-span-3) ───────────────────────── */}
             <div className="xl:col-span-3 chalk-box content-box flex flex-col gap-6 bg-teal-950/75 backdrop-blur-md h-full">
               <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-3">
@@ -565,7 +576,7 @@ export default function FormulaPyramidPage() {
            2. 딜러 모드 화면
            ─────────────────────────────────────────────────────────────────── */}
         {mode === "dealer" && (
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch w-full mx-auto">
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch w-full mx-auto animate-fade-in">
             {/* ── [좌측/중앙] 개발중입니다 (xl:col-span-8) ────────────────────── */}
             <div className="xl:col-span-8 chalk-box content-box flex flex-col items-center justify-center min-h-[450px] bg-teal-950/50 border-dashed border-teal-700/60 text-center h-full">
               <Pencil size={56} className="text-yellow-400/60 mb-4 animate-bounce" />
