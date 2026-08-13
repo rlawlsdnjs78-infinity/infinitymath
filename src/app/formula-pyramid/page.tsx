@@ -72,7 +72,7 @@ function HexagonCell({
   return (
     <div
       onClick={onClick}
-      className={`relative cursor-pointer transition-all duration-200 hover:scale-105 select-none w-[68px] h-[78.5px] sm:w-[80px] sm:h-[92.4px] flex items-center justify-center ${
+      className={`relative cursor-pointer transition-all duration-200 hover:scale-105 select-none w-[56px] h-[64.7px] sm:w-[64px] sm:h-[73.9px] flex items-center justify-center ${
         isSelected ? "drop-shadow-[0_0_16px_rgba(245,230,66,0.95)]" : ""
       }`}
     >
@@ -103,7 +103,7 @@ function HexagonCell({
           y="29.5"
           textAnchor="middle"
           fill={isSelected ? "#1a3a3a" : "var(--chalk-yellow)"}
-          fontSize="17"
+          fontSize="16"
           fontWeight="bold"
           fontFamily="var(--font-chalk)"
         >
@@ -280,7 +280,7 @@ export default function FormulaPyramidPage() {
         {/* ───────────────────────────────────────────────────────────────────
            [하단 3분할 박스 영역]
            ─────────────────────────────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch w-full mx-auto min-h-[640px]">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start w-full mx-auto">
           {/* ── [좌측 박스] xl:col-span-3 ─────────────────────────────────── */}
           <div className="xl:col-span-3 chalk-box content-box flex flex-col bg-teal-950/75 backdrop-blur-md h-full min-h-[640px] p-6 sm:p-7">
             {mode === "player" ? (
@@ -432,12 +432,15 @@ export default function FormulaPyramidPage() {
                 />
 
                 {/* [요구사항 2 & 4] 피라미드 정육각형 배치 및 층간 uniform spacing & 하단 박스와의 충분한 간격 */}
-                <div className="flex-1 py-8 my-4 flex flex-col items-center justify-center w-full overflow-x-auto">
+                <div
+                  className="py-4 my-2 flex flex-col items-center justify-center w-full overflow-x-auto"
+                  style={{ marginBottom: "2.5rem" }}
+                >
                   {PYRAMID_DATA.map((row, rowIndex) => (
                     <div
                       key={rowIndex}
                       className="flex justify-center gap-2 sm:gap-2.5"
-                      style={{ marginTop: rowIndex === 0 ? "0px" : "-13px" }}
+                      style={{ marginTop: rowIndex === 0 ? "0px" : "-11px" }}
                     >
                       {row.map((node) => (
                         <HexagonCell
@@ -451,8 +454,11 @@ export default function FormulaPyramidPage() {
                   ))}
                 </div>
 
-                {/* [요구사항 4] 피라미드와 정답 입력 박스 사이 여백(mt-10 sm:mt-12) 확실히 확보 */}
-                <div className="w-full chalk-box-straight p-6 sm:p-7 bg-teal-900/60 rounded-md flex flex-col gap-6 mt-10 sm:mt-12">
+                {/* [요구사항 4] 피라미드와 정답 입력 박스 사이 여백(marginTop: 2.5rem) 확실히 확보 */}
+                <div
+                  className="w-full chalk-box-straight bg-teal-900/60 rounded-md flex flex-col gap-6"
+                  style={{ padding: "1.75rem 1.5rem", marginTop: "2.5rem" }}
+                >
                   <div className="w-full bg-teal-950 px-5 py-4 rounded-md border border-dashed border-teal-600 flex items-center justify-between">
                     <span className="text-sm text-teal-400 font-semibold" style={{ fontFamily: "var(--font-chalk)" }}>
                       선택된 수식 보드:
@@ -608,19 +614,43 @@ export default function FormulaPyramidPage() {
                     </p>
                   </div>
 
-                  {/* [요구사항 7] ③번 하위 '주의' 표시 항목만 박스 처리 및 내부 공간(p-5 sm:p-6) 및 여백 확실히 확보 */}
-                  <div className="w-full my-3.5 p-5 sm:p-6 rounded-lg border-2 border-dashed border-yellow-400/60 bg-teal-900/80 flex flex-col gap-3.5 shadow-md">
-                    <div className="flex items-start gap-3 text-sm sm:text-base text-yellow-200 font-medium [word-break:keep-all]">
-                      <AlertTriangle size={18} className="flex-shrink-0 mt-0.5 text-yellow-400" />
-                      <span className="leading-relaxed">동일한 칸은 중복선택할 수 없습니다.</span>
+                  {/* [요구사항 7] ③번 하위 '주의' 표시 항목 전용 박스 - 명시적 인라인 스타일 패딩 및 여백 부여 */}
+                  <div
+                    className="w-full rounded-lg shadow-md"
+                    style={{
+                      border: "2px dashed #f5e642",
+                      backgroundColor: "rgba(15, 45, 45, 0.9)",
+                      padding: "20px 20px",
+                      marginTop: "1.25rem",
+                      marginBottom: "1.25rem",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "14px",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    <div
+                      className="flex items-start gap-3.5 text-yellow-200 font-medium"
+                      style={{ fontSize: "0.95rem", lineHeight: "1.6", wordBreak: "keep-all" }}
+                    >
+                      <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-1" />
+                      <span>동일한 칸은 중복선택할 수 없습니다.</span>
                     </div>
-                    <div className="flex items-start gap-3 text-sm sm:text-base text-yellow-200 font-medium [word-break:keep-all]">
-                      <AlertTriangle size={18} className="flex-shrink-0 mt-0.5 text-yellow-400" />
-                      <span className="leading-relaxed">수식의 맨 앞에 사용된 칸의 연산 기호는 무시합니다.</span>
+
+                    <div
+                      className="flex items-start gap-3.5 text-yellow-200 font-medium"
+                      style={{ fontSize: "0.95rem", lineHeight: "1.6", wordBreak: "keep-all" }}
+                    >
+                      <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-1" />
+                      <span>수식의 맨 앞에 사용된 칸의 연산 기호는 무시합니다.</span>
                     </div>
-                    <div className="flex items-start gap-3 text-sm sm:text-base text-yellow-200 font-medium [word-break:keep-all]">
-                      <AlertTriangle size={18} className="flex-shrink-0 mt-0.5 text-yellow-400" />
-                      <span className="leading-relaxed">완성된 수식은 사칙연산 순서에 따라 계산됩니다.</span>
+
+                    <div
+                      className="flex items-start gap-3.5 text-yellow-200 font-medium"
+                      style={{ fontSize: "0.95rem", lineHeight: "1.6", wordBreak: "keep-all" }}
+                    >
+                      <AlertTriangle size={18} className="flex-shrink-0 text-yellow-400 mt-1" />
+                      <span>완성된 수식은 사칙연산 순서에 따라 계산됩니다.</span>
                     </div>
                   </div>
 
