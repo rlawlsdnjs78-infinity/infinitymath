@@ -1,4 +1,4 @@
 @echo off
 git add .
-git commit -m "fix: use inline clamp() padding on header for reliable left/right margin"
+git commit -m "feat: update header nav with Brain Survival dropdown & add Formula Pyramid game page"
 git push

@@ -1,15 +1,9 @@
 /**
  * Header.tsx
  * 전역 헤더
- *
- * [여백 처리]
- * 좌우 padding 을 inline style 의 clamp() 로 직접 지정합니다.
- * Tailwind 반응형 클래스 파싱에 의존하지 않으므로 100% 신뢰할 수 있습니다.
- *   - 최소: 1rem  (모바일)
- *   - 중간: 4vw   (화면 비례)
- *   - 최대: 5rem  (와이드 스크린)
  */
 
+import Link from "next/link";
 import NavMenu from "./NavMenu";
 
 export default function Header() {
@@ -36,37 +30,39 @@ export default function Header() {
       }}
     >
       {/* ── 로고 ──────────────────────────────────────────────── */}
-      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-        {/* ∞ 무한대 기호 로고 — 테두리 없음, 노란 glow */}
-        <span
-          aria-hidden="true"
-          style={{
-            fontFamily: "var(--font-chalk)",
-            fontSize:   "2.4rem",
-            lineHeight:  1,
-            color:       "var(--chalk-yellow)",
-            textShadow:
-              "0 0 12px rgba(245,230,66,0.5), 0 0 24px rgba(245,230,66,0.2)",
-            userSelect: "none",
-          }}
-        >
-          ∞
-        </span>
+      <Link href="/" style={{ textDecoration: "none" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          {/* ∞ 무한대 기호 로고 — 테두리 없음, 노란 glow */}
+          <span
+            aria-hidden="true"
+            style={{
+              fontFamily: "var(--font-chalk)",
+              fontSize:   "2.4rem",
+              lineHeight:  1,
+              color:       "var(--chalk-yellow)",
+              textShadow:
+                "0 0 12px rgba(245,230,66,0.5), 0 0 24px rgba(245,230,66,0.2)",
+              userSelect: "none",
+            }}
+          >
+            ∞
+          </span>
 
-        {/* 사이트명 */}
-        <span
-          className="chalk-flicker"
-          style={{
-            fontFamily:    "var(--font-chalk)",
-            fontSize:      "1.6rem",
-            color:         "var(--chalk-white)",
-            letterSpacing: "0.04em",
-            whiteSpace:    "nowrap",
-          }}
-        >
-          무한대 수학반
-        </span>
-      </div>
+          {/* 사이트명 */}
+          <span
+            className="chalk-flicker"
+            style={{
+              fontFamily:    "var(--font-chalk)",
+              fontSize:      "1.6rem",
+              color:         "var(--chalk-white)",
+              letterSpacing: "0.04em",
+              whiteSpace:    "nowrap",
+            }}
+          >
+            무한대 수학반
+          </span>
+        </div>
+      </Link>
 
       {/* ── 네비게이션 (Client Component) ──────────────────────── */}
       <NavMenu />
