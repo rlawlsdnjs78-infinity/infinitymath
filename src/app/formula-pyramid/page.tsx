@@ -471,11 +471,11 @@ export default function FormulaPyramidPage() {
                   {/* [우측] 연습 설명글 & 정답확인 버튼 & absolute 펼침 창 */}
                   <div className="relative flex-1 w-full flex flex-col items-center xl:items-stretch gap-4">
                     <div
-                      className="flex items-center gap-2 text-base sm:text-lg text-gray-200 font-semibold justify-center xl:justify-start"
-                      style={{ fontFamily: "var(--font-chalk)" }}
+                      className="flex items-center gap-2 text-xs sm:text-sm md:text-base xl:text-lg text-gray-200 font-semibold justify-center xl:justify-start whitespace-nowrap"
+                      style={{ fontFamily: "var(--font-chalk)", wordBreak: "keep-all" }}
                     >
-                      <Pencil size={20} className="text-yellow-400 flex-shrink-0" />
-                      <span>게임 시작을 기다리는 동안 연습해 보세요.</span>
+                      <Pencil size={18} className="text-yellow-400 flex-shrink-0" />
+                      <span className="whitespace-nowrap">게임 시작을 기다리는 동안 연습해 보세요.</span>
                     </div>
 
                     {/* '정답 확인' 버튼 - 이전 디자인 그대로 복구 */}
