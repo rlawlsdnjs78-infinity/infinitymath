@@ -221,19 +221,21 @@ export default function FormulaPyramidPage() {
 
   return (
     <div
-      className="w-full flex-1 flex flex-col items-center justify-start pt-6 pb-12"
+      className="w-full flex-1 flex flex-col items-center justify-start pb-12"
       style={{
+        paddingTop: "2.5rem",
+        paddingBottom: "3rem",
         paddingLeft: "clamp(1.5rem, 5vw, 5rem)",
         paddingRight: "clamp(1.5rem, 5vw, 5rem)",
       }}
     >
       <div className="w-full max-w-[1550px] flex flex-col mx-auto">
         {/* ───────────────────────────────────────────────────────────────────
-           [상단 고정 타이틀 & 모드 설정 통합 버튼]
+           [상단 고정 타이틀 & 모드 설정 통합 버튼 - 글로벌 헤더 구분선과 넉넉한 상단 여백 확보]
            ─────────────────────────────────────────────────────────────────── */}
         <div
-          className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-4"
-          style={{ marginBottom: "1.75rem" }}
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-6"
+          style={{ marginTop: "1.25rem", marginBottom: "2.25rem" }}
         >
           <div>
             <h1
