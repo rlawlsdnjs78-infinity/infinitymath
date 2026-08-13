@@ -468,42 +468,35 @@ export default function FormulaPyramidPage() {
                     ))}
                   </div>
 
-                  {/* [우측] 연습 설명글 & 정답확인 버튼 (문구 가운데 정렬) & 정답 목록 펼침 */}
-                  <div className="flex-1 w-full flex flex-col items-center xl:items-stretch gap-5">
+                  {/* [우측] 연습 설명글 & 정답확인 버튼 & absolute 펼침 창 */}
+                  <div className="relative flex-1 w-full flex flex-col items-center xl:items-stretch gap-4">
                     <div
                       className="flex items-center gap-2 text-base sm:text-lg text-gray-200 font-semibold justify-center xl:justify-start"
-                      style={{ fontFamily: "var(--font-chalk)", marginTop: "0.5rem", marginBottom: "0.25rem" }}
+                      style={{ fontFamily: "var(--font-chalk)" }}
                     >
                       <Pencil size={20} className="text-yellow-400 flex-shrink-0" />
                       <span>게임 시작을 기다리는 동안 연습해 보세요.</span>
                     </div>
 
-                    {/* '정답 확인' 버튼 - 시원한 내부 패딩과 박스 가운데 정렬 */}
+                    {/* '정답 확인' 버튼 - 이전 디자인 그대로 복구 */}
                     <button
                       type="button"
                       onClick={() => setShowSolutions(!showSolutions)}
-                      className="w-full flex items-center justify-center gap-3 rounded-full bg-teal-900/90 hover:bg-teal-800 border-2 border-dashed border-yellow-400/80 text-yellow-300 text-base sm:text-lg font-bold transition-all cursor-pointer shadow-md text-center"
-                      style={{
-                        padding: "1rem 1.75rem",
-                        marginTop: "0.25rem",
-                        marginBottom: "0.5rem",
-                        fontFamily: "var(--font-chalk)",
-                      }}
+                      className="w-full flex items-center justify-center gap-3 px-5 py-3 rounded-full bg-teal-900/90 hover:bg-teal-800 border-2 border-dashed border-yellow-400/80 text-yellow-300 text-base sm:text-lg font-bold transition-all cursor-pointer shadow-md text-center"
+                      style={{ fontFamily: "var(--font-chalk)" }}
                     >
                       <Sparkles size={18} className="text-yellow-400 animate-pulse" />
                       <span>정답 확인 ({validSolutions.length}개 조합)</span>
                       {showSolutions ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                     </button>
 
-                    {/* [여백 최우선 원칙] 바로 아래쪽으로 펼쳐지며 넉넉한 패딩(1.5rem)과 4줄로 왼쪽(정답), 오른쪽(계산식) 표출 */}
+                    {/* [요구사항] 정답을 펼쳤을 때 연습문제 박스 UI 크기가 변하지 않도록 absolute 레이어로 오버레이 */}
                     {showSolutions && (
                       <div
-                        className="w-full bg-teal-900/95 rounded-xl border-2 border-dashed border-yellow-400/80 shadow-2xl flex flex-col"
+                        className="absolute top-full left-0 mt-2 w-full bg-teal-900/98 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-2xl flex flex-col z-30 backdrop-blur-md"
                         style={{
-                          padding: "1.5rem 1.5rem",
-                          marginTop: "0.5rem",
-                          marginBottom: "1.5rem",
-                          gap: "1rem",
+                          padding: "1.25rem 1.25rem",
+                          gap: "0.75rem",
                         }}
                       >
                         {validSolutions.slice(0, 4).map((sol, idx) => (
@@ -514,9 +507,9 @@ export default function FormulaPyramidPage() {
                               setSelectedNodes(sol.nodes);
                               setTempNotice(null);
                             }}
-                            className="w-full flex items-center justify-between rounded-lg bg-teal-950/90 hover:bg-yellow-400 hover:text-teal-950 text-white transition-all border border-teal-700/80 cursor-pointer shadow-md group"
+                            className="w-full flex items-center justify-between rounded-lg bg-teal-950/95 hover:bg-yellow-400 hover:text-teal-950 text-white transition-all border border-teal-700/80 cursor-pointer shadow-md group"
                             style={{
-                              padding: "1rem 1.5rem",
+                              padding: "0.75rem 1.25rem",
                               fontFamily: "var(--font-chalk)",
                             }}
                           >
