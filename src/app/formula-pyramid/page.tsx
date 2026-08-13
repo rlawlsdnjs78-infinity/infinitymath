@@ -2,10 +2,9 @@
  * src/app/formula-pyramid/page.tsx
  * 수식 피라미드 게임 페이지
  *
- * [여백 대폭 보강]
- * 1. 박스 제목 및 점선 구분선 상하 여백 (pb-4, mb-6)
- * 2. 닉네임/입장코드 입력 박스 라벨 간격(mb-3) & 인라인 패딩(px-5 py-3.5)
- * 3. 수식 보드, TARGET 박스, 제출 버튼 및 오답 주의 녹색 박스 내부 여백 확장
+ * [제목 & 점선 사이 여백 인라인 지정]
+ * '게임 입장하기', '수식 피라미드', '게임 설명', '게임 세팅' 제목 글자와
+ * 하단 점선 구분선 사이의 여백을 paddingBottom: "1.25rem"(20px) 인라인으로 확실하게 확보
  */
 
 "use client";
@@ -281,15 +280,21 @@ export default function FormulaPyramidPage() {
         {/* ───────────────────────────────────────────────────────────────────
            [하단 3분할 박스 영역]
            ─────────────────────────────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch w-full mx-auto min-h-[660px]">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch w-full mx-auto min-h-[640px]">
           {/* ── [좌측 박스] xl:col-span-3 ─────────────────────────────────── */}
-          <div className="xl:col-span-3 chalk-box content-box flex flex-col gap-6 bg-teal-950/75 backdrop-blur-md h-full min-h-[660px] p-6 sm:p-7">
+          <div className="xl:col-span-3 chalk-box content-box flex flex-col gap-6 bg-teal-950/75 backdrop-blur-md h-full min-h-[640px] p-6 sm:p-7">
             {mode === "player" ? (
               <>
-                {/* 헤더 및 점선 구분선 여백 확장 */}
-                <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-4 mb-2">
-                  <LogIn className="text-yellow-400" size={24} />
-                  <h2 className="text-2.5xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
+                {/* [핵심] 제목 글자와 아래 점선 사이 여백(paddingBottom: 1.25rem) 및 마진(marginBottom: 1.5rem) 확 벌림 */}
+                <div
+                  className="flex items-center gap-3 border-b border-dashed border-teal-700"
+                  style={{ paddingBottom: "1.25rem", marginBottom: "1.5rem" }}
+                >
+                  <LogIn className="text-yellow-400 flex-shrink-0" size={24} />
+                  <h2
+                    className="text-2.5xl text-yellow-300"
+                    style={{ fontFamily: "var(--font-chalk)", lineHeight: 1.3 }}
+                  >
                     게임 입장하기
                   </h2>
                 </div>
@@ -303,7 +308,7 @@ export default function FormulaPyramidPage() {
                 >
                   <div className="flex flex-col gap-5">
                     {/* 닉네임 입력 */}
-                    <div className="flex flex-col gap-2.5">
+                    <div className="flex flex-col gap-3">
                       <label
                         htmlFor="nickname-input"
                         className="text-base text-gray-200 font-medium tracking-wide"
@@ -317,13 +322,17 @@ export default function FormulaPyramidPage() {
                         placeholder="닉네임을 입력해 주세요"
                         value={nickname}
                         onChange={(e) => setNickname(e.target.value)}
-                        className="w-full px-5 py-3.5 rounded-md bg-teal-900/90 border border-dashed border-teal-600 text-white text-base focus:outline-none focus:border-yellow-400 placeholder:text-gray-400/80"
-                        style={{ fontFamily: "var(--font-body)", lineHeight: "1.4" }}
+                        className="w-full rounded-md bg-teal-900/90 border border-dashed border-teal-600 text-white text-base focus:outline-none focus:border-yellow-400 placeholder:text-gray-400/80"
+                        style={{
+                          padding: "12px 18px",
+                          fontFamily: "var(--font-body)",
+                          lineHeight: "1.5",
+                        }}
                       />
                     </div>
 
                     {/* 입장 코드 입력 */}
-                    <div className="flex flex-col gap-2.5">
+                    <div className="flex flex-col gap-3">
                       <label
                         htmlFor="code-input"
                         className="text-base text-gray-200 font-medium tracking-wide"
@@ -337,15 +346,20 @@ export default function FormulaPyramidPage() {
                         placeholder="딜러에게 받은 코드 (예: PYRAMID-1234)"
                         value={entryCode}
                         onChange={(e) => setEntryCode(e.target.value)}
-                        className="w-full px-5 py-3.5 rounded-md bg-teal-900/90 border border-dashed border-teal-600 text-white text-base uppercase focus:outline-none focus:border-yellow-400 placeholder:text-gray-400/80"
-                        style={{ fontFamily: "var(--font-body)", lineHeight: "1.4" }}
+                        className="w-full rounded-md bg-teal-900/90 border border-dashed border-teal-600 text-white text-base uppercase focus:outline-none focus:border-yellow-400 placeholder:text-gray-400/80"
+                        style={{
+                          padding: "12px 18px",
+                          fontFamily: "var(--font-body)",
+                          lineHeight: "1.5",
+                        }}
                       />
                     </div>
                   </div>
 
                   <button
                     type="submit"
-                    className="btn-chalk w-full justify-center py-4 text-xl mt-4"
+                    className="btn-chalk w-full justify-center text-xl mt-4"
+                    style={{ padding: "14px 20px" }}
                   >
                     게임 방 입장하기
                   </button>
@@ -353,9 +367,15 @@ export default function FormulaPyramidPage() {
               </>
             ) : (
               <>
-                <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-4 mb-2">
-                  <Monitor className="text-yellow-400" size={24} />
-                  <h2 className="text-2.5xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
+                <div
+                  className="flex items-center gap-3 border-b border-dashed border-teal-700"
+                  style={{ paddingBottom: "1.25rem", marginBottom: "1.5rem" }}
+                >
+                  <Monitor className="text-yellow-400 flex-shrink-0" size={24} />
+                  <h2
+                    className="text-2.5xl text-yellow-300"
+                    style={{ fontFamily: "var(--font-chalk)", lineHeight: 1.3 }}
+                  >
                     딜러 가이드
                   </h2>
                 </div>
@@ -380,11 +400,17 @@ export default function FormulaPyramidPage() {
           </div>
 
           {/* ── [중앙 박스] xl:col-span-6 ─────────────────────────────────── */}
-          <div className="xl:col-span-6 chalk-box content-box flex flex-col items-center gap-6 bg-teal-950/85 backdrop-blur-md h-full min-h-[660px] p-6 sm:p-7">
+          <div className="xl:col-span-6 chalk-box content-box flex flex-col items-center gap-6 bg-teal-950/85 backdrop-blur-md h-full min-h-[640px] p-6 sm:p-7">
             {mode === "player" ? (
               <>
-                <div className="text-center w-full border-b border-dashed border-teal-700 pb-4 mb-2">
-                  <h2 className="text-3.5xl text-yellow-300 mb-1" style={{ fontFamily: "var(--font-chalk)" }}>
+                <div
+                  className="text-center w-full border-b border-dashed border-teal-700"
+                  style={{ paddingBottom: "1.25rem", marginBottom: "1.5rem" }}
+                >
+                  <h2
+                    className="text-3.5xl text-yellow-300 mb-1"
+                    style={{ fontFamily: "var(--font-chalk)", lineHeight: 1.3 }}
+                  >
                     수식 피라미드
                   </h2>
                   <div className="flex items-center justify-center gap-2 text-sm text-gray-300 mt-2">
@@ -528,12 +554,18 @@ export default function FormulaPyramidPage() {
           </div>
 
           {/* ── [우측 박스] xl:col-span-3 ─────────────────────────────────── */}
-          <div className="xl:col-span-3 chalk-box content-box flex flex-col gap-6 bg-teal-950/80 backdrop-blur-md h-full min-h-[660px] p-6 sm:p-7">
+          <div className="xl:col-span-3 chalk-box content-box flex flex-col gap-6 bg-teal-950/80 backdrop-blur-md h-full min-h-[640px] p-6 sm:p-7">
             {mode === "player" ? (
               <>
-                <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-4 mb-2">
-                  <HelpCircle className="text-yellow-400" size={24} />
-                  <h2 className="text-2.5xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
+                <div
+                  className="flex items-center gap-3 border-b border-dashed border-teal-700"
+                  style={{ paddingBottom: "1.25rem", marginBottom: "1.5rem" }}
+                >
+                  <HelpCircle className="text-yellow-400 flex-shrink-0" size={24} />
+                  <h2
+                    className="text-2.5xl text-yellow-300"
+                    style={{ fontFamily: "var(--font-chalk)", lineHeight: 1.3 }}
+                  >
                     게임 설명
                   </h2>
                 </div>
@@ -553,7 +585,6 @@ export default function FormulaPyramidPage() {
                     있습니다.
                   </p>
 
-                  {/* 주의사항 녹색 박스 내부 여백 확장 */}
                   <div className="flex flex-col gap-3 bg-teal-900/70 p-4.5 rounded-md border border-dashed border-yellow-500/40">
                     <p className="font-medium text-yellow-200">
                       ③ 문제판이 공개되면 이 중 3개의 칸을 조합해 타깃 넘버가 답이 되는 수식을 만들어야
@@ -583,16 +614,21 @@ export default function FormulaPyramidPage() {
               </>
             ) : (
               <>
-                <div className="flex items-center gap-2 border-b border-dashed border-teal-700 pb-4 mb-2">
-                  <Settings className="text-yellow-400" size={24} />
-                  <h2 className="text-2.5xl text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
+                <div
+                  className="flex items-center gap-3 border-b border-dashed border-teal-700"
+                  style={{ paddingBottom: "1.25rem", marginBottom: "1.5rem" }}
+                >
+                  <Settings className="text-yellow-400 flex-shrink-0" size={24} />
+                  <h2
+                    className="text-2.5xl text-yellow-300"
+                    style={{ fontFamily: "var(--font-chalk)", lineHeight: 1.3 }}
+                  >
                     게임 세팅 & 방 생성
                   </h2>
                 </div>
 
                 <div className="flex flex-col gap-6 flex-1 justify-between py-1">
                   <div className="flex flex-col gap-5">
-                    {/* 1. 라운드 설정 */}
                     <div className="flex flex-col gap-2.5">
                       <label className="text-base text-gray-200 font-medium" style={{ fontFamily: "var(--font-chalk)" }}>
                         라운드 설정 ({selectedRound}라운드)
@@ -616,7 +652,6 @@ export default function FormulaPyramidPage() {
                       </div>
                     </div>
 
-                    {/* 2. 라운드 별 시간 */}
                     <div className="flex flex-col gap-2.5">
                       <label className="text-base text-gray-200 font-medium" style={{ fontFamily: "var(--font-chalk)" }}>
                         라운드 별 시간 ({selectedTime}분)
@@ -640,7 +675,6 @@ export default function FormulaPyramidPage() {
                       </div>
                     </div>
 
-                    {/* 3. 오답 패널티 */}
                     <div className="flex flex-col gap-2.5">
                       <label className="text-base text-gray-200 font-medium" style={{ fontFamily: "var(--font-chalk)" }}>
                         오답 패널티 ({selectedPenalty})
