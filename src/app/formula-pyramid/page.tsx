@@ -746,6 +746,7 @@ export default function FormulaPyramidPage() {
             }
             lastStartedGameTsRef.current = data.gameStartTs || Date.now();
 
+            setIsGameStarted(true);
             setSelectedBoardId(data.selectedBoardId || 1);
             if (data.currentRound) setCurrentRound(data.currentRound);
             if (data.roomEndTime) {
@@ -814,6 +815,65 @@ export default function FormulaPyramidPage() {
         } catch (e) {}
       }
       mqttClientRef.current = null;
+    };
+  }, [inGameRoom, activeRoomCode]);
+
+  /* ── 동일 기기 브라우저 탭 간 BroadcastChannel 실시간 리스너 ── */
+  useEffect(() => {
+    if (!inGameRoom || !activeRoomCode || typeof window === "undefined" || !("BroadcastChannel" in window)) return;
+    const bc = new BroadcastChannel(`pyramid-room-${activeRoomCode}`);
+
+    bc.onmessage = (event) => {
+      try {
+        const data = event.data;
+        if (!data || !data.type) return;
+        const curr = roomStateRef.current;
+        if (data.sender && data.sender === curr.myNickname) return;
+
+        if (data.type === "START_GAME") {
+          if (data.gameStartTs && data.gameStartTs === lastStartedGameTsRef.current) return;
+          lastStartedGameTsRef.current = data.gameStartTs || Date.now();
+          setIsGameStarted(true);
+          setSelectedBoardId(data.selectedBoardId || 1);
+          if (data.currentRound) setCurrentRound(data.currentRound);
+          if (data.roomEndTime) {
+            setRoomEndTime(data.roomEndTime);
+            setRoomTimerSeconds(Math.max(0, Math.ceil((data.roomEndTime - Date.now()) / 1000)));
+          }
+          setSubmittedAnswersList([]);
+          setIsRoundLocked(false);
+          setShowRoundEndPopup(false);
+          setSelectedNodes([]);
+          setPenaltyLockSeconds(0);
+          setCountdownValue(3);
+          setActivityLogs((prev) => [
+            `[안내] ${data.currentRound || 1}라운드가 시작되었습니다! (TARGET: ${data.target || 10})`,
+            ...prev,
+          ]);
+        } else if (data.type === "SCORE_UPDATE") {
+          if (data.playerName !== curr.myNickname) {
+            setPlayers((prev) =>
+              prev.map((p) => (p.name === data.playerName ? { ...p, score: data.newScore } : p))
+            );
+          }
+          if (data.submittedAnswer) {
+            setSubmittedAnswersList((prev) => (prev.some((a) => a.nodes === data.submittedAnswer.nodes) ? prev : [...prev, data.submittedAnswer]));
+          }
+          if (data.logMsg) {
+            setActivityLogs((prev) => [data.logMsg, ...prev]);
+          }
+        } else if (data.type === "LEAVE") {
+          if (data.playerName === curr.myNickname) return;
+          setPlayers((prev) => prev.filter((p) => p.name !== data.playerName));
+          setActivityLogs((prev) => [`[퇴장] ${data.playerName} 님이 퇴장하였습니다.`, ...prev]);
+        }
+      } catch {}
+    };
+
+    return () => {
+      try {
+        bc.close();
+      } catch {}
     };
   }, [inGameRoom, activeRoomCode]);
 
@@ -980,6 +1040,7 @@ export default function FormulaPyramidPage() {
     setCurrentRound(roundNum);
     setSelectedBoardId(chosenBoardId);
     setRoomEndTime(calculatedEndTime);
+    setIsGameStarted(true);
     setShowRoundEndPopup(false);
     setIsRoundLocked(false);
     setSubmittedAnswersList([]);
