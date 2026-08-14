@@ -331,24 +331,41 @@ export default function FormulaPyramidPage() {
     return () => clearInterval(timer);
   }, [penaltyLockSeconds]);
 
-  /* ── 라운드 타이머 (기기 간 시계 오차 없는 초 단위 안정적 타이머) ── */
+  /* ── 라운드 타이머 (딜러가 Master Clock으로 매초 모든 기기에 정확한 남은 시간 동기화) ── */
   useEffect(() => {
     if (!inGameRoom || !isGameStarted || countdownValue !== null || isRoundLocked) return;
 
     const interval = setInterval(() => {
       setRoomTimerSeconds((prev) => {
-        if (prev <= 1) {
+        const next = prev <= 1 ? 0 : prev - 1;
+        if (next === 0) {
           setIsRoundLocked(true);
-          setShowRoundEndPopup(true);
+          if (!isDealerHost) setShowRoundEndPopup(true);
           addActivityLog(`[안내] ${currentRound}라운드가 종료되었습니다.`);
-          return 0;
         }
-        return prev - 1;
+
+        // 딜러(호스트)는 매 1초마다 현재 남은 시간을 모든 플레이어 기기에 전송 (Master Clock Sync)
+        if (isDealerHost && mqttClientRef.current && activeRoomCode) {
+          try {
+            const topic = `infinitymath/v2/pyramid/${activeRoomCode}`;
+            mqttClientRef.current.publish(
+              topic,
+              JSON.stringify({
+                type: "TIME_SYNC",
+                remainingSeconds: next,
+                currentRound,
+                isRoundLocked: next === 0,
+              })
+            );
+          } catch {}
+        }
+
+        return next;
       });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [inGameRoom, isGameStarted, countdownValue, isRoundLocked, currentRound]);
+  }, [inGameRoom, isGameStarted, countdownValue, isRoundLocked, currentRound, isDealerHost, activeRoomCode]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -578,6 +595,7 @@ export default function FormulaPyramidPage() {
     currentRound,
     isGameStarted,
     roomEndTime,
+    roomTimerSeconds,
     currentTargetNumber,
     currentAllNodes,
     isRoundLocked,
@@ -594,6 +612,7 @@ export default function FormulaPyramidPage() {
       currentRound,
       isGameStarted,
       roomEndTime,
+      roomTimerSeconds,
       currentTargetNumber,
       currentAllNodes,
       isRoundLocked,
@@ -708,7 +727,7 @@ export default function FormulaPyramidPage() {
                     selectedBoardId: curr.selectedBoardId,
                     isGameStarted: curr.isGameStarted,
                     currentRound: curr.currentRound,
-                    roomEndTime: curr.roomEndTime,
+                    currentRemainingSeconds: curr.roomTimerSeconds,
                     submittedAnswersList: submittedAnswersListRef.current,
                   },
                 })
@@ -758,12 +777,20 @@ export default function FormulaPyramidPage() {
               if (data.roomConfig.selectedBoardId) setSelectedBoardId(data.roomConfig.selectedBoardId);
               if (data.roomConfig.isGameStarted !== undefined) setIsGameStarted(data.roomConfig.isGameStarted);
               if (data.roomConfig.currentRound) setCurrentRound(data.roomConfig.currentRound);
-              if (data.roomConfig.roomEndTime) {
-                setRoomEndTime(data.roomConfig.roomEndTime);
-                setRoomTimerSeconds(Math.max(0, Math.ceil((data.roomConfig.roomEndTime - Date.now()) / 1000)));
+              if (typeof data.roomConfig.currentRemainingSeconds === "number") {
+                setRoomTimerSeconds(data.roomConfig.currentRemainingSeconds);
               }
               if (data.roomConfig.submittedAnswersList && Array.isArray(data.roomConfig.submittedAnswersList)) {
                 setSubmittedAnswersList(data.roomConfig.submittedAnswersList);
+              }
+            }
+          } else if (data.type === "TIME_SYNC") {
+            // 딜러(Master Clock)가 보낸 실시간 남은 시간 동기화 수신
+            if (!curr.isDealerHost && typeof data.remainingSeconds === "number") {
+              setRoomTimerSeconds(data.remainingSeconds);
+              if (data.isRoundLocked && !isRoundLocked) {
+                setIsRoundLocked(true);
+                setShowRoundEndPopup(true);
               }
             }
           } else if (data.type === "START_GAME") {
@@ -845,7 +872,15 @@ export default function FormulaPyramidPage() {
         const curr = roomStateRef.current;
         if (data.sender && data.sender === curr.myNickname) return;
 
-        if (data.type === "START_GAME") {
+        if (data.type === "TIME_SYNC") {
+          if (!curr.isDealerHost && typeof data.remainingSeconds === "number") {
+            setRoomTimerSeconds(data.remainingSeconds);
+            if (data.isRoundLocked && !isRoundLocked) {
+              setIsRoundLocked(true);
+              setShowRoundEndPopup(true);
+            }
+          }
+        } else if (data.type === "START_GAME") {
           if (data.gameStartTs && data.gameStartTs === lastStartedGameTsRef.current) return;
           lastStartedGameTsRef.current = data.gameStartTs || Date.now();
           setIsGameStarted(true);
