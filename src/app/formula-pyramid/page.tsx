@@ -1301,8 +1301,22 @@ export default function FormulaPyramidPage() {
               /* 👑 [딜러 모드 전용 가운데 UI] - 플레이어 모드 변경 시 영향 받지 않음  */
               /* =================================================================== */
               <div className="flex flex-col gap-4 w-full h-full">
-                {/* 딜러 상태 컨트롤 바 (방 코드 생성 시 노출) */}
-                {inGameRoom && (
+                {/* 1. [요구사항 1] 입장 코드 생성 전 (대기 상태) 최상단 안내창 배치 및 글씨 크기 확대 */}
+                {!inGameRoom ? (
+                  <div
+                    className="w-full flex items-center justify-center p-4 bg-teal-900/95 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-lg text-center"
+                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
+                  >
+                    <div
+                      className="text-lg sm:text-xl text-yellow-300 font-extrabold flex items-center justify-center gap-3 py-1"
+                      style={{ fontFamily: "var(--font-chalk)", wordBreak: "keep-all" }}
+                    >
+                      <Megaphone size={24} className="text-yellow-400 flex-shrink-0 animate-bounce" />
+                      <span>우측 [입장 코드 생성하기]를 클릭하면 딜러 대시보드가 실시간으로 연결됩니다.</span>
+                    </div>
+                  </div>
+                ) : (
+                  /* 딜러 상태 컨트롤 바 (방 코드 생성 완료 시) */
                   <div
                     className="chalk-box-straight bg-teal-900/90 flex flex-wrap items-center justify-between gap-3 border border-yellow-400/80 shadow-md rounded-xl"
                     style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.75rem", paddingBottom: "0.75rem" }}
@@ -1322,14 +1336,16 @@ export default function FormulaPyramidPage() {
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    {/* 2. [요구사항 2] '게임 시작하기' 및 '퇴장' 버튼 내부 여백 1.25rem (20px / px-5) 100% 동일하게 통일 적용 */}
+                    <div className="flex items-center gap-3">
                       {!isGameStarted && (
                         <button
                           type="button"
                           onClick={handleStartGame}
-                          className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-md text-xs sm:text-sm border border-emerald-400 shadow-md cursor-pointer animate-pulse px-4 py-2"
+                          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-md text-sm sm:text-base border border-emerald-400 shadow-md cursor-pointer animate-pulse"
+                          style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.6rem", paddingBottom: "0.6rem" }}
                         >
-                          <Play size={16} className="fill-white flex-shrink-0" />
+                          <Play size={18} className="fill-white flex-shrink-0" />
                           <span>게임 시작하기</span>
                         </button>
                       )}
@@ -1337,9 +1353,10 @@ export default function FormulaPyramidPage() {
                       <button
                         type="button"
                         onClick={handleLeaveRoom}
-                        className="flex items-center gap-1.5 bg-rose-900/80 hover:bg-rose-800 text-rose-200 rounded-md text-xs sm:text-sm font-bold border border-rose-600/60 cursor-pointer px-3 py-2"
+                        className="flex items-center gap-2 bg-rose-900/90 hover:bg-rose-800 text-rose-200 rounded-md text-sm sm:text-base font-bold border border-rose-600/70 cursor-pointer shadow-md"
+                        style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.6rem", paddingBottom: "0.6rem" }}
                       >
-                        <LogOut size={16} />
+                        <LogOut size={18} />
                         <span>퇴장</span>
                       </button>
                     </div>
@@ -1474,14 +1491,14 @@ export default function FormulaPyramidPage() {
                 {/* 중간 점선 구분선 */}
                 <div className="w-full border-t border-dashed border-teal-600/70" style={{ marginTop: "0.2rem", marginBottom: "0.4rem" }} />
 
-                {/* 딜러 모드 하단 전용 모니터링 안내 영역 */}
-                <div className="flex items-center justify-center p-3.5 bg-teal-900/60 rounded-xl border border-teal-700/60 text-center">
-                  <span className="text-sm text-yellow-300 font-extrabold" style={{ fontFamily: "var(--font-chalk)" }}>
-                    {inGameRoom
-                      ? "📢 딜러 화면입니다. 상단 실시간 점수판 및 정답 현황을 실시간 모니터링할 수 있습니다."
-                      : "📢 우측 [입장 코드 생성하기]를 클릭하면 딜러 대시보드가 실시간으로 연결됩니다."}
-                  </span>
-                </div>
+                {/* 딜러 모드 하단 전용 안내 영역 */}
+                {inGameRoom && (
+                  <div className="flex items-center justify-center p-3.5 bg-teal-900/60 rounded-xl border border-teal-700/60 text-center">
+                    <span className="text-sm text-yellow-300 font-extrabold" style={{ fontFamily: "var(--font-chalk)" }}>
+                      📢 딜러 화면입니다. 상단 실시간 점수판 및 정답 현황을 실시간 모니터링할 수 있습니다.
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>
