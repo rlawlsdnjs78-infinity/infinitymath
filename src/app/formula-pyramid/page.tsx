@@ -471,6 +471,26 @@ export default function FormulaPyramidPage() {
               `[정답] ${data.playerName} 님이 정답 제출! (${data.submittedAnswer?.nodes || ""} -> ${data.newScore}점)`,
               ...prev,
             ]);
+          } else if (data.type === "LEAVE") {
+            if (data.playerName === curr.myNickname) return;
+
+            setPlayers((prev) => {
+              const updated = prev.filter((p) => p.name !== data.playerName);
+              // 방에 접속자가 0명이 되면 방 설정 초기화
+              if (updated.length === 0 && activeRoomCode) {
+                if (typeof window !== "undefined") {
+                  try {
+                    localStorage.removeItem(`pyramid-room-config-${activeRoomCode}`);
+                  } catch (e) {}
+                }
+              }
+              return updated;
+            });
+
+            setActivityLogs((prev) => [
+              `[실시간] ${data.playerName} 님이 방을 나갔습니다.`,
+              ...prev,
+            ]);
           }
         };
 
@@ -486,6 +506,55 @@ export default function FormulaPyramidPage() {
       if (bc) bc.close();
     };
   }, [inGameRoom, activeRoomCode]);
+
+  // 탭/창 종료 시 퇴장 메시지 발송 및 방 비어짐 감지
+  useEffect(() => {
+    if (!inGameRoom || !activeRoomCode) return;
+
+    const handleUnload = () => {
+      try {
+        const bc = new BroadcastChannel(`pyramid-room-${activeRoomCode}`);
+        bc.postMessage({ type: "LEAVE", playerName: myNickname, isHost: isDealerHost });
+        bc.close();
+      } catch (e) {}
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleUnload);
+    };
+  }, [inGameRoom, activeRoomCode, myNickname, isDealerHost]);
+
+  const handleLeaveRoom = () => {
+    if (inGameRoom && activeRoomCode && typeof window !== "undefined" && "BroadcastChannel" in window) {
+      try {
+        const bc = new BroadcastChannel(`pyramid-room-${activeRoomCode}`);
+        bc.postMessage({ type: "LEAVE", playerName: myNickname, isHost: isDealerHost });
+        bc.close();
+      } catch (err) {}
+    }
+
+    const remainingPlayers = players.filter((p) => p.name !== myNickname);
+    // 방에 실시간으로 접속한 사람이 아무도 없게 되면 방 설정 초기화!
+    if (remainingPlayers.length === 0 && activeRoomCode) {
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.removeItem(`pyramid-room-config-${activeRoomCode}`);
+        } catch (e) {}
+      }
+      setSelectedRound(1);
+      setSelectedTime(3);
+      setSelectedPenalty("없음");
+      setRoomTimerSeconds(180);
+      setRoomEndTime(null);
+    }
+
+    setInGameRoom(false);
+    setActiveRoomCode("");
+    setPlayers([]);
+    setActivityLogs([]);
+    setSubmittedAnswersList([]);
+  };
 
   const handleJoinGameRoom = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -676,7 +745,7 @@ export default function FormulaPyramidPage() {
                 {/* '방 나가기' 버튼 (좌우 여백 1.25rem) */}
                 <button
                   type="button"
-                  onClick={() => setInGameRoom(false)}
+                  onClick={handleLeaveRoom}
                   className="flex items-center bg-rose-900/80 hover:bg-rose-800 text-rose-200 rounded-md text-sm font-bold border border-rose-600/60 transition-all cursor-pointer shadow-md"
                   style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.6rem", paddingBottom: "0.6rem", gap: "0.75rem" }}
                 >
