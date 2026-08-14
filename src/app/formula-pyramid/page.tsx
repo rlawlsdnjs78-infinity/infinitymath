@@ -801,11 +801,11 @@ export default function FormulaPyramidPage() {
 
                 <div className="flex flex-col gap-6 flex-1 justify-between py-1">
                   <div className="flex flex-col gap-5">
-                    {/* [요구사항 2] 라벨 폰트를 var(--font-body)로 맞추고 (N라운드) 수치 우측 정렬 */}
+                    {/* [요구사항] 게임 설명 본문 항목과 100% 동일한 글씨 크기(text-sm) & 폰트(var(--font-body)) 적용 */}
                     <div className="flex flex-col gap-2.5">
                       <div
-                        className="flex items-center justify-between w-full text-base sm:text-lg text-gray-200 font-medium"
-                        style={{ fontFamily: "var(--font-body)" }}
+                        className="flex items-center justify-between w-full text-sm text-gray-200 font-medium"
+                        style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
                       >
                         <span>라운드 설정</span>
                         <span className="text-yellow-300 font-bold">({selectedRound}라운드)</span>
@@ -816,7 +816,7 @@ export default function FormulaPyramidPage() {
                             key={r}
                             type="button"
                             onClick={() => setSelectedRound(r)}
-                            className={`py-2 text-base sm:text-lg font-bold rounded-md transition-all ${
+                            className={`py-2 text-sm font-medium rounded-md transition-all ${
                               selectedRound === r
                                 ? "bg-yellow-400 text-teal-950 shadow scale-105"
                                 : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
@@ -831,8 +831,8 @@ export default function FormulaPyramidPage() {
 
                     <div className="flex flex-col gap-2.5">
                       <div
-                        className="flex items-center justify-between w-full text-base sm:text-lg text-gray-200 font-medium"
-                        style={{ fontFamily: "var(--font-body)" }}
+                        className="flex items-center justify-between w-full text-sm text-gray-200 font-medium"
+                        style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
                       >
                         <span>라운드 별 시간</span>
                         <span className="text-yellow-300 font-bold">({selectedTime}분)</span>
@@ -843,7 +843,7 @@ export default function FormulaPyramidPage() {
                             key={t}
                             type="button"
                             onClick={() => setSelectedTime(t)}
-                            className={`py-2.5 text-base sm:text-lg font-bold rounded-md transition-all ${
+                            className={`py-2.5 text-sm font-medium rounded-md transition-all ${
                               selectedTime === t
                                 ? "bg-yellow-400 text-teal-950 shadow scale-105"
                                 : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
@@ -858,8 +858,8 @@ export default function FormulaPyramidPage() {
 
                     <div className="flex flex-col gap-2.5">
                       <div
-                        className="flex items-center justify-between w-full text-base sm:text-lg text-gray-200 font-medium"
-                        style={{ fontFamily: "var(--font-body)" }}
+                        className="flex items-center justify-between w-full text-sm text-gray-200 font-medium"
+                        style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
                       >
                         <span>오답 패널티</span>
                         <span className="text-yellow-300 font-bold">({selectedPenalty})</span>
@@ -870,7 +870,7 @@ export default function FormulaPyramidPage() {
                             key={p}
                             type="button"
                             onClick={() => setSelectedPenalty(p)}
-                            className={`py-2.5 text-base sm:text-lg font-bold rounded-md transition-all ${
+                            className={`py-2.5 text-sm font-medium rounded-md transition-all ${
                               selectedPenalty === p
                                 ? "bg-yellow-400 text-teal-950 shadow scale-105"
                                 : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
@@ -888,7 +888,7 @@ export default function FormulaPyramidPage() {
                     <button
                       type="button"
                       onClick={handleCreateGame}
-                      className="btn-chalk w-full justify-center py-3.5 text-xl font-bold"
+                      className="btn-chalk w-full justify-center py-3.5 text-lg font-bold"
                       style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
                     >
                       게임 방 생성하기
