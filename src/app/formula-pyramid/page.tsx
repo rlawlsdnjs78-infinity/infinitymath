@@ -257,6 +257,14 @@ export default function FormulaPyramidPage() {
   const [roomTimerSeconds, setRoomTimerSeconds] = useState(180);
   const [roomEndTime, setRoomEndTime] = useState<number | null>(null);
 
+  /* ── 중복 안내 문구 방지 헬퍼 ── */
+  const addActivityLog = (msg: string) => {
+    setActivityLogs((prev) => {
+      if (prev.length > 0 && prev[0] === msg) return prev;
+      return [msg, ...prev];
+    });
+  };
+
   /* ── 카운트다운 & 라운드 종료 팝업 ── */
   const [countdownValue, setCountdownValue] = useState<number | null>(null);
   const [showRoundEndPopup, setShowRoundEndPopup] = useState(false);
@@ -306,34 +314,24 @@ export default function FormulaPyramidPage() {
     return () => clearInterval(timer);
   }, [penaltyLockSeconds]);
 
-  /* ── 라운드 타이머 ── */
+  /* ── 라운드 타이머 (기기 간 시계 오차 없는 초 단위 안정적 타이머) ── */
   useEffect(() => {
-    if (!inGameRoom) return;
+    if (!inGameRoom || !isGameStarted || countdownValue !== null || isRoundLocked) return;
+
     const interval = setInterval(() => {
-      if (!isGameStarted) return;
-      if (roomEndTime) {
-        const rem = Math.max(0, Math.ceil((roomEndTime - Date.now()) / 1000));
-        setRoomTimerSeconds(rem);
-        // 시간이 0이 되면 라운드 종료 처리
-        if (rem === 0 && !showRoundEndPopup && !isRoundLocked) {
+      setRoomTimerSeconds((prev) => {
+        if (prev <= 1) {
           setIsRoundLocked(true);
           setShowRoundEndPopup(true);
-          setActivityLogs((prev) => [`[안내] ${currentRound}라운드가 종료되었습니다.`, ...prev]);
+          addActivityLog(`[안내] ${currentRound}라운드가 종료되었습니다.`);
+          return 0;
         }
-      } else {
-        setRoomTimerSeconds((prev) => {
-          const next = prev > 0 ? prev - 1 : 0;
-          if (next === 0 && !showRoundEndPopup && !isRoundLocked) {
-            setIsRoundLocked(true);
-            setShowRoundEndPopup(true);
-            setActivityLogs((logPrev) => [`[안내] ${currentRound}라운드가 종료되었습니다.`, ...logPrev]);
-          }
-          return next;
-        });
-      }
+        return prev - 1;
+      });
     }, 1000);
+
     return () => clearInterval(interval);
-  }, [inGameRoom, isGameStarted, roomEndTime, showRoundEndPopup, isRoundLocked]);
+  }, [inGameRoom, isGameStarted, countdownValue, isRoundLocked, currentRound]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -411,7 +409,7 @@ export default function FormulaPyramidPage() {
         triggerNotice("이미 제출된 정답입니다! (-1점)", "error", 1500);
       }
       const logMsg = `[오답] ${myNickname} 님이 이미 제출된 정답 ${nodesStr} 을 다시 제출하였습니다.`;
-      setActivityLogs((prev) => [logMsg, ...prev]);
+      addActivityLog(logMsg);
       broadcastScoreUpdate(myNickname, nextScore, undefined, false, logMsg);
       setSelectedNodes([]);
       return;
@@ -427,7 +425,7 @@ export default function FormulaPyramidPage() {
       const formulaStr = `${nodesArr[0].num} ${nodesArr[1].op}${nodesArr[1].num} ${nodesArr[2].op}${nodesArr[2].num} = ${currentTargetNumber}`;
       const ansObj = { nodes: nodesStr, formula: formulaStr };
       const logMsg = `[정답] ${myNickname} 님이 정답 ${nodesStr} 을 제출하였습니다.`;
-      setActivityLogs((prev) => [logMsg, ...prev]);
+      addActivityLog(logMsg);
 
       setSubmittedAnswersList((prev) => {
         if (prev.some((a) => normalizeNodesKey(a.nodes) === currentNormalizedKey)) return prev;
@@ -445,10 +443,7 @@ export default function FormulaPyramidPage() {
           setShowRoundEndPopup(true);
           setRoomTimerSeconds(0);
           setRoomEndTime(Date.now());
-          setActivityLogs((logPrev) => [
-            `[안내] 이번 라운드의 모든 정답이 제출되었습니다. ${currentRound}라운드를 종료합니다.`,
-            ...logPrev,
-          ]);
+          addActivityLog(`[안내] 이번 라운드의 모든 정답이 제출되었습니다. ${currentRound}라운드를 종료합니다.`);
           if (activeRoomCode && typeof window !== "undefined") {
             try {
               const confStr = localStorage.getItem(`pyramid-room-config-${activeRoomCode}`);
@@ -474,7 +469,7 @@ export default function FormulaPyramidPage() {
         triggerNotice("오답입니다! (-1점)", "error", 1200);
       }
       const logMsg = `[오답] ${myNickname} 님이 오답 ${nodesStr} 을 제출하였습니다.`;
-      setActivityLogs((prev) => [logMsg, ...prev]);
+      addActivityLog(logMsg);
       broadcastScoreUpdate(myNickname, nextScore, undefined, false, logMsg);
     }
     setSelectedNodes([]);
@@ -765,20 +760,13 @@ export default function FormulaPyramidPage() {
             setIsGameStarted(true);
             setSelectedBoardId(data.selectedBoardId || 1);
             if (data.currentRound) setCurrentRound(data.currentRound);
-            if (data.roomEndTime) {
-              setRoomEndTime(data.roomEndTime);
-              setRoomTimerSeconds(Math.max(0, Math.ceil((data.roomEndTime - Date.now()) / 1000)));
-            }
+            setRoomTimerSeconds(selectedTime * 60);
             setSubmittedAnswersList([]);
             setIsRoundLocked(false);
             setShowRoundEndPopup(false);
             setSelectedNodes([]);
             setPenaltyLockSeconds(0);
             setCountdownValue(3);
-            setActivityLogs((prev) => [
-              `[안내] ${data.currentRound || 1}라운드가 시작되었습니다! (TARGET: ${data.target || 10})`,
-              ...prev,
-            ]);
           } else if (data.type === "SCORE_UPDATE") {
             if (data.playerName !== curr.myNickname) {
               setPlayers((prev) =>
@@ -800,27 +788,20 @@ export default function FormulaPyramidPage() {
                   setIsRoundLocked(true);
                   setShowRoundEndPopup(true);
                   setRoomTimerSeconds(0);
-                  setRoomEndTime(Date.now());
-                  setActivityLogs((logPrev) => [
-                    "[안내] 이번 라운드의 모든 정답이 제출되었습니다.",
-                    ...logPrev,
-                  ]);
+                  addActivityLog(`[안내] 이번 라운드의 모든 정답이 제출되었습니다. ${curr.currentRound}라운드를 종료합니다.`);
                 }
                 return nextList;
               });
             }
             if (data.logMsg) {
-              setActivityLogs((prev) => [data.logMsg, ...prev]);
+              addActivityLog(data.logMsg);
             } else if (data.submittedAnswer) {
-              setActivityLogs((prev) => [
-                `[정답] ${data.playerName} 님이 정답 ${data.submittedAnswer.nodes} 을 제출하였습니다.`,
-                ...prev,
-              ]);
+              addActivityLog(`[정답] ${data.playerName} 님이 정답 ${data.submittedAnswer.nodes} 을 제출하였습니다.`);
             }
           } else if (data.type === "LEAVE") {
             if (data.playerName === curr.myNickname) return;
             setPlayers((prev) => prev.filter((p) => p.name !== data.playerName));
-            setActivityLogs((prev) => [`[퇴장] ${data.playerName} 님이 퇴장하였습니다.`, ...prev]);
+            addActivityLog(`[퇴장] ${data.playerName} 님이 퇴장하였습니다.`);
           }
         } catch (err) {}
       });
@@ -834,7 +815,7 @@ export default function FormulaPyramidPage() {
       }
       mqttClientRef.current = null;
     };
-  }, [inGameRoom, activeRoomCode]);
+  }, [inGameRoom, activeRoomCode, selectedTime]);
 
   /* ── 동일 기기 브라우저 탭 간 BroadcastChannel 실시간 리스너 ── */
   useEffect(() => {
@@ -854,20 +835,13 @@ export default function FormulaPyramidPage() {
           setIsGameStarted(true);
           setSelectedBoardId(data.selectedBoardId || 1);
           if (data.currentRound) setCurrentRound(data.currentRound);
-          if (data.roomEndTime) {
-            setRoomEndTime(data.roomEndTime);
-            setRoomTimerSeconds(Math.max(0, Math.ceil((data.roomEndTime - Date.now()) / 1000)));
-          }
+          setRoomTimerSeconds(selectedTime * 60);
           setSubmittedAnswersList([]);
           setIsRoundLocked(false);
           setShowRoundEndPopup(false);
           setSelectedNodes([]);
           setPenaltyLockSeconds(0);
           setCountdownValue(3);
-          setActivityLogs((prev) => [
-            `[안내] ${data.currentRound || 1}라운드가 시작되었습니다! (TARGET: ${data.target || 10})`,
-            ...prev,
-          ]);
         } else if (data.type === "SCORE_UPDATE") {
           if (data.playerName !== curr.myNickname) {
             setPlayers((prev) =>
@@ -889,22 +863,18 @@ export default function FormulaPyramidPage() {
                 setIsRoundLocked(true);
                 setShowRoundEndPopup(true);
                 setRoomTimerSeconds(0);
-                setRoomEndTime(Date.now());
-                setActivityLogs((logPrev) => [
-                  "[안내] 이번 라운드의 모든 정답이 제출되었습니다.",
-                  ...logPrev,
-                ]);
+                addActivityLog(`[안내] 이번 라운드의 모든 정답이 제출되었습니다. ${curr.currentRound}라운드를 종료합니다.`);
               }
               return nextList;
             });
           }
           if (data.logMsg) {
-            setActivityLogs((prev) => [data.logMsg, ...prev]);
+            addActivityLog(data.logMsg);
           }
         } else if (data.type === "LEAVE") {
           if (data.playerName === curr.myNickname) return;
           setPlayers((prev) => prev.filter((p) => p.name !== data.playerName));
-          setActivityLogs((prev) => [`[퇴장] ${data.playerName} 님이 퇴장하였습니다.`, ...prev]);
+          addActivityLog(`[퇴장] ${data.playerName} 님이 퇴장하였습니다.`);
         }
       } catch {}
     };
@@ -914,7 +884,7 @@ export default function FormulaPyramidPage() {
         bc.close();
       } catch {}
     };
-  }, [inGameRoom, activeRoomCode]);
+  }, [inGameRoom, activeRoomCode, selectedTime]);
 
   /* ── 태블릿 & 모바일 환경을 위한 탄탄한 백그라운드 HTTP 서버 동기화 폴링 (1.2초) ── */
   useEffect(() => {
@@ -997,13 +967,15 @@ export default function FormulaPyramidPage() {
     if (countdownValue <= 0) {
       setCountdownValue(null);
       setIsGameStarted(true);
+      setRoomTimerSeconds(selectedTime * 60);
+      addActivityLog(`[안내] ${currentRound}라운드가 시작되었습니다! (TARGET: ${currentTargetNumber})`);
       return;
     }
     const timer = setTimeout(() => {
       setCountdownValue((prev) => (prev !== null ? prev - 1 : null));
     }, 1000);
     return () => clearTimeout(timer);
-  }, [countdownValue]);
+  }, [countdownValue, selectedTime, currentRound, currentTargetNumber]);
 
   /* ── unload 처리 ── */
   useEffect(() => {
@@ -1160,11 +1132,6 @@ export default function FormulaPyramidPage() {
 
     const gameStartTs = Date.now();
     lastStartedGameTsRef.current = gameStartTs;
-
-    setActivityLogs((prev) => [
-      `[안내] ${roundNum}라운드가 시작되었습니다! (TARGET: ${chosenBoard.target})`,
-      ...prev,
-    ]);
 
     // 모든 기기로 게임 시작 전송
     broadcastRoomEvent({
