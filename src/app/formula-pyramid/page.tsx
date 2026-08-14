@@ -474,22 +474,23 @@ export default function FormulaPyramidPage() {
 
   /* ── 모든 기기(PC, 태블릿, 모바일) 및 탭으로 이벤트 즉시 브로드캐스트 ── */
   const broadcastRoomEvent = (eventData: Record<string, unknown>) => {
+    const fullData = { ...eventData, sender: myNickname };
     // 1. MQTT WebSocket (인터넷을 통한 PC ↔ 태블릿 0.05초 초고속 실시간 전파)
     if (mqttClientRef.current && activeRoomCode) {
       try {
         const topic = `infinitymath/pyramid/${activeRoomCode}`;
-        mqttClientRef.current.publish(topic, JSON.stringify(eventData));
+        mqttClientRef.current.publish(topic, JSON.stringify(fullData));
       } catch {}
     }
     // 2. BroadcastChannel (같은 기기 탭 간 0ms 즉시 전파)
     if (inGameRoom && activeRoomCode && typeof window !== "undefined" && "BroadcastChannel" in window) {
       try {
         const bc = new BroadcastChannel(`pyramid-room-${activeRoomCode}`);
-        bc.postMessage(eventData);
+        bc.postMessage(fullData);
         bc.close();
       } catch {}
     }
-    // 3. Server API (백업 및 폴링용)
+    // 3. Server API (백업용)
     if (eventData.type === "SCORE_UPDATE") {
       postRoomAction("SCORE_UPDATE", {
         playerName: eventData.playerName,
@@ -595,6 +596,9 @@ export default function FormulaPyramidPage() {
           const data = JSON.parse(message.toString());
           if (!data || !data.type) return;
           const curr = roomStateRef.current;
+
+          // 본인이 보낸 메시지는 무시 (에코 방지)
+          if (data.sender && data.sender === curr.myNickname) return;
 
           if (data.type === "JOIN") {
             if (data.player.name === curr.myNickname) return;
@@ -717,94 +721,6 @@ export default function FormulaPyramidPage() {
     const timer = setTimeout(() => setCountdownValue((prev) => (prev !== null ? prev - 1 : null)), 1000);
     return () => clearTimeout(timer);
   }, [countdownValue]);
-
-  /* ── 다른 기기(PC, 태블릿) 간 실시간 서버 폴링 동기화 ── */
-  useEffect(() => {
-    if (!inGameRoom || !activeRoomCode) return;
-
-    let isSubscribed = true;
-    const pollInterval = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/pyramid?roomCode=${encodeURIComponent(activeRoomCode)}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!isSubscribed) return;
-
-        if (data.exists && data.room) {
-          const r = data.room;
-          const curr = roomStateRef.current;
-
-          // 플레이어 목록 동기화
-          if (r.players && Array.isArray(r.players)) {
-            setPlayers(r.players);
-            const me = r.players.find((p: { name: string; score: number }) => p.name === curr.myNickname);
-            if (me && me.score !== curr.myScore) {
-              setMyScore(me.score);
-            }
-          }
-
-          // 게임 시작 / 새 라운드 시작 동기화 (다른 기기에서 시작했을 때)
-          const isBrandNewGame = r.isGameStarted && !curr.isGameStarted;
-          const isNextRoundStarted = r.isGameStarted && curr.isGameStarted && (
-            (r.currentRound && r.currentRound !== curr.selectedRound) ||
-            (r.selectedBoardId && r.selectedBoardId !== curr.selectedBoardId && curr.isRoundLocked)
-          );
-
-          if (isBrandNewGame || isNextRoundStarted) {
-            setSelectedBoardId(r.selectedBoardId || 1);
-            if (r.currentRound) setCurrentRound(r.currentRound);
-            if (r.roomEndTime) {
-              setRoomEndTime(r.roomEndTime);
-              setRoomTimerSeconds(Math.max(0, Math.ceil((r.roomEndTime - Date.now()) / 1000)));
-            }
-            setSubmittedAnswersList([]);
-            setIsRoundLocked(false);
-            setShowRoundEndPopup(false);
-            setSelectedNodes([]);
-            setPenaltyLockSeconds(0);
-            setCountdownValue(3); // 3초 카운트다운
-          } else if (r.isGameStarted && curr.isGameStarted) {
-            if (r.selectedBoardId && r.selectedBoardId !== curr.selectedBoardId) {
-              setSelectedBoardId(r.selectedBoardId);
-            }
-            if (r.currentRound && r.currentRound !== curr.selectedRound) {
-              setCurrentRound(r.currentRound);
-            }
-            if (r.roomEndTime) {
-              setRoomEndTime(r.roomEndTime);
-            }
-          }
-
-          // 정답 제출 목록 동기화
-          if (r.submittedAnswersList && Array.isArray(r.submittedAnswersList)) {
-            setSubmittedAnswersList(r.submittedAnswersList);
-
-            // 모든 정답이 완료되었는지 확인
-            const allSolutions = getAllValidSolutions(curr.currentTargetNumber, curr.currentAllNodes);
-            const allSubmittedKeys = r.submittedAnswersList.map((a: { nodes: string }) => a.nodes);
-            const allSolKeys = allSolutions.map((s) => s.nodes.join(" "));
-            const allDone = allSolKeys.length > 0 && allSolKeys.every((k) => allSubmittedKeys.includes(k));
-            if (allDone && !curr.isRoundLocked) {
-              setIsRoundLocked(true);
-              setShowRoundEndPopup(true);
-              setRoomTimerSeconds(0);
-              setRoomEndTime(Date.now());
-            }
-          }
-
-          // 활동 로그
-          if (r.activityLogs && Array.isArray(r.activityLogs)) {
-            setActivityLogs(r.activityLogs);
-          }
-        }
-      } catch {}
-    }, 800);
-
-    return () => {
-      isSubscribed = false;
-      clearInterval(pollInterval);
-    };
-  }, [inGameRoom, activeRoomCode]);
 
   /* ── unload 처리 ── */
   useEffect(() => {
