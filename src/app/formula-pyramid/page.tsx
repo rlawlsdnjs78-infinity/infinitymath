@@ -314,6 +314,25 @@ export default function FormulaPyramidPage() {
   const [players, setPlayers] = useState<{ name: string; score: number; isHost?: boolean }[]>([]);
   const [activityLogs, setActivityLogs] = useState<string[]>([]);
   const [submittedAnswersList, setSubmittedAnswersList] = useState<{ nodes: string; formula: string }[]>([]);
+  const [roomTimerSeconds, setRoomTimerSeconds] = useState(180);
+
+  useEffect(() => {
+    setRoomTimerSeconds(selectedTime * 60);
+  }, [selectedTime]);
+
+  useEffect(() => {
+    if (!inGameRoom) return;
+    const interval = setInterval(() => {
+      setRoomTimerSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [inGameRoom]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  };
 
   // BroadcastChannel 실시간 멀티플레이어 동기화 (같은 방 코드로 참가한 탭/창 실시간 연동)
   useEffect(() => {
@@ -481,29 +500,50 @@ export default function FormulaPyramidPage() {
            ─────────────────────────────────────────────────────────────────── */}
         {inGameRoom ? (
           <div className="w-full flex flex-col gap-5">
-            {/* 상단 컨트롤 바 (여백 최우선 원칙 p-5 sm:px-8 sm:py-5) */}
+            {/* 상단 컨트롤 바 */}
             <div className="chalk-box-straight bg-teal-950 p-5 sm:px-8 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 border-2 border-yellow-400/80 shadow-lg">
+              {/* [요구사항 2 & 3] 입장코드 좌우 여백(px-5 py-1.5) 추가 & 닉네임 란 삭제 */}
               <div className="flex items-center gap-5 flex-wrap">
                 <span className="text-xl sm:text-2.5xl text-yellow-300 font-extrabold flex items-center gap-2.5" style={{ fontFamily: "var(--font-chalk)" }}>
-                  입장 코드: <span className="tracking-widest text-white bg-teal-900 px-4 py-1 rounded-md border border-teal-700">{activeRoomCode}</span>
-                </span>
-                <span className="bg-teal-900 text-yellow-200 px-4 py-1.5 rounded-full text-sm font-bold border border-teal-700 shadow-inner">
-                  {isDealerHost ? "👑 딜러(선생님)" : `👤 ${myNickname}`}
+                  입장 코드:{" "}
+                  <span
+                    className="tracking-widest text-white bg-teal-900 rounded-md border border-teal-700/80 shadow-inner"
+                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.35rem", paddingBottom: "0.35rem" }}
+                  >
+                    {activeRoomCode}
+                  </span>
                 </span>
               </div>
 
-              <div className="flex items-center gap-5">
-                <div className="flex items-center gap-2.5 bg-teal-900/90 px-4 py-2 rounded-md border border-teal-700 shadow-sm">
-                  <Clock className="text-yellow-400" size={20} />
-                  <span className="text-yellow-300 font-bold text-base sm:text-xl" style={{ fontFamily: "var(--font-chalk)" }}>
-                    1 / {selectedRound} 라운드 ({selectedTime}분)
+              {/* [요구사항 4 & 5] 라운드 & 남은 시간 두 개의 별도 박스로 분리 및 방 나가기 여백 강화 */}
+              <div className="flex items-center gap-4 flex-wrap">
+                {/* 박스 1: 라운드 */}
+                <div
+                  className="flex items-center bg-teal-900/90 rounded-md border border-teal-700/80 shadow-sm"
+                  style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
+                >
+                  <span className="text-yellow-300 font-extrabold text-base sm:text-lg" style={{ fontFamily: "var(--font-chalk)" }}>
+                    라운드 : <span className="text-white ml-1">{selectedRound} / {selectedRound}</span>
                   </span>
                 </div>
 
+                {/* 박스 2: 남은 시간 */}
+                <div
+                  className="flex items-center gap-2 bg-teal-900/90 rounded-md border border-teal-700/80 shadow-sm"
+                  style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
+                >
+                  <Clock className="text-yellow-400" size={18} />
+                  <span className="text-yellow-300 font-extrabold text-base sm:text-lg" style={{ fontFamily: "var(--font-chalk)" }}>
+                    남은 시간 : <span className="text-white ml-1 tracking-wider">{formatTime(roomTimerSeconds)}</span>
+                  </span>
+                </div>
+
+                {/* [요구사항 4] '방 나가기' 버튼 여백 부여 (px-6 py-2.5) */}
                 <button
                   type="button"
                   onClick={() => setInGameRoom(false)}
-                  className="flex items-center gap-2 bg-rose-900/80 hover:bg-rose-800 text-rose-200 px-5 py-2 rounded-md text-sm font-bold border border-rose-600/60 transition-all cursor-pointer shadow-md"
+                  className="flex items-center bg-rose-900/80 hover:bg-rose-800 text-rose-200 rounded-md text-sm font-bold border border-rose-600/60 transition-all cursor-pointer shadow-md"
+                  style={{ paddingLeft: "1.5rem", paddingRight: "1.5rem", paddingTop: "0.6rem", paddingBottom: "0.6rem", gap: "0.75rem" }}
                 >
                   <LogOut size={18} />
                   <span>방 나가기</span>
@@ -520,7 +560,6 @@ export default function FormulaPyramidPage() {
                     <Trophy size={22} className="text-yellow-400" />
                     <span>실시간 점수판</span>
                   </div>
-                  {/* [요구사항 1] '(n명 접속 중)' 테두리 및 뱃지 배경 제거 */}
                   <span className="text-xs sm:text-sm text-gray-300 font-medium select-none">({players.length}명 접속 중)</span>
                 </div>
 
@@ -539,12 +578,12 @@ export default function FormulaPyramidPage() {
                         style={{
                           paddingTop: "0.85rem",
                           paddingBottom: "0.85rem",
-                          paddingLeft: "1.75rem",
-                          paddingRight: "1.75rem",
+                          paddingLeft: "1.1rem",
+                          paddingRight: "1.1rem",
                         }}
                       >
-                        {/* [요구사항 2] 좌측 메달(🥇)에 paddingLeft: 0.5rem (총 36px 좌측 절연 여백) 지정 */}
-                        <div className="flex items-center gap-3.5" style={{ paddingLeft: "0.5rem" }}>
+                        {/* [요구사항 1] 메달 좌측 여백 절반 감축 (paddingLeft: 1.1rem) */}
+                        <div className="flex items-center gap-3">
                           <span className="font-extrabold text-lg text-yellow-400 w-6 flex-shrink-0 flex items-center justify-center">
                             {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}`}
                           </span>
@@ -552,10 +591,10 @@ export default function FormulaPyramidPage() {
                             {p.name} {p.isHost && "(딜러)"}
                           </span>
                         </div>
-                        {/* [요구사항 3] 우측 '0점'에 paddingRight: 0.5rem (총 36px 우측 절연 여백) 지정 */}
+                        {/* [요구사항 3] 우측 '0점' 넉넉한 절연 여백 지정 */}
                         <span
                           className="font-extrabold text-xl text-yellow-300 flex-shrink-0"
-                          style={{ fontFamily: "var(--font-chalk)", paddingRight: "0.5rem" }}
+                          style={{ fontFamily: "var(--font-chalk)" }}
                         >
                           {p.score}점
                         </span>
@@ -585,15 +624,18 @@ export default function FormulaPyramidPage() {
                     ))}
                   </div>
 
-                  {/* [요구사항 5] 피라미드 우측 공간에 '이미 제출된 정답' 표시 박스 (플레이어 모드 디자인 반영) */}
+                  {/* [요구사항 6] 이미 제출된 정답 수량 표기를 'n개'로 변경 */}
                   <div className="relative flex-1 w-full flex flex-col items-stretch gap-3">
                     <div className="flex items-center justify-between border-b border-dashed border-teal-700 pb-2">
                       <div className="flex items-center gap-2 text-yellow-300 font-extrabold text-xl" style={{ fontFamily: "var(--font-chalk)" }}>
                         <Sparkles size={20} className="text-yellow-400 animate-pulse" />
                         <span>이미 제출된 정답</span>
                       </div>
-                      <span className="text-xs text-teal-300 font-bold bg-teal-900 px-2 py-0.5 rounded border border-teal-700">
-                        {validSolutions.length}개 중 {submittedAnswersList.length}개
+                      <span
+                        className="text-xs sm:text-sm text-yellow-300 font-extrabold bg-teal-900 rounded-md border border-teal-700/80 shadow-sm"
+                        style={{ paddingLeft: "0.85rem", paddingRight: "0.85rem", paddingTop: "0.25rem", paddingBottom: "0.25rem" }}
+                      >
+                        {submittedAnswersList.length}개
                       </span>
                     </div>
 
@@ -631,7 +673,7 @@ export default function FormulaPyramidPage() {
                   </div>
                 </div>
 
-                {/* [요구사항 4] '제출할 수식 칸 선택' 부분을 대기창 플레이어 모드의 '선택한 수식:' 박스로 교체 */}
+                {/* [선택한 수식: 박스] */}
                 <div
                   className={`w-full rounded-md border border-dashed transition-all duration-200 flex items-center justify-between min-h-[64px] h-[64px] ${
                     tempNotice
@@ -728,12 +770,21 @@ export default function FormulaPyramidPage() {
                   <span>실시간 활동 현황</span>
                 </div>
 
+                {/* [요구사항 7] 실시간 활동 현황 [안내] 좌측 26px 여백 부여 (paddingLeft: 1.6rem) */}
                 <div className="flex flex-col gap-3 max-h-[360px] overflow-y-auto pr-1">
                   {activityLogs.map((log, i) => (
                     <div
                       key={i}
-                      className="text-xs sm:text-sm text-gray-200 bg-teal-900/70 px-4 py-3 rounded-md border border-teal-700/80 shadow-sm leading-relaxed"
-                      style={{ fontFamily: "var(--font-body)", wordBreak: "break-all", letterSpacing: "-0.015em" }}
+                      className="text-xs sm:text-sm text-gray-200 bg-teal-900/70 rounded-md border border-teal-700/80 shadow-sm leading-relaxed"
+                      style={{
+                        paddingLeft: "1.6rem",
+                        paddingRight: "1.4rem",
+                        paddingTop: "0.75rem",
+                        paddingBottom: "0.75rem",
+                        fontFamily: "var(--font-body)",
+                        wordBreak: "break-all",
+                        letterSpacing: "-0.015em",
+                      }}
                     >
                       {log}
                     </div>
