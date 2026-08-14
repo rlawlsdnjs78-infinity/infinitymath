@@ -557,12 +557,18 @@ export default function FormulaPyramidPage() {
               }
             }
           } else if (data.type === "START_GAME") {
-            // 수신 측에서는 카운트다운 없이 바로 boardId 세팅만 하고 countdownValue를 통해 트리거
+            // 새 라운드 시작 동기화: 제출 정답 목록 초기화, 입력 잠금 해제, 페널티 초기화, 팝업 닫기
             setSelectedBoardId(data.selectedBoardId || 1);
+            if (data.currentRound) setCurrentRound(data.currentRound);
             if (data.roomEndTime) {
               setRoomEndTime(data.roomEndTime);
               setRoomTimerSeconds(Math.max(0, Math.ceil((data.roomEndTime - Date.now()) / 1000)));
             }
+            setSubmittedAnswersList([]);
+            setIsRoundLocked(false);
+            setShowRoundEndPopup(false);
+            setSelectedNodes([]);
+            setPenaltyLockSeconds(0);
             // 카운트다운 시작 (3초)
             setCountdownValue(3);
           } else if (data.type === "SCORE_UPDATE") {
@@ -649,16 +655,25 @@ export default function FormulaPyramidPage() {
             }
           }
 
-          // 게임 시작 동기화 (다른 기기에서 시작했을 때)
-          if (r.isGameStarted && !curr.isGameStarted) {
+          // 게임 시작 / 새 라운드 시작 동기화 (다른 기기에서 시작했을 때)
+          const isBrandNewGame = r.isGameStarted && !curr.isGameStarted;
+          const isNextRoundStarted = r.isGameStarted && curr.isGameStarted && (
+            (r.currentRound && r.currentRound !== curr.selectedRound) ||
+            (r.selectedBoardId && r.selectedBoardId !== curr.selectedBoardId && curr.isRoundLocked)
+          );
+
+          if (isBrandNewGame || isNextRoundStarted) {
             setSelectedBoardId(r.selectedBoardId || 1);
             if (r.currentRound) setCurrentRound(r.currentRound);
             if (r.roomEndTime) {
               setRoomEndTime(r.roomEndTime);
               setRoomTimerSeconds(Math.max(0, Math.ceil((r.roomEndTime - Date.now()) / 1000)));
             }
-            setShowRoundEndPopup(false);
+            setSubmittedAnswersList([]);
             setIsRoundLocked(false);
+            setShowRoundEndPopup(false);
+            setSelectedNodes([]);
+            setPenaltyLockSeconds(0);
             setCountdownValue(3); // 3초 카운트다운
           } else if (r.isGameStarted && curr.isGameStarted) {
             if (r.selectedBoardId && r.selectedBoardId !== curr.selectedBoardId) {
@@ -1393,7 +1408,7 @@ export default function FormulaPyramidPage() {
                       ))}
                     </div>
 
-                    {/* 이미 제출된 정답 */}
+                    {/* 이미 제출된 정답: 3열 그리드 (수식 제외 노드 번호만 표시) */}
                     <div className="relative flex-1 w-full flex flex-col items-stretch gap-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-yellow-300 font-extrabold text-xl" style={{ fontFamily: "var(--font-chalk)" }}>
@@ -1406,16 +1421,21 @@ export default function FormulaPyramidPage() {
                       </div>
                       <div className="w-full border-t border-dashed border-teal-600/70" style={{ marginTop: "0.4rem", marginBottom: "0.5rem" }} />
                       <div
-                        className="w-full bg-teal-900/98 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-lg flex flex-col backdrop-blur-md overflow-y-auto min-h-[120px] max-h-[200px]"
-                        style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", paddingLeft: "1.25rem", paddingRight: "1.25rem", gap: "0.4rem" }}
+                        className="w-full bg-teal-900/98 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-lg backdrop-blur-md overflow-y-auto min-h-[120px] max-h-[200px]"
+                        style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
                       >
                         {submittedAnswersList.length > 0 ? (
-                          submittedAnswersList.map((sol, idx) => (
-                            <div key={idx} className="w-full flex items-center justify-between rounded-lg bg-teal-950/95 text-white border border-teal-700/80 shadow-sm" style={{ paddingTop: "0.5rem", paddingBottom: "0.5rem", paddingLeft: "1.25rem", paddingRight: "1.25rem", fontFamily: "var(--font-chalk)" }}>
-                              <span className="text-lg sm:text-xl font-black text-yellow-300 tracking-widest">{sol.nodes}</span>
-                              <span className="text-sm sm:text-base text-teal-200 font-extrabold tracking-wide">{sol.formula}</span>
-                            </div>
-                          ))
+                          <div className="grid grid-cols-3 gap-1.5">
+                            {submittedAnswersList.map((sol, idx) => (
+                              <div
+                                key={idx}
+                                className="flex items-center justify-center rounded-lg text-center font-black text-base tracking-widest bg-teal-950/90 text-yellow-300 border border-teal-700/80 shadow-sm"
+                                style={{ paddingTop: "0.45rem", paddingBottom: "0.45rem", paddingLeft: "0.5rem", paddingRight: "0.5rem", fontFamily: "var(--font-chalk)" }}
+                              >
+                                {sol.nodes}
+                              </div>
+                            ))}
+                          </div>
                         ) : (
                           <div className="py-6 text-center text-gray-400 text-sm font-medium" style={{ fontFamily: "var(--font-body)" }}>
                             {isGameStarted ? "아직 제출된 정답이 없습니다." : "게임 시작을 기다리는 중입니다..."}
