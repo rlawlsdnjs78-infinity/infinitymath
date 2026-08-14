@@ -790,7 +790,7 @@ export default function FormulaPyramidPage() {
            ─────────────────────────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
           {/* ── [좌측 박스] xl:col-span-3 ─────────────────────────────────── */}
-          <div className="xl:col-span-3 chalk-box content-box flex flex-col justify-between bg-teal-950/80 backdrop-blur-md h-full min-h-[610px] p-4 sm:p-5">
+          <div className="xl:col-span-3 chalk-box content-box flex flex-col bg-teal-950/80 backdrop-blur-md h-full p-4 sm:p-5">
             {/* 카드 헤더 */}
             <div className="flex items-center gap-3 w-full min-h-[44px]">
               <LogIn className="text-yellow-400 flex-shrink-0" size={28} />
@@ -1001,7 +1001,7 @@ export default function FormulaPyramidPage() {
           </div>
 
           {/* ── [중앙 박스] xl:col-span-6 ─────────────────────────────────── */}
-          <div className="xl:col-span-6 chalk-box content-box flex flex-col justify-between bg-teal-950/85 backdrop-blur-md h-full min-h-[610px] p-4 sm:p-5 gap-4">
+          <div className="xl:col-span-6 chalk-box content-box flex flex-col bg-teal-950/85 backdrop-blur-md h-full p-4 sm:p-5 gap-4">
             {mode === "player" ? (
               /* =================================================================== */
               /* 🎮 [플레이어 모드 전용 가운데 UI] - 딜러 모드 변경 시 영향 받지 않음 */
@@ -1390,9 +1390,9 @@ export default function FormulaPyramidPage() {
               /* 👑 [딜러 모드 전용 가운데 UI] - 플레이어 모드 변경 시 영향 받지 않음  */
               /* =================================================================== */
               <div className="flex flex-col gap-4 w-full h-full">
-                {/* 1. [요구사항] 입장 코드 생성 전: 대시보드 연결 후 높이(570px)와 동일한 공간을 유지하며 컴팩트한 안내 박스를 중앙에 배치 */}
+                {/* 1. [요구사항] 입장 코드 생성 전: 컴팩트한 안내 박스를 가운데 칠판 수직 정중앙에 수평으로 배치 */}
                 {!inGameRoom ? (
-                  <div className="w-full flex-1 flex flex-col items-center justify-center min-h-[520px] sm:min-h-[570px]">
+                  <div className="w-full flex-1 flex flex-col items-center justify-center py-12 sm:py-16 my-auto">
                     <div
                       className="w-full flex items-center justify-center bg-teal-950/90 rounded-2xl border-2 border-dashed border-teal-500/90 shadow-md text-center"
                       style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.85rem", paddingBottom: "0.85rem" }}
@@ -1625,7 +1625,7 @@ export default function FormulaPyramidPage() {
           </div>
 
           {/* ── [우측 박스] xl:col-span-3 ─────────────────────────────────── */}
-          <div className="xl:col-span-3 chalk-box content-box flex flex-col justify-between bg-teal-950/80 backdrop-blur-md h-full min-h-[610px] p-4 sm:p-5">
+          <div className="xl:col-span-3 chalk-box content-box flex flex-col bg-teal-950/80 backdrop-blur-md h-full p-4 sm:p-5">
             {mode === "player" ? (
               <>
                 <div className="flex items-center justify-between w-full min-h-[44px]">
