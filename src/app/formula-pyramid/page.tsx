@@ -315,18 +315,20 @@ export default function FormulaPyramidPage() {
   const [activityLogs, setActivityLogs] = useState<string[]>([]);
   const [submittedAnswersList, setSubmittedAnswersList] = useState<{ nodes: string; formula: string }[]>([]);
   const [roomTimerSeconds, setRoomTimerSeconds] = useState(180);
-
-  useEffect(() => {
-    setRoomTimerSeconds(selectedTime * 60);
-  }, [selectedTime]);
+  const [roomEndTime, setRoomEndTime] = useState<number | null>(null);
 
   useEffect(() => {
     if (!inGameRoom) return;
     const interval = setInterval(() => {
-      setRoomTimerSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+      if (roomEndTime) {
+        const rem = Math.max(0, Math.ceil((roomEndTime - Date.now()) / 1000));
+        setRoomTimerSeconds(rem);
+      } else {
+        setRoomTimerSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+      }
     }, 1000);
     return () => clearInterval(interval);
-  }, [inGameRoom]);
+  }, [inGameRoom, roomEndTime]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -334,7 +336,7 @@ export default function FormulaPyramidPage() {
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
-  // BroadcastChannel 실시간 멀티플레이어 동기화 (같은 방 코드로 참가한 탭/창 실시간 연동 및 방 설정 동기화)
+  // BroadcastChannel 실시간 멀티플레이어 동기화 (같은 방 코드로 참가한 탭/창 실시간 연동 및 방 타이머/설정 동기화)
   useEffect(() => {
     if (!inGameRoom || !activeRoomCode) return;
 
@@ -353,7 +355,7 @@ export default function FormulaPyramidPage() {
             });
             setActivityLogs((prev) => [`[실시간] ${data.player.name} 님이 방에 참가하셨습니다.`, ...prev]);
 
-            // 기존 참가자(방장/딜러)가 새로 들어온 참가자에게 현재 방 설정(라운드, 제한시간, 오답패널티)과 프로필 전송
+            // 기존 참가자(방장/딜러)가 새로 들어온 참가자에게 현재 방 설정과 정확한 roomEndTime 전송
             bc?.postMessage({
               type: "SYNC_PRESENCE",
               player: { name: myNickname, score: myScore, isHost: isDealerHost },
@@ -361,6 +363,7 @@ export default function FormulaPyramidPage() {
                 selectedRound,
                 selectedTime,
                 selectedPenalty,
+                roomEndTime: roomEndTime || Date.now() + selectedTime * 60 * 1000,
               },
             });
           } else if (data.type === "SYNC_PRESENCE") {
@@ -371,11 +374,13 @@ export default function FormulaPyramidPage() {
 
             if (data.roomConfig) {
               if (data.roomConfig.selectedRound) setSelectedRound(data.roomConfig.selectedRound);
-              if (data.roomConfig.selectedTime) {
-                setSelectedTime(data.roomConfig.selectedTime);
-                setRoomTimerSeconds(data.roomConfig.selectedTime * 60);
-              }
+              if (data.roomConfig.selectedTime) setSelectedTime(data.roomConfig.selectedTime);
               if (data.roomConfig.selectedPenalty) setSelectedPenalty(data.roomConfig.selectedPenalty);
+              if (data.roomConfig.roomEndTime) {
+                setRoomEndTime(data.roomConfig.roomEndTime);
+                const rem = Math.max(0, Math.ceil((data.roomConfig.roomEndTime - Date.now()) / 1000));
+                setRoomTimerSeconds(rem);
+              }
             }
           } else if (data.type === "SCORE_UPDATE") {
             setPlayers((prev) =>
@@ -404,7 +409,7 @@ export default function FormulaPyramidPage() {
     return () => {
       if (bc) bc.close();
     };
-  }, [inGameRoom, activeRoomCode, myNickname, myScore, isDealerHost, selectedRound, selectedTime, selectedPenalty]);
+  }, [inGameRoom, activeRoomCode, myNickname, myScore, isDealerHost, selectedRound, selectedTime, selectedPenalty, roomEndTime]);
 
   const handleJoinGameRoom = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -418,18 +423,20 @@ export default function FormulaPyramidPage() {
     }
     const cleanCode = entryCode.trim().toUpperCase();
 
-    // 입장하려는 방의 설정(라운드, 제한시간, 오답패널티)을 localStorage 및 로컬 상태로 동기화
+    // 입장하려는 방의 설정(라운드, 제한시간, 오답패널티, roomEndTime)을 localStorage 및 로컬 상태로 동기화
     if (typeof window !== "undefined") {
       try {
         const savedConfigStr = localStorage.getItem(`pyramid-room-config-${cleanCode}`);
         if (savedConfigStr) {
           const savedConfig = JSON.parse(savedConfigStr);
           if (savedConfig.selectedRound) setSelectedRound(savedConfig.selectedRound);
-          if (savedConfig.selectedTime) {
-            setSelectedTime(savedConfig.selectedTime);
-            setRoomTimerSeconds(savedConfig.selectedTime * 60);
-          }
+          if (savedConfig.selectedTime) setSelectedTime(savedConfig.selectedTime);
           if (savedConfig.selectedPenalty) setSelectedPenalty(savedConfig.selectedPenalty);
+          if (savedConfig.roomEndTime) {
+            setRoomEndTime(savedConfig.roomEndTime);
+            const rem = Math.max(0, Math.ceil((savedConfig.roomEndTime - Date.now()) / 1000));
+            setRoomTimerSeconds(rem);
+          }
         }
       } catch (err) {}
     }
@@ -456,11 +463,13 @@ export default function FormulaPyramidPage() {
   const handleCreateGame = () => {
     const randomNum = Math.floor(10000 + Math.random() * 90000);
     const code = `P${randomNum}`;
+    const calculatedEndTime = Date.now() + selectedTime * 60 * 1000;
 
     const currentRoomConfig = {
       selectedRound,
       selectedTime,
       selectedPenalty,
+      roomEndTime: calculatedEndTime,
     };
 
     if (typeof window !== "undefined") {
@@ -469,6 +478,8 @@ export default function FormulaPyramidPage() {
       } catch (err) {}
     }
 
+    setRoomEndTime(calculatedEndTime);
+    setRoomTimerSeconds(selectedTime * 60);
     setGeneratedRoomCode(code);
     setActiveRoomCode(code);
     setMyNickname("딜러(선생님)");
