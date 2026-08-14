@@ -78,7 +78,7 @@ function FeatureCard({
       className="chalk-box chalk-box-inner slide-in-up flex flex-col gap-3"
       style={{
         animationDelay: delay,
-        background: "rgba(255,255,255,0.04)",
+        background: "rgba(255,255,255,0.8)",
         backdropFilter: "blur(2px)",
         paddingLeft: "1.25rem",
         paddingRight: "1.25rem",
@@ -112,10 +112,9 @@ function HeroSection() {
       <ChalkboardGrid />
       <ChalkDust />
 
-      {/* 칠판 프레임 */}
       <div
         className="relative z-10 chalkboard-frame w-full max-w-4xl mx-auto"
-        style={{ background: "rgba(20, 50, 50, 0.92)" }}
+        style={{ background: "rgba(255, 255, 255, 0.95)" }}
       >
         {/* 칠판 프레임 내부 여백 (좌우 여백 1.25rem 적용) */}
         <div
@@ -171,7 +170,7 @@ function HeroSection() {
             style={{
               animationDelay: "0.2s",
               border: "1px dashed var(--chalk-border)",
-              background: "rgba(255,255,255,0.03)",
+              background: "rgba(0,0,0,0.02)",
               paddingLeft: "1.25rem",
               paddingRight: "1.25rem",
               paddingTop: "1.25rem",
@@ -254,8 +253,8 @@ function Footer() {
       id="footer"
       className="relative z-10 w-full py-5 text-center"
       style={{
-        borderTop: "2px dashed rgba(240,237,232,0.15)",
-        background: "rgba(20,45,45,0.9)",
+        borderTop: "2px dashed rgba(0,0,0,0.1)",
+        background: "rgba(255,255,255,0.9)",
         paddingLeft: "1.25rem",
         paddingRight: "1.25rem",
       }}

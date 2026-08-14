@@ -27,7 +27,7 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
         >
           <button
             type="button"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 hover:bg-teal-900/60"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 hover:bg-gray-100"
             style={{
               fontFamily: "var(--font-chalk)",
               fontSize: "1.45rem",
@@ -38,12 +38,12 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
               letterSpacing: "0.04em",
             }}
           >
-            <Gamepad2 size={22} className="text-yellow-400" />
+            <Gamepad2 size={22} className="text-[var(--chalk-yellow)]" />
             <span>미니게임</span>
             <ChevronDown
               size={18}
               className={`transition-transform duration-200 ${
-                isMiniOpen ? "rotate-180 text-yellow-400" : "text-gray-300"
+                isMiniOpen ? "rotate-180 text-[var(--chalk-yellow)]" : "text-gray-400"
               }`}
             />
           </button>
@@ -57,20 +57,20 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
               <div
                 className="chalk-box-straight shadow-2xl p-3 rounded flex flex-col gap-1.5"
                 style={{
-                  background: "rgba(20, 48, 48, 0.98)",
+                  background: "rgba(255, 255, 255, 0.98)",
                   backdropFilter: "blur(12px)",
                   border: "2px dashed var(--chalk-yellow)",
                 }}
               >
                 <div
-                  className="flex items-center gap-2.5 px-4 py-3 text-lg rounded text-gray-300"
+                  className="flex items-center gap-2.5 px-4 py-3 text-lg rounded text-gray-700"
                   style={{
                     fontFamily: "var(--font-chalk)",
                     letterSpacing: "-0.015em",
                   }}
                 >
-                  <span className="w-2 h-2 rounded-full bg-teal-400 inline-block flex-shrink-0" />
-                  <span className="text-sm font-medium text-gray-300" style={{ fontFamily: "var(--font-body)" }}>준비 중입니다</span>
+                  <span className="w-2 h-2 rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
+                  <span className="text-sm font-medium text-gray-600" style={{ fontFamily: "var(--font-body)" }}>준비 중입니다</span>
                 </div>
               </div>
             </div>
@@ -85,7 +85,7 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
         >
           <button
             type="button"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 hover:bg-teal-900/60"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 hover:bg-gray-100"
             style={{
               fontFamily: "var(--font-chalk)",
               fontSize: "1.45rem",
@@ -96,12 +96,12 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
               letterSpacing: "0.04em",
             }}
           >
-            <Brain size={22} className="text-yellow-400" />
+            <Brain size={22} className="text-[var(--chalk-yellow)]" />
             <span>브레인 서바이벌</span>
             <ChevronDown
               size={18}
               className={`transition-transform duration-200 ${
-                isBrainOpen ? "rotate-180 text-yellow-400" : "text-gray-300"
+                isBrainOpen ? "rotate-180 text-[var(--chalk-yellow)]" : "text-gray-400"
               }`}
             />
           </button>
@@ -115,14 +115,14 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
               <div
                 className="chalk-box-straight shadow-2xl p-3 rounded flex flex-col gap-1.5"
                 style={{
-                  background: "rgba(20, 48, 48, 0.98)",
+                  background: "rgba(255, 255, 255, 0.98)",
                   backdropFilter: "blur(12px)",
                   border: "2px dashed var(--chalk-yellow)",
                 }}
               >
                 <Link
                   href="/formula-pyramid"
-                  className="flex items-center gap-2.5 px-4 py-3 text-lg rounded transition-colors duration-150 hover:bg-teal-800/90"
+                  className="flex items-center gap-2.5 px-4 py-3 text-lg rounded transition-colors duration-150 hover:bg-gray-100"
                   style={{
                     fontFamily: "var(--font-chalk)",
                     color: "var(--chalk-yellow)",
@@ -130,7 +130,7 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
                   }}
                   onClick={() => setIsBrainOpen(false)}
                 >
-                  <span className="w-2.5 h-2.5 rounded-full bg-yellow-400 inline-block flex-shrink-0" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
                   <span>수식 피라미드</span>
                 </Link>
               </div>
@@ -147,7 +147,7 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
       {/* 로그인 버튼 */}
       <Link
         href="#"
-        className="rounded-md transition-all duration-200 hover:bg-white/15 hover:border-yellow-300"
+        className="rounded-md transition-all duration-200 hover:bg-black/5"
         style={{
           display: "inline-flex",
           alignItems: "center",
@@ -160,19 +160,19 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
           color: "var(--chalk-white)",
           border: "1.5px dashed var(--chalk-border-bright)",
           textDecoration: "none",
-          background: "rgba(255, 255, 255, 0.08)",
+          background: "rgba(0, 0, 0, 0.03)",
           letterSpacing: "0.04em",
           whiteSpace: "nowrap",
         }}
       >
-        <LogIn size={18} className="text-gray-300 flex-shrink-0" />
+        <LogIn size={18} className="text-gray-500 flex-shrink-0" />
         <span>로그인</span>
       </Link>
 
       {/* 회원가입 버튼 */}
       <Link
         href="#"
-        className="rounded-md transition-all duration-200 hover:scale-105 hover:bg-yellow-300"
+        className="rounded-md transition-all duration-200 hover:scale-105 hover:opacity-90"
         style={{
           display: "inline-flex",
           alignItems: "center",
@@ -182,12 +182,12 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
           fontFamily: "var(--font-chalk)",
           fontSize: "1.15rem",
           lineHeight: 1,
-          color: "#122a2a",
+          color: "#ffffff",
           background: "var(--chalk-yellow)",
           fontWeight: 700,
           border: "1.5px solid var(--chalk-yellow)",
           textDecoration: "none",
-          boxShadow: "0 0 12px rgba(245, 230, 66, 0.4)",
+          boxShadow: "0 0 12px rgba(203, 167, 210, 0.4)",
           letterSpacing: "0.04em",
           whiteSpace: "nowrap",
         }}

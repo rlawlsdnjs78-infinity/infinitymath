@@ -13,18 +13,18 @@
    디자인 토큰 (CSS 변수)
    ========================================= */
 :root {
-  /* 칠판 색상 팔레트 */
-  --chalk-bg: #1a3a3a;          /* 짙은 칠판 녹색 */
-  --chalk-bg-light: #1f4040;    /* 약간 밝은 칠판 */
-  --chalk-white: #f0ede8;       /* 하얀 분필 */
-  --chalk-yellow: #f5e642;      /* 노란 분필 */
+  /* 화이트보드 색상 팔레트 */
+  --chalk-bg: #ffffff;          /* 흰색 배경 */
+  --chalk-bg-light: #f8f9fa;    /* 매우 밝은 회색 */
+  --chalk-white: #333333;       /* 하얀 분필 대신 어두운 텍스트 */
+  --chalk-yellow: #CBA7D2;      /* 노란 분필 대신 연보라색 포인트 컬러 */
   --chalk-blue: #7dd3fc;        /* 파란 분필 */
   --chalk-pink: #f9a8d4;        /* 분홍 분필 */
   --chalk-green: #86efac;       /* 초록 분필 */
   --chalk-orange: #fdba74;      /* 주황 분필 */
-  --chalk-dim: rgba(240, 237, 232, 0.55); /* 흐린 분필 */
-  --chalk-border: rgba(240, 237, 232, 0.3);
-  --chalk-border-bright: rgba(240, 237, 232, 0.65);
+  --chalk-dim: rgba(0, 0, 0, 0.55); /* 흐린 텍스트 */
+  --chalk-border: rgba(0, 0, 0, 0.15);
+  --chalk-border-bright: rgba(0, 0, 0, 0.3);
 
   /* 폰트 */
   --font-chalk: "Nanum Pen Script", "Gowun Dodum", cursive;
@@ -47,20 +47,8 @@ html {
 }
 
 body {
-  /* 칠판 배경: 약간의 텍스처 그라디언트 */
+  /* 화이트보드 배경 */
   background-color: var(--chalk-bg);
-  background-image:
-    /* 칠판 분필 번짐 효과 */
-    radial-gradient(ellipse at 20% 30%, rgba(255,255,255,0.03) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 70%, rgba(255,255,255,0.02) 0%, transparent 50%),
-    /* 미세한 노이즈 패턴으로 칠판 질감 표현 */
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(255,255,255,0.005) 2px,
-      rgba(255,255,255,0.005) 4px
-    );
   color: var(--chalk-white);
   font-family: var(--font-body);
   min-height: 100vh;
@@ -78,10 +66,8 @@ body {
    ========================================= */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-chalk);
-  /* 분필 텍스트 특유의 약간 번진 느낌 */
-  text-shadow:
-    1px 1px 0 rgba(255,255,255,0.08),
-    -1px -1px 0 rgba(0,0,0,0.15);
+  /* 텍스트 특유의 번진 느낌 (화이트보드 톤) */
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.05);
   letter-spacing: 0.02em;
 }
 
@@ -127,13 +113,13 @@ h1, h2, h3, h4, h5, h6 {
    커스텀 유틸리티 클래스
    ========================================= */
 
-/* 분필 텍스트 스타일 */
+/* 분필 텍스트 스타일 (화이트보드) */
 .chalk-text {
   font-family: var(--font-chalk);
   color: var(--chalk-white);
   text-shadow:
-    0 0 8px rgba(255,255,255,0.15),
-    1px 1px 0 rgba(0,0,0,0.2);
+    0 0 8px rgba(0,0,0,0.05),
+    1px 1px 0 rgba(0,0,0,0.1);
 }
 
 .chalk-yellow { color: var(--chalk-yellow); }
@@ -155,6 +141,7 @@ h1, h2, h3, h4, h5, h6 {
   position: relative;
   padding: 1.5rem 1.25rem;
   transform: rotate(-0.3deg);
+  background-color: var(--chalk-bg-light); /* 화이트보드 톤 박스 */
 }
 
 /* 박스 내부 스타일 (좌우 여백 1.25rem) */
@@ -167,6 +154,7 @@ h1, h2, h3, h4, h5, h6 {
   border: 2px dashed var(--chalk-border-bright);
   border-radius: 2px;
   padding: 1.25rem 1.25rem;
+  background-color: var(--chalk-bg-light);
 }
 
 /* 텍스트 설명 박스 (좌우 여백 1.25rem) */
@@ -198,8 +186,8 @@ h1, h2, h3, h4, h5, h6 {
   background-image: repeating-linear-gradient(
     transparent,
     transparent 31px,
-    rgba(240, 237, 232, 0.12) 31px,
-    rgba(240, 237, 232, 0.12) 32px
+    rgba(0, 0, 0, 0.05) 31px,
+    rgba(0, 0, 0, 0.05) 32px
   );
   background-position: 0 8px;
 }
@@ -211,23 +199,24 @@ h1, h2, h3, h4, h5, h6 {
   gap: 0.5rem;
   font-family: var(--font-chalk);
   font-size: 1.25rem;
-  color: var(--chalk-yellow);
-  background: transparent;
-  border: 2px dashed var(--chalk-yellow);
+  color: var(--chalk-bg);
+  background: var(--chalk-yellow);
+  border: 2px solid var(--chalk-yellow);
   padding: 0.6rem 1.6rem;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.25s ease;
   transform: rotate(-0.5deg);
   letter-spacing: 0.05em;
+  font-weight: bold;
 }
 
 .btn-chalk:hover {
-  background: rgba(245, 230, 66, 0.12);
-  border-color: var(--chalk-yellow);
+  background: transparent;
+  color: var(--chalk-yellow);
   box-shadow:
-    0 0 12px rgba(245, 230, 66, 0.25),
-    inset 0 0 8px rgba(245, 230, 66, 0.05);
+    0 0 12px rgba(203, 167, 210, 0.25),
+    inset 0 0 8px rgba(203, 167, 210, 0.05);
   transform: rotate(0deg) scale(1.03);
 }
 
@@ -235,14 +224,13 @@ h1, h2, h3, h4, h5, h6 {
   transform: rotate(0deg) scale(0.97);
 }
 
-/* 칠판 테두리 프레임 */
+/* 화이트보드 테두리 프레임 */
 .chalkboard-frame {
-  border: 6px solid #3d2b1a;
+  border: 6px solid #e2e8f0; /* 밝은 알루미늄 느낌 */
   box-shadow:
-    inset 0 0 60px rgba(0,0,0,0.25),
-    0 8px 32px rgba(0,0,0,0.4),
-    0 0 0 2px rgba(255,255,255,0.05);
-  border-radius: 4px;
+    inset 0 0 20px rgba(0,0,0,0.02),
+    0 8px 32px rgba(0,0,0,0.08);
+  border-radius: 8px;
 }
 
 /* 분필 번짐 효과 애니메이션 */

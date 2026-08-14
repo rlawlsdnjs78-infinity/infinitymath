@@ -28,9 +28,9 @@ export default function Header() {
       style={{
         paddingLeft: "1.25rem",
         paddingRight: "1.25rem",
-        background: "rgba(26, 58, 58, 0.92)",
+        background: "rgba(255, 255, 255, 0.92)",
         backdropFilter: "blur(12px)",
-        borderBottom: "2px dashed rgba(240, 237, 232, 0.2)",
+        borderBottom: "2px dashed rgba(0, 0, 0, 0.1)",
         minHeight: "72px",
       }}
     >
@@ -46,7 +46,7 @@ export default function Header() {
                 lineHeight: 1,
                 color: "var(--chalk-yellow)",
                 textShadow:
-                  "0 0 12px rgba(245,230,66,0.5), 0 0 24px rgba(245,230,66,0.2)",
+                  "0 0 12px rgba(203,167,210,0.5), 0 0 24px rgba(203,167,210,0.2)",
                 userSelect: "none",
               }}
             >
