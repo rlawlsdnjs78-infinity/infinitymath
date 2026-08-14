@@ -800,7 +800,7 @@ export default function FormulaPyramidPage() {
                   style={{ marginTop: "0.75rem", marginBottom: "0.75rem" }}
                 />
 
-                <div className="flex flex-col flex-1 justify-between py-1">
+                <div className="flex flex-col py-1">
                   <div className="flex flex-col gap-3.5">
                     {/* [요구사항] 게임 설명 본문 항목과 100% 동일한 글씨 크기(text-sm) & 폰트(var(--font-body)) 적용 */}
                     <div className="flex flex-col gap-1.5">
@@ -886,8 +886,8 @@ export default function FormulaPyramidPage() {
                     </div>
                   </div>
 
-                  {/* [요구사항] '오답 패널티' 3초~5초 버튼과 '입장 코드 생성하기' 박스 사이 간격을 상단 항목 간격의 2배(mt-7: 28px)로 확장 */}
-                  <div className="mt-7 flex flex-col gap-2.5">
+                  {/* [요구사항] 11R~15R과 라운드별 시간 사이 간격(14px)의 정확히 2배(28px = marginTop: 1.75rem) 적용 */}
+                  <div className="flex flex-col gap-2.5" style={{ marginTop: "1.75rem" }}>
                     <button
                       type="button"
                       onClick={handleCreateGame}
