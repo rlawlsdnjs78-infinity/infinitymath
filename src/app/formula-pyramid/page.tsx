@@ -286,26 +286,32 @@ export default function FormulaPyramidPage() {
            ─────────────────────────────────────────────────────────────────── */}
         <div
           className="flex items-center justify-between w-full"
-          style={{ marginTop: "0.5rem", marginBottom: "0.75rem" }}
+          style={{ marginTop: "0.75rem", marginBottom: "1.25rem" }}
         >
           <div>
             <h1
               className="text-3xl sm:text-4xl text-yellow-300 flex items-center gap-4"
               style={{ fontFamily: "var(--font-chalk)" }}
             >
-              <Pyramid className="text-yellow-400 flex-shrink-0" size={34} />
+              <Pyramid className="text-yellow-400 flex-shrink-0" size={36} />
               수식 피라미드 (Formula Pyramid)
             </h1>
           </div>
 
-          {/* [요구사항] '← 홈으로' 버튼 */}
+          {/* [여백 최우선 원칙] '← 홈으로' 버튼 내부 패딩(0.9rem 2rem) 및 아이콘-글자 간격(0.85rem) 넉넉히 부여 */}
           <Link
             href="/"
-            className="flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-teal-900/90 hover:bg-teal-800 border-2 border-dashed border-yellow-400/80 text-yellow-300 text-base sm:text-lg font-bold transition-all shadow-md hover:scale-105 cursor-pointer"
-            style={{ fontFamily: "var(--font-chalk)", textDecoration: "none" }}
+            className="flex items-center rounded-full bg-teal-900/90 hover:bg-teal-800 border-2 border-dashed border-yellow-400/90 text-yellow-300 text-xl sm:text-2xl font-extrabold transition-all shadow-lg hover:scale-105 cursor-pointer"
+            style={{
+              padding: "0.9rem 2rem",
+              gap: "0.85rem",
+              fontFamily: "var(--font-chalk)",
+              textDecoration: "none",
+              letterSpacing: "0.05em",
+            }}
           >
-            <ArrowLeft size={20} className="text-yellow-400" />
-            <span>홈으로</span>
+            <ArrowLeft size={24} className="text-yellow-400 flex-shrink-0" />
+            <span className="leading-none">홈으로</span>
           </Link>
         </div>
 
