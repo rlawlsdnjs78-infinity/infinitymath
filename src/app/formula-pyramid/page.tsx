@@ -282,6 +282,13 @@ export default function FormulaPyramidPage() {
     });
   };
 
+  const logsEndRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (logsEndRef.current) {
+      logsEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [activityLogs]);
+
   /* ── 카운트다운 & 라운드 종료 팝업 ── */
   const [countdownValue, setCountdownValue] = useState<number | null>(null);
   const [showRoundEndPopup, setShowRoundEndPopup] = useState(false);
@@ -331,7 +338,7 @@ export default function FormulaPyramidPage() {
     return () => clearInterval(timer);
   }, [penaltyLockSeconds]);
 
-  /* ── 라운드 타이머 (딜러가 Master Clock으로 매초 모든 기기에 정확한 남은 시간 동기화) ── */
+  /* ── 라운드 타이머 (딜러가 Master Clock으로 초반 10초 실시간, 이후 10초 주기 동기화) ── */
   useEffect(() => {
     if (!inGameRoom || !isGameStarted || countdownValue !== null || isRoundLocked) return;
 
@@ -344,10 +351,10 @@ export default function FormulaPyramidPage() {
           addActivityLog(`[안내] ${currentRound}라운드가 종료되었습니다.`);
         }
 
-        // 딜러(호스트)는 라운드 시작 후 초반 5초 동안 및 종료 시점(0초)에만 동기화 전송 (시간 역행/버벅임 원천 차단)
+        // 딜러(호스트)는 라운드 시작 10초 동안은 실시간 매초 동기화, 그 이후에는 10초마다 1번씩 및 종료 시점(0초)에만 동기화 전송
         const totalRoundSec = selectedTime * 60;
         const elapsedSec = totalRoundSec - next;
-        const shouldSync = elapsedSec <= 5 || next === 0;
+        const shouldSync = elapsedSec <= 10 || next % 10 === 0 || next === 0;
 
         if (isDealerHost && shouldSync && mqttClientRef.current && activeRoomCode) {
           try {
@@ -2163,6 +2170,7 @@ export default function FormulaPyramidPage() {
                         공지 내역이 여기에 실시간으로 표시됩니다.
                       </div>
                     )}
+                    <div ref={logsEndRef} />
                   </div>
                 </div>
               </div>
