@@ -11,7 +11,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Pencil,
@@ -29,6 +29,11 @@ import {
   ChevronDown,
   ChevronUp,
   ArrowLeft,
+  Megaphone,
+  Users,
+  Trophy,
+  LogOut,
+  Clock,
 } from "lucide-react";
 
 /* ─── 피라미드 칸 데이터 (A ~ J) ─────────────────────────────────────────── */
@@ -245,7 +250,6 @@ export default function FormulaPyramidPage() {
 
   const handleSubmitAnswer = () => {
     if (selectedNodes.length !== 3) {
-      // [요구사항 3] 3개 미만 선택 시 제출을 클릭해도 선택된 노드 즉시 초기화
       triggerNotice("3개의 칸을 모두 선택해야 합니다!", "warning", 1000);
       setSelectedNodes([]);
       return;
@@ -253,22 +257,151 @@ export default function FormulaPyramidPage() {
 
     const TARGET = 9;
     if (currentResult === TARGET) {
-      // 정답 선택 시 1초 간 정답 표출 후 원복
-      triggerNotice("정답입니다! (1점)", "success", 1000);
+      const nextScore = myScore + 1;
+      setMyScore(nextScore);
+      setPlayers((prev) =>
+        prev.map((p) => (p.name === myNickname ? { ...p, score: nextScore } : p))
+      );
+      triggerNotice("정답입니다! (+1점)", "success", 1200);
+
+      if (inGameRoom && activeRoomCode && typeof window !== "undefined" && "BroadcastChannel" in window) {
+        try {
+          const bc = new BroadcastChannel(`pyramid-room-${activeRoomCode}`);
+          bc.postMessage({ type: "SCORE_UPDATE", playerName: myNickname, newScore: nextScore });
+          bc.close();
+        } catch (err) {}
+      }
     } else {
-      // 오답 선택 시 1초 간 오답 표출 후 원복
-      triggerNotice("오답입니다! (-1점)", "error", 1000);
+      const nextScore = Math.max(0, myScore - 1);
+      setMyScore(nextScore);
+      setPlayers((prev) =>
+        prev.map((p) => (p.name === myNickname ? { ...p, score: nextScore } : p))
+      );
+      triggerNotice("오답입니다! (-1점)", "error", 1200);
+
+      if (inGameRoom && activeRoomCode && typeof window !== "undefined" && "BroadcastChannel" in window) {
+        try {
+          const bc = new BroadcastChannel(`pyramid-room-${activeRoomCode}`);
+          bc.postMessage({ type: "SCORE_UPDATE", playerName: myNickname, newScore: nextScore });
+          bc.close();
+        } catch (err) {}
+      }
     }
 
-    // 제출 시 선택 칸 바로 초기화
     setSelectedNodes([]);
   };
 
+  /* ── 실시간 다중 플레이어 대전 방 상태 ── */
+  const [inGameRoom, setInGameRoom] = useState(false);
+  const [activeRoomCode, setActiveRoomCode] = useState("");
+  const [myNickname, setMyNickname] = useState("");
+  const [myScore, setMyScore] = useState(0);
+  const [isDealerHost, setIsDealerHost] = useState(false);
+  const [players, setPlayers] = useState<{ name: string; score: number; isHost?: boolean }[]>([]);
+  const [activityLogs, setActivityLogs] = useState<string[]>([]);
+
+  // BroadcastChannel 실시간 멀티플레이어 동기화 (같은 방 코드로 참가한 탭/창 실시간 연동)
+  useEffect(() => {
+    if (!inGameRoom || !activeRoomCode) return;
+
+    let bc: BroadcastChannel | null = null;
+    if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+      try {
+        bc = new BroadcastChannel(`pyramid-room-${activeRoomCode}`);
+        bc.onmessage = (event) => {
+          const data = event.data;
+          if (!data) return;
+
+          if (data.type === "JOIN") {
+            setPlayers((prev) => {
+              if (prev.some((p) => p.name === data.player.name)) return prev;
+              return [...prev, data.player];
+            });
+            setActivityLogs((prev) => [`[실시간] ${data.player.name} 님이 방에 참가하셨습니다.`, ...prev]);
+
+            bc?.postMessage({
+              type: "SYNC_PRESENCE",
+              player: { name: myNickname, score: myScore, isHost: isDealerHost },
+            });
+          } else if (data.type === "SYNC_PRESENCE") {
+            setPlayers((prev) => {
+              if (prev.some((p) => p.name === data.player.name)) return prev;
+              return [...prev, data.player];
+            });
+          } else if (data.type === "SCORE_UPDATE") {
+            setPlayers((prev) =>
+              prev.map((p) => (p.name === data.playerName ? { ...p, score: data.newScore } : p))
+            );
+            setActivityLogs((prev) => [
+              `[정답] ${data.playerName} 님이 정답 제출! (현재 ${data.newScore}점)`,
+              ...prev,
+            ]);
+          }
+        };
+
+        bc.postMessage({
+          type: "JOIN",
+          player: { name: myNickname, score: myScore, isHost: isDealerHost },
+        });
+      } catch (e) {}
+    }
+
+    return () => {
+      if (bc) bc.close();
+    };
+  }, [inGameRoom, activeRoomCode, myNickname, myScore, isDealerHost]);
+
+  const handleJoinGameRoom = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!nickname.trim()) {
+      alert("닉네임을 입력해 주세요.");
+      return;
+    }
+    if (!entryCode.trim()) {
+      alert("입장 코드를 입력해 주세요.");
+      return;
+    }
+    const cleanCode = entryCode.trim().toUpperCase();
+    setActiveRoomCode(cleanCode);
+    setMyNickname(nickname.trim());
+    setMyScore(0);
+    setIsDealerHost(false);
+    setInGameRoom(true);
+
+    const me = { name: nickname.trim(), score: 0 };
+    setPlayers([me]);
+    setActivityLogs([`[안내] 방 [${cleanCode}] 에 성공적으로 입장했습니다.`]);
+
+    if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+      try {
+        const bc = new BroadcastChannel(`pyramid-room-${cleanCode}`);
+        bc.postMessage({ type: "JOIN", player: me });
+        bc.close();
+      } catch (err) {}
+    }
+  };
+
   const handleCreateGame = () => {
-    // [요구사항] P로 시작하고 숫자 5자리로 구성된 6자리 코드 (예: P74829)
     const randomNum = Math.floor(10000 + Math.random() * 90000);
     const code = `P${randomNum}`;
     setGeneratedRoomCode(code);
+    setActiveRoomCode(code);
+    setMyNickname("딜러(선생님)");
+    setMyScore(0);
+    setIsDealerHost(true);
+    setInGameRoom(true);
+
+    const host = { name: "딜러(선생님)", score: 0, isHost: true };
+    setPlayers([host]);
+    setActivityLogs([`[안내] 딜러 방 [${code}] 가 생성 및 입장되었습니다.`]);
+
+    if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+      try {
+        const bc = new BroadcastChannel(`pyramid-room-${code}`);
+        bc.postMessage({ type: "JOIN", player: host });
+        bc.close();
+      } catch (err) {}
+    }
   };
 
   return (
@@ -323,9 +456,172 @@ export default function FormulaPyramidPage() {
         />
 
         {/* ───────────────────────────────────────────────────────────────────
-           [하단 3분할 박스 영역]
+           [하단 3분할 박스 영역 또는 실시간 게임 방 영역]
            ─────────────────────────────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start w-full mx-auto">
+        {inGameRoom ? (
+          <div className="w-full flex flex-col gap-4">
+            {/* 상단 컨트롤 바 */}
+            <div className="chalk-box-straight bg-teal-950 p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 border-yellow-400/80">
+              <div className="flex items-center gap-4 flex-wrap">
+                <span className="text-xl sm:text-2xl text-yellow-300 font-extrabold flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
+                  입장 코드: <span className="tracking-widest text-white bg-teal-900 px-3 py-0.5 rounded border border-teal-700">{activeRoomCode}</span>
+                </span>
+                <span className="bg-teal-900 text-yellow-200 px-3 py-1 rounded-full text-sm font-bold border border-teal-700">
+                  {isDealerHost ? "👑 딜러(선생님)" : `👤 ${myNickname}`}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 bg-teal-900/90 px-3.5 py-1.5 rounded-md border border-teal-700">
+                  <Clock className="text-yellow-400" size={18} />
+                  <span className="text-yellow-300 font-bold text-base sm:text-lg" style={{ fontFamily: "var(--font-chalk)" }}>
+                    1 / {selectedRound} 라운드 ({selectedTime}분)
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setInGameRoom(false)}
+                  className="flex items-center gap-1.5 bg-rose-900/80 hover:bg-rose-800 text-rose-200 px-4 py-1.5 rounded-md text-sm font-bold border border-rose-600/60 transition-colors cursor-pointer"
+                >
+                  <LogOut size={16} />
+                  <span>방 나가기</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 메인 3컬럼 대전 그리드 */}
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+              {/* [좌측: 실시간 참가자 & 점수판] */}
+              <div className="xl:col-span-3 chalk-box content-box bg-teal-950/80 p-4 sm:p-5 flex flex-col gap-4">
+                <div className="flex items-center justify-between border-b border-dashed border-teal-700 pb-2">
+                  <div className="flex items-center gap-2 text-yellow-300 font-extrabold text-xl" style={{ fontFamily: "var(--font-chalk)" }}>
+                    <Trophy size={20} className="text-yellow-400" />
+                    <span>실시간 점수판</span>
+                  </div>
+                  <span className="text-xs text-gray-300 font-medium">({players.length}명 접속 중)</span>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  {players
+                    .slice()
+                    .sort((a, b) => b.score - a.score)
+                    .map((p, idx) => (
+                      <div
+                        key={idx}
+                        className={`flex items-center justify-between p-2.5 rounded-md border ${
+                          p.name === myNickname
+                            ? "bg-yellow-400/20 border-yellow-400 text-yellow-200"
+                            : "bg-teal-900/60 border-teal-700/80 text-gray-200"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-extrabold text-sm text-yellow-400 w-5">
+                            {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}`}
+                          </span>
+                          <span className="font-bold text-sm" style={{ fontFamily: "var(--font-body)" }}>
+                            {p.name} {p.isHost && "(딜러)"}
+                          </span>
+                        </div>
+                        <span className="font-extrabold text-base text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
+                          {p.score}점
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              {/* [중앙: 수식 피라미드 보드] */}
+              <div className="xl:col-span-6 chalk-box content-box bg-teal-950/85 p-4 sm:p-5 flex flex-col gap-4">
+                <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between gap-6 mb-2">
+                  <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0">
+                    {PYRAMID_DATA.map((row, rowIndex) => (
+                      <div
+                        key={rowIndex}
+                        className="flex justify-center gap-2 sm:gap-2.5"
+                        style={{ marginTop: rowIndex === 0 ? "0px" : "-10px" }}
+                      >
+                        {row.map((node) => (
+                          <HexagonCell
+                            key={node.id}
+                            node={node}
+                            isSelected={selectedNodes.includes(node.id)}
+                          />
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* TARGET 표시 및 A~J 선택 버튼 */}
+                <div className="flex flex-col sm:flex-row items-stretch gap-4">
+                  <div className="chalk-box-straight bg-teal-950 px-7 py-4 flex flex-col items-center justify-center min-w-[135px] border-yellow-400/80">
+                    <span className="text-xl sm:text-2xl text-yellow-400 font-extrabold tracking-widest mb-1" style={{ fontFamily: "var(--font-chalk)" }}>
+                      TARGET
+                    </span>
+                    <span className="text-5xl sm:text-6xl text-white font-black" style={{ fontFamily: "var(--font-chalk)" }}>
+                      9
+                    </span>
+                  </div>
+
+                  <div className="flex-1 flex flex-col justify-between gap-2.5">
+                    <div className="text-xl sm:text-2xl text-yellow-300 font-bold mb-0.5" style={{ fontFamily: "var(--font-chalk)" }}>
+                      제출할 수식 칸 선택
+                    </div>
+                    <div className="grid grid-cols-5 gap-2.5">
+                      {Object.values(ALL_NODES).map((node) => {
+                        const isSel = selectedNodes.includes(node.id);
+                        return (
+                          <button
+                            key={node.id}
+                            type="button"
+                            onClick={() => handleNodeClick(node.id)}
+                            className={`py-3 px-3 rounded-md text-xl sm:text-2xl font-black transition-all ${
+                              isSel
+                                ? "bg-yellow-400 text-teal-950 scale-105 shadow-md"
+                                : "bg-teal-800/90 text-white hover:bg-teal-700"
+                            }`}
+                            style={{ fontFamily: "var(--font-chalk)" }}
+                          >
+                            {node.id}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="w-full mt-1">
+                  <button
+                    type="button"
+                    onClick={handleSubmitAnswer}
+                    className="btn-chalk w-full justify-center py-3 text-2.5xl sm:text-3xl font-extrabold cursor-pointer shadow-lg"
+                    style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.35em" }}
+                  >
+                    제출하기
+                  </button>
+                </div>
+              </div>
+
+              {/* [우측: 실시간 활동 피드] */}
+              <div className="xl:col-span-3 chalk-box content-box bg-teal-950/80 p-4 sm:p-5 flex flex-col gap-4">
+                <div className="flex items-center gap-2 text-yellow-300 font-extrabold text-xl border-b border-dashed border-teal-700 pb-2" style={{ fontFamily: "var(--font-chalk)" }}>
+                  <Users size={20} className="text-yellow-400" />
+                  <span>실시간 활동 현황</span>
+                </div>
+
+                <div className="flex flex-col gap-2 max-h-[360px] overflow-y-auto pr-1">
+                  {activityLogs.map((log, i) => (
+                    <div key={i} className="text-xs text-gray-300 bg-teal-900/50 p-2 rounded border border-teal-800/60" style={{ fontFamily: "var(--font-body)" }}>
+                      {log}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start w-full mx-auto">
           {/* ── [좌측 박스] xl:col-span-3 ─────────────────────────────────── */}
           <div className="xl:col-span-3 chalk-box content-box flex flex-col bg-teal-950/75 backdrop-blur-md h-full min-h-0 p-4 sm:p-5">
             {/* [요구사항 3] 카드 헤더 높이 및 정렬 통일 */}
@@ -378,10 +674,7 @@ export default function FormulaPyramidPage() {
 
             {mode === "player" ? (
               <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  alert(`[${nickname || "손님"}] 님, 입장 코드 [${entryCode}] 로 입장을 시도합니다.`);
-                }}
+                onSubmit={handleJoinGameRoom}
                 className="flex flex-col py-1"
               >
                 <div className="flex flex-col gap-6">
@@ -437,7 +730,7 @@ export default function FormulaPyramidPage() {
                 {/* [요구사항] 입장코드 입력 박스 하단과 입장하기 버튼 사이 간격을 닉네임 박스 하단~입장코드 제목 간격(24px: gap-6)의 정확히 2배(48px = marginTop: 3rem)로 설정 */}
                 <button
                   type="submit"
-                  className="btn-chalk w-full justify-center text-2.5xl sm:text-3xl font-extrabold"
+                  className="btn-chalk w-full justify-center text-2.5xl sm:text-3xl font-extrabold cursor-pointer"
                   style={{ marginTop: "3rem", padding: "16px 24px", fontFamily: "var(--font-chalk)" }}
                 >
                   입장하기
@@ -452,13 +745,12 @@ export default function FormulaPyramidPage() {
                   <p className="leading-loose text-base sm:text-lg">
                     딜러 모드에서는 라운드 수, 제한 시간, 오답 패널티를 설정하여 방을 생성할 수 있습니다.
                   </p>
-                  {/* [요구사항 1] 전구 아이콘(💡) 기준 내어쓰기 적용 */}
-                  <div className="bg-teal-900/60 p-4.5 rounded-md border border-dashed border-yellow-400/50 text-base sm:text-lg text-yellow-300 leading-relaxed flex items-start gap-2.5">
-                    <span className="flex-shrink-0 select-none">💡</span>
+                  {/* [요구사항 1] 확성기 공지 아이콘(Megaphone) 적용 */}
+                  <div className="bg-teal-900/60 p-4 rounded-md border border-dashed border-yellow-400/50 text-base sm:text-lg text-yellow-300 leading-relaxed flex items-start gap-3">
+                    <Megaphone className="text-yellow-400 flex-shrink-0 mt-1" size={22} />
                     <span className="flex-1 leading-relaxed">생성된 방 코드를 플레이어들에게 공유하세요.</span>
                   </div>
                 </div>
-                {/* [요구사항 2] 하단의 '현재 모드: 딜러 진행 관리' 부분 삭제 */}
               </div>
             )}
           </div>
@@ -930,6 +1222,7 @@ export default function FormulaPyramidPage() {
             )}
           </div>
         </div>
+        )}
       </div>
     </div>
   );
