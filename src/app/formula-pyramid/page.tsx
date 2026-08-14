@@ -348,7 +348,7 @@ export default function FormulaPyramidPage() {
         if (next === 0) {
           setIsRoundLocked(true);
           if (!isDealerHost) setShowRoundEndPopup(true);
-          addActivityLog(`[안내] ${currentRound}라운드가 종료되었습니다.`);
+          addActivityLog(`[안내] ${currentRound}라운드를 종료합니다.`);
         }
 
         // 딜러(호스트)는 라운드 시작 10초 동안은 실시간 매초 동기화, 그 이후에는 10초마다 1번씩 및 종료 시점(0초)에만 동기화 전송
@@ -808,6 +808,7 @@ export default function FormulaPyramidPage() {
               if (data.isRoundLocked && !isRoundLocked) {
                 setIsRoundLocked(true);
                 setShowRoundEndPopup(true);
+                addActivityLog(`[안내] ${data.currentRound || curr.currentRound}라운드를 종료합니다.`);
               }
             }
           } else if (data.type === "START_GAME") {
@@ -901,6 +902,7 @@ export default function FormulaPyramidPage() {
             if (data.isRoundLocked && !isRoundLocked) {
               setIsRoundLocked(true);
               setShowRoundEndPopup(true);
+              addActivityLog(`[안내] ${data.currentRound || curr.currentRound}라운드를 종료합니다.`);
             }
           }
         } else if (data.type === "START_GAME") {
