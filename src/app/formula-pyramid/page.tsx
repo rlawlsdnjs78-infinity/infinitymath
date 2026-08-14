@@ -1539,17 +1539,85 @@ export default function FormulaPyramidPage() {
                 </div>
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center h-full my-auto text-center py-16">
-                <Pencil size={60} className="text-yellow-400/60 mb-5 animate-bounce" />
-                <h2
-                  className="text-4xl text-yellow-300 mb-3"
-                  style={{ fontFamily: "var(--font-chalk)" }}
-                >
-                  개발중입니다.
-                </h2>
-                <p className="text-base text-gray-300 max-w-md leading-relaxed" style={{ fontFamily: "var(--font-body)" }}>
-                  딜러 진행용 실시간 게임 현황 모니터링 및 진행 컨트롤러 기능이 준비 중입니다.
-                </p>
+              <div className="flex flex-col gap-5 w-full h-full">
+                <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between gap-6 mb-2">
+                  <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0">
+                    {PYRAMID_DATA.map((row, rowIndex) => (
+                      <div
+                        key={rowIndex}
+                        className="flex justify-center gap-2 sm:gap-2.5"
+                        style={{ marginTop: rowIndex === 0 ? "0px" : "-10px" }}
+                      >
+                        {row.map((node) => (
+                          <HexagonCell
+                            key={node.id}
+                            node={node}
+                            isSelected={selectedNodes.includes(node.id)}
+                          />
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 이미 제출된 정답 수량 표기 (펼쳐진 공책 아이콘 BookOpen) */}
+                  <div className="relative flex-1 w-full flex flex-col items-stretch gap-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-yellow-300 font-extrabold text-xl" style={{ fontFamily: "var(--font-chalk)" }}>
+                        <BookOpen size={20} className="text-yellow-400" />
+                        <span>이미 제출된 정답</span>
+                      </div>
+                      <span
+                        className="text-xs sm:text-sm text-yellow-300 font-extrabold bg-teal-900 rounded-md border border-teal-700/80 shadow-sm"
+                        style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.25rem", paddingBottom: "0.25rem" }}
+                      >
+                        {submittedAnswersList.length}개
+                      </span>
+                    </div>
+                    {/* [요구사항 1] 녹색 점선 구분선 간격을 사진과 100% 동일하게 조율 */}
+                    <div
+                      className="w-full border-t border-dashed border-teal-600/70"
+                      style={{ marginTop: "0.4rem", marginBottom: "0.5rem" }}
+                    />
+
+                    <div
+                      className="w-full bg-teal-900/98 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-lg flex flex-col backdrop-blur-md overflow-hidden min-h-[160px] max-h-[220px] overflow-y-auto"
+                      style={{
+                        paddingTop: "0.65rem",
+                        paddingBottom: "0.65rem",
+                        paddingLeft: "1.25rem",
+                        paddingRight: "1.25rem",
+                        gap: "0.4rem",
+                      }}
+                    >
+                      {submittedAnswersList.length > 0 ? (
+                        submittedAnswersList.map((sol, idx) => (
+                          <div
+                            key={idx}
+                            className="w-full flex items-center justify-between rounded-lg bg-teal-950/95 text-white transition-all border border-teal-700/80 shadow-sm"
+                            style={{
+                              paddingTop: "0.5rem",
+                              paddingBottom: "0.5rem",
+                              paddingLeft: "1.25rem",
+                              paddingRight: "1.25rem",
+                              fontFamily: "var(--font-chalk)",
+                            }}
+                          >
+                            <span className="text-lg sm:text-xl font-black text-yellow-300 tracking-widest">
+                              {sol.nodes}
+                            </span>
+                            <span className="text-sm sm:text-base text-teal-200 font-extrabold tracking-wide">
+                              {sol.formula}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="py-8 text-center text-gray-400 text-sm font-medium" style={{ fontFamily: "var(--font-body)" }}>
+                          입장 코드를 생성하면 실시간 정답 제출 현황이 표시됩니다.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
