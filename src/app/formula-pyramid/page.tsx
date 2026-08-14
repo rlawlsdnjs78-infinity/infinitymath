@@ -745,28 +745,25 @@ export default function FormulaPyramidPage() {
                   <p className="leading-loose text-base sm:text-lg">
                     딜러 모드에서는 라운드 수, 제한 시간, 오답 패널티를 설정하여 방을 생성할 수 있습니다.
                   </p>
-                  {/* [테두리 절연 필수 수칙] 확성기 아이콘 및 텍스트가 좌우 테두리에 닿지 않도록 명시적 인라인 패딩(3.25rem / 52px 좌측 여백) 보장 */}
+                  {/* [두 번째 사진(주의 박스)과 100% 동일한 서식 및 패딩 적용] */}
                   <div
-                    className="w-full bg-teal-900/70 rounded-lg border-2 border-dashed border-yellow-400/70 text-base sm:text-lg text-yellow-300 flex items-start shadow-sm"
+                    className="w-full rounded-xl shadow-lg border-2 border-dashed border-yellow-400/90 bg-teal-900/95"
                     style={{
-                      paddingTop: "1.25rem",
-                      paddingBottom: "1.25rem",
-                      paddingLeft: "3.25rem",
-                      paddingRight: "2.5rem",
-                      gap: "1.25rem",
+                      padding: "0.8rem 1.25rem",
+                      marginTop: "0.25rem",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.75rem",
+                      boxSizing: "border-box",
                     }}
                   >
-                    <Megaphone className="text-yellow-400 flex-shrink-0 mt-1" size={24} />
-                    <span
-                      className="flex-1 leading-relaxed font-medium"
-                      style={{
-                        fontFamily: "var(--font-body)",
-                        wordBreak: "break-all",
-                        letterSpacing: "-0.015em",
-                      }}
+                    <div
+                      className="flex items-start gap-3 text-yellow-300 text-base sm:text-lg font-medium"
+                      style={{ lineHeight: "1.5", wordBreak: "break-all", letterSpacing: "-0.015em" }}
                     >
-                      생성된 방 코드를 플레이어들에게 공유하세요.
-                    </span>
+                      <Megaphone size={18} className="flex-shrink-0 text-yellow-400 mt-0.5" />
+                      <span style={{ wordBreak: "break-all" }}>생성된 방 코드를 플레이어들에게 공유하세요.</span>
+                    </div>
                   </div>
                 </div>
               </div>
