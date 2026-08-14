@@ -327,7 +327,7 @@ export default function FormulaPyramidPage() {
            ─────────────────────────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start w-full mx-auto">
           {/* ── [좌측 박스] xl:col-span-3 ─────────────────────────────────── */}
-          <div className="xl:col-span-3 chalk-box content-box flex flex-col bg-teal-950/75 backdrop-blur-md h-full min-h-[640px] p-6 sm:p-7">
+          <div className="xl:col-span-3 chalk-box content-box flex flex-col bg-teal-950/75 backdrop-blur-md h-full min-h-0 p-4 sm:p-5">
             {/* [요구사항 3] 카드 헤더 높이 및 정렬 통일 */}
             <div className="flex items-center justify-between w-full min-h-[44px]">
               <div className="flex items-center gap-3">
@@ -464,7 +464,7 @@ export default function FormulaPyramidPage() {
           </div>
 
           {/* ── [중앙 박스] xl:col-span-6 ─────────────────────────────────── */}
-          <div className="xl:col-span-6 chalk-box content-box flex flex-col bg-teal-950/85 backdrop-blur-md h-full min-h-[640px] p-6 sm:p-7">
+          <div className="xl:col-span-6 chalk-box content-box flex flex-col bg-teal-950/85 backdrop-blur-md h-full min-h-0 p-4 sm:p-5">
             {mode === "player" ? (
               <>
                 {/* [요구사항] 한 블록 안에서 좌측: 피라미드, 우측: 설명글 & 정답보기 */}
@@ -675,7 +675,7 @@ export default function FormulaPyramidPage() {
           </div>
 
           {/* ── [우측 박스] xl:col-span-3 ─────────────────────────────────── */}
-          <div className="xl:col-span-3 chalk-box content-box flex flex-col bg-teal-950/80 backdrop-blur-md h-full min-h-[480px] p-4 sm:p-5">
+          <div className="xl:col-span-3 chalk-box content-box flex flex-col bg-teal-950/80 backdrop-blur-md h-full min-h-0 p-4 sm:p-5">
             {mode === "player" ? (
               <>
                 {/* [요구사항 3] 카드 헤더 높이 및 정렬 통일 */}
