@@ -1424,16 +1424,7 @@ export default function FormulaPyramidPage() {
                     딜러 모드에서는 라운드 수, 제한 시간, 오답 패널티를 설정하여 방을 생성할 수 있습니다.
                   </p>
                   
-                  {/* 상단 점선 안내 상자 */}
-                  <div
-                    className="w-full rounded-xl shadow-lg border-2 border-dashed border-yellow-400/90 bg-teal-900/95"
-                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.25rem", paddingBottom: "1.25rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}
-                  >
-                    <div className="flex items-start gap-3 text-yellow-300 text-base sm:text-lg font-medium" style={{ lineHeight: "1.5", wordBreak: "break-all" }}>
-                      <Megaphone size={20} className="flex-shrink-0 text-yellow-400 mt-0.5" />
-                      <span>생성된 방 코드를 플레이어들에게 공유하세요.</span>
-                    </div>
-                  </div>
+
 
                   {/* 중간 버튼 (두 블록 사이에 독립 위치) */}
                   {inGameRoom && isDealerHost && !isGameStarted && !isRoundLocked && (
@@ -1981,7 +1972,7 @@ export default function FormulaPyramidPage() {
                       <span className="text-yellow-300 font-bold">({selectedRound}라운드)</span>
                     </div>
                     <div className="grid grid-cols-5 gap-1.5">
-                      {Array.from({ length: 15 }, (_, i) => i + 1).map((r) => (
+                      {Array.from({ length: 10 }, (_, i) => i + 1).map((r) => (
                         <button key={r} type="button" onClick={() => setSelectedRound(r)}
                           className={`py-1 text-sm font-medium rounded-md transition-all ${selectedRound === r ? "bg-yellow-400 text-teal-950 shadow scale-105" : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"}`}
                           style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
