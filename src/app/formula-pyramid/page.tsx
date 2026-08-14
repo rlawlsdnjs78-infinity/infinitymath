@@ -786,7 +786,7 @@ export default function FormulaPyramidPage() {
         />
 
         {/* ───────────────────────────────────────────────────────────────────
-           [하단 3분할 박스 영역 - 모든 상태에서 사진 속 3분할 그리드 100% 유지]
+           [하단 3분할 박스 영역]
            ─────────────────────────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
           {/* ── [좌측 박스] xl:col-span-3 ─────────────────────────────────── */}
@@ -837,57 +837,7 @@ export default function FormulaPyramidPage() {
               </div>
             </div>
 
-            {/* 방에 입장해있는 경우: 좌측 박스에 실시간 점수판 표시 */}
-            {inGameRoom ? (
-              <div className="flex flex-col gap-3.5 w-full">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-yellow-300 font-extrabold text-xl" style={{ fontFamily: "var(--font-chalk)" }}>
-                    <Trophy size={22} className="text-yellow-400" />
-                    <span>실시간 점수판</span>
-                  </div>
-                  <span className="text-xs text-gray-300 font-medium select-none">
-                    ({players.filter((p) => !p.isHost).length}명 접속 중)
-                  </span>
-                </div>
-                <div className="w-full border-t border-dashed border-teal-600/70" style={{ marginTop: "0.2rem", marginBottom: "0.4rem" }} />
-
-                <div className="flex flex-col gap-2.5 max-h-[380px] overflow-y-auto pr-1">
-                  {players.filter((p) => !p.isHost).length > 0 ? (
-                    players
-                      .filter((p) => !p.isHost)
-                      .slice()
-                      .sort((a, b) => b.score - a.score)
-                      .map((p, idx) => (
-                        <div
-                          key={idx}
-                          className={`flex items-center justify-between rounded-lg border-2 transition-all p-3 ${
-                            p.name === myNickname
-                              ? "bg-yellow-400/20 border-yellow-400 text-yellow-200 shadow-md"
-                              : "bg-teal-900/70 border-teal-700/80 text-gray-200"
-                          }`}
-                          style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <span className="font-extrabold text-base text-yellow-400 w-5 flex-shrink-0 flex items-center justify-center">
-                              {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}`}
-                            </span>
-                            <span className="font-bold text-sm" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
-                              {p.name}
-                            </span>
-                          </div>
-                          <span className="font-extrabold text-lg text-yellow-300 flex-shrink-0" style={{ fontFamily: "var(--font-chalk)" }}>
-                            {p.score}점
-                          </span>
-                        </div>
-                      ))
-                  ) : (
-                    <div className="py-6 text-center text-gray-400 text-sm font-medium" style={{ fontFamily: "var(--font-body)" }}>
-                      플레이어 참가 대기 중...
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : mode === "player" ? (
+            {mode === "player" ? (
               /* 플레이어 모드 입장 양식 */
               <form onSubmit={handleJoinGameRoom} className="flex flex-col py-1 gap-5">
                 <div className="flex flex-col gap-2">
@@ -939,10 +889,23 @@ export default function FormulaPyramidPage() {
                 <button
                   type="submit"
                   className="btn-chalk w-full justify-center text-2.5xl sm:text-3xl font-extrabold cursor-pointer"
-                  style={{ marginTop: "1.5rem", padding: "16px 24px", fontFamily: "var(--font-chalk)" }}
+                  style={{ marginTop: "1rem", padding: "16px 24px", fontFamily: "var(--font-chalk)" }}
                 >
                   입장하기
                 </button>
+
+                {inGameRoom && !isDealerHost && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-950/90 border border-emerald-500/80 text-emerald-300 text-xs sm:text-sm font-bold mt-1">
+                    <span>🟢 [{activeRoomCode}] 접속 완료 ({myNickname})</span>
+                    <button
+                      type="button"
+                      onClick={handleLeaveRoom}
+                      className="text-rose-400 hover:text-rose-200 underline font-extrabold cursor-pointer ml-2"
+                    >
+                      퇴장
+                    </button>
+                  </div>
+                )}
               </form>
             ) : (
               /* 딜러 모드 대기 정보 */
@@ -969,14 +932,73 @@ export default function FormulaPyramidPage() {
                     <span style={{ wordBreak: "break-all" }}>생성된 방 코드를 플레이어들에게 공유하세요.</span>
                   </div>
                 </div>
+
+                {inGameRoom && isDealerHost && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-amber-950/90 border border-amber-500/80 text-amber-300 text-xs sm:text-sm font-bold mt-1">
+                    <span>👑 딜러 방 [{activeRoomCode}] 운영 중</span>
+                    <button
+                      type="button"
+                      onClick={handleLeaveRoom}
+                      className="text-rose-400 hover:text-rose-200 underline font-extrabold cursor-pointer ml-2"
+                    >
+                      퇴장
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
 
           {/* ── [중앙 박스] xl:col-span-6 ─────────────────────────────────── */}
           <div className="xl:col-span-6 chalk-box content-box flex flex-col bg-teal-950/85 backdrop-blur-md h-full min-h-0 p-4 sm:p-5 gap-4">
-            {/* 상단: 대칭 수식 피라미드 보드 & 이미 제출된 정답 모니터 */}
+            {/* 상단 딜러/게임 상태 바 (방 접속 시 노출) */}
+            {inGameRoom && (
+              <div
+                className="chalk-box-straight bg-teal-900/90 flex flex-wrap items-center justify-between gap-3 border border-yellow-400/80 shadow-md rounded-xl"
+                style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.75rem", paddingBottom: "0.75rem" }}
+              >
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="text-yellow-300 font-extrabold text-sm sm:text-base" style={{ fontFamily: "var(--font-chalk)" }}>
+                    라운드: <span className="text-white">{currentRound} / {selectedRound}</span>
+                  </span>
+                  <span className="text-teal-600">|</span>
+                  <span className={`font-extrabold text-sm sm:text-base flex items-center gap-1.5 ${roomTimerSeconds <= 30 && isGameStarted ? "text-rose-300 animate-pulse" : "text-yellow-300"}`} style={{ fontFamily: "var(--font-chalk)" }}>
+                    <Clock size={16} className={roomTimerSeconds <= 30 && isGameStarted ? "text-rose-400 animate-spin" : "text-yellow-400"} />
+                    남은 시간: <span className="text-white ml-0.5">{!isGameStarted ? `${formatTime(roomTimerSeconds)} (대기 중)` : formatTime(roomTimerSeconds)}</span>
+                  </span>
+                  <span className="text-teal-600">|</span>
+                  <span className="text-yellow-300 font-extrabold text-sm sm:text-base" style={{ fontFamily: "var(--font-chalk)" }}>
+                    오답 페널티: <span className="text-white">{selectedPenalty}</span>
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {isDealerHost && !isGameStarted && (
+                    <button
+                      type="button"
+                      onClick={handleStartGame}
+                      className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-md text-xs sm:text-sm border border-emerald-400 shadow-md cursor-pointer animate-pulse px-4 py-2"
+                    >
+                      <Play size={16} className="fill-white flex-shrink-0" />
+                      <span>게임 시작하기</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleLeaveRoom}
+                    className="flex items-center gap-1.5 bg-rose-900/80 hover:bg-rose-800 text-rose-200 rounded-md text-xs sm:text-sm font-bold border border-rose-600/60 cursor-pointer px-3 py-2"
+                  >
+                    <LogOut size={16} />
+                    <span>퇴장</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 대칭 수식 피라미드 보드 & 이미 제출된 정답 모니터 & 실시간 점수판 */}
             <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between gap-6 mb-1">
+              {/* 피라미드 보드 */}
               <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0">
                 {PYRAMID_DATA.map((row, rowIndex) => (
                   <div
@@ -995,8 +1017,9 @@ export default function FormulaPyramidPage() {
                 ))}
               </div>
 
-              {/* 이미 제출된 정답 수량 표기 (펼쳐진 공책 아이콘 BookOpen) */}
+              {/* 우측 모니터 영역: 이미 제출된 정답 + (방 접속 시) 실시간 점수판 */}
               <div className="relative flex-1 w-full flex flex-col items-stretch gap-3">
+                {/* 이미 제출된 정답 수량 표기 */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-yellow-300 font-extrabold text-xl" style={{ fontFamily: "var(--font-chalk)" }}>
                     <BookOpen size={20} className="text-yellow-400" />
@@ -1009,14 +1032,10 @@ export default function FormulaPyramidPage() {
                     {submittedAnswersList.length}개
                   </span>
                 </div>
-                {/* 녹색 점선 구분선 */}
-                <div
-                  className="w-full border-t border-dashed border-teal-600/70"
-                  style={{ marginTop: "0.4rem", marginBottom: "0.5rem" }}
-                />
+                <div className="w-full border-t border-dashed border-teal-600/70" style={{ marginTop: "0.4rem", marginBottom: "0.5rem" }} />
 
                 <div
-                  className="w-full bg-teal-900/98 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-lg flex flex-col backdrop-blur-md overflow-hidden min-h-[160px] max-h-[220px] overflow-y-auto"
+                  className="w-full bg-teal-900/98 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-lg flex flex-col backdrop-blur-md overflow-hidden min-h-[140px] max-h-[180px] overflow-y-auto"
                   style={{
                     paddingTop: "0.65rem",
                     paddingBottom: "0.65rem",
@@ -1047,163 +1066,71 @@ export default function FormulaPyramidPage() {
                       </div>
                     ))
                   ) : (
-                    <div className="py-8 text-center text-gray-400 text-sm font-medium" style={{ fontFamily: "var(--font-body)" }}>
+                    <div className="py-6 text-center text-gray-400 text-sm font-medium" style={{ fontFamily: "var(--font-body)" }}>
                       {inGameRoom ? "아직 제출된 정답이 없습니다." : "입장 코드를 생성하면 실시간 정답 제출 현황이 표시됩니다."}
                     </div>
                   )}
                 </div>
+
+                {/* 방 접속 시: 실시간 점수판 모니터 추가 */}
+                {inGameRoom && (
+                  <div className="flex flex-col gap-2 mt-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-yellow-300 font-extrabold text-lg" style={{ fontFamily: "var(--font-chalk)" }}>
+                        <Trophy size={18} className="text-yellow-400" />
+                        <span>실시간 점수판</span>
+                      </div>
+                      <span className="text-xs text-gray-300 font-medium">
+                        ({players.filter((p) => !p.isHost).length}명 접속 중)
+                      </span>
+                    </div>
+                    <div className="w-full border-t border-dashed border-teal-600/70" style={{ marginTop: "0.2rem", marginBottom: "0.3rem" }} />
+
+                    <div className="flex flex-col gap-2 max-h-[140px] overflow-y-auto pr-1">
+                      {players.filter((p) => !p.isHost).length > 0 ? (
+                        players
+                          .filter((p) => !p.isHost)
+                          .slice()
+                          .sort((a, b) => b.score - a.score)
+                          .map((p, idx) => (
+                            <div
+                              key={idx}
+                              className={`flex items-center justify-between rounded-lg border transition-all px-4 py-2 ${
+                                p.name === myNickname
+                                  ? "bg-yellow-400/20 border-yellow-400 text-yellow-200 shadow-md"
+                                  : "bg-teal-900/70 border-teal-700/80 text-gray-200"
+                              }`}
+                              style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="font-extrabold text-sm text-yellow-400 w-4 flex-shrink-0 flex items-center justify-center">
+                                  {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}`}
+                                </span>
+                                <span className="font-bold text-xs sm:text-sm" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
+                                  {p.name}
+                                </span>
+                              </div>
+                              <span className="font-extrabold text-base text-yellow-300 flex-shrink-0" style={{ fontFamily: "var(--font-chalk)" }}>
+                                {p.score}점
+                              </span>
+                            </div>
+                          ))
+                      ) : (
+                        <div className="py-3 text-center text-gray-400 text-xs font-medium" style={{ fontFamily: "var(--font-body)" }}>
+                          플레이어 참가 대기 중...
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* 중간 점선 구분선 */}
             <div className="w-full border-t border-dashed border-teal-600/70" style={{ marginTop: "0.2rem", marginBottom: "0.4rem" }} />
 
-            {/* 하단 제어 컨트롤: 방 입장 시와 대기 시 구분 */}
-            {inGameRoom ? (
-              <div className="flex flex-col gap-4 w-full">
-                {/* 상단 딜러/게임 상태 바 (라운드, 남은 시간, 오답 패널티, 컨트롤) */}
-                <div
-                  className="chalk-box-straight bg-teal-900/90 flex flex-wrap items-center justify-between gap-3 border border-yellow-400/80 shadow-md rounded-xl"
-                  style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.75rem", paddingBottom: "0.75rem" }}
-                >
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-yellow-300 font-extrabold text-sm sm:text-base" style={{ fontFamily: "var(--font-chalk)" }}>
-                      라운드: <span className="text-white">{currentRound} / {selectedRound}</span>
-                    </span>
-                    <span className="text-teal-600">|</span>
-                    <span className={`font-extrabold text-sm sm:text-base flex items-center gap-1.5 ${roomTimerSeconds <= 30 && isGameStarted ? "text-rose-300 animate-pulse" : "text-yellow-300"}`} style={{ fontFamily: "var(--font-chalk)" }}>
-                      <Clock size={16} className={roomTimerSeconds <= 30 && isGameStarted ? "text-rose-400 animate-spin" : "text-yellow-400"} />
-                      남은 시간: <span className="text-white ml-0.5">{!isGameStarted ? `${formatTime(roomTimerSeconds)} (대기 중)` : formatTime(roomTimerSeconds)}</span>
-                    </span>
-                    <span className="text-teal-600">|</span>
-                    <span className="text-yellow-300 font-extrabold text-sm sm:text-base" style={{ fontFamily: "var(--font-chalk)" }}>
-                      오답 페널티: <span className="text-white">{selectedPenalty}</span>
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {isDealerHost && !isGameStarted && (
-                      <button
-                        type="button"
-                        onClick={handleStartGame}
-                        className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-md text-xs sm:text-sm border border-emerald-400 shadow-md cursor-pointer animate-pulse px-4 py-2"
-                      >
-                        <Play size={16} className="fill-white flex-shrink-0" />
-                        <span>게임 시작하기</span>
-                      </button>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={handleLeaveRoom}
-                      className="flex items-center gap-1.5 bg-rose-900/80 hover:bg-rose-800 text-rose-200 rounded-md text-xs sm:text-sm font-bold border border-rose-600/60 cursor-pointer px-3 py-2"
-                    >
-                      <LogOut size={16} />
-                      <span>퇴장</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* 플레이어 수식 제출 컨트롤 (딜러가 아닌 사용자에게만 노출) */}
-                {!isDealerHost && (
-                  <>
-                    <div
-                      className={`w-full rounded-md border border-dashed transition-all duration-200 flex items-center justify-between min-h-[58px] h-[58px] ${
-                        tempNotice
-                          ? tempNotice.type === "success"
-                            ? "bg-emerald-950/90 border-emerald-500 text-emerald-200"
-                            : "bg-rose-950/90 border-rose-500 text-rose-200"
-                          : "bg-teal-950 border-teal-600 text-yellow-300"
-                      }`}
-                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.6rem", paddingBottom: "0.6rem" }}
-                    >
-                      {tempNotice ? (
-                        <div className={`flex items-center gap-3 w-full justify-center text-xl font-bold ${tempNotice.type === "success" ? "text-emerald-300" : "text-rose-300"}`}>
-                          {tempNotice.type === "success" ? (
-                            <CheckCircle2 size={22} className="text-emerald-400 flex-shrink-0 animate-bounce" />
-                          ) : tempNotice.type === "error" ? (
-                            <XCircle size={22} className="text-rose-400 flex-shrink-0 animate-bounce" />
-                          ) : (
-                            <AlertTriangle size={22} className="text-rose-400 flex-shrink-0 animate-bounce" />
-                          )}
-                          <span style={{ fontFamily: "var(--font-chalk)" }}>{tempNotice.msg}</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-4">
-                          <span className="text-2xl text-teal-300 font-extrabold" style={{ fontFamily: "var(--font-chalk)" }}>
-                            선택한 수식:
-                          </span>
-                          <span className="text-3xl font-black text-yellow-300 tracking-widest flex items-center" style={{ fontFamily: "var(--font-chalk)" }}>
-                            {exprStr || "\u00A0"}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row items-stretch gap-4">
-                      <div
-                        className="chalk-box-straight bg-teal-950 flex flex-col items-center justify-center min-w-[130px] border-2 border-yellow-400/80 shadow-md p-3"
-                        style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
-                      >
-                        <span className="text-lg text-yellow-400 font-extrabold tracking-widest mb-0.5" style={{ fontFamily: "var(--font-chalk)" }}>
-                          TARGET
-                        </span>
-                        <span className="text-5xl text-white font-black" style={{ fontFamily: "var(--font-chalk)" }}>
-                          9
-                        </span>
-                      </div>
-
-                      <div className="flex-1 flex flex-col justify-between gap-2">
-                        <div className="grid grid-cols-5 gap-2">
-                          {Object.values(ALL_NODES).map((node) => {
-                            const isSel = selectedNodes.includes(node.id);
-                            return (
-                              <button
-                                key={node.id}
-                                type="button"
-                                onClick={() => handleNodeClick(node.id)}
-                                className={`py-2.5 px-2 rounded-md text-xl font-black transition-all ${
-                                  isSel
-                                    ? "bg-yellow-400 text-teal-950 scale-105 shadow-md"
-                                    : "bg-teal-800/90 text-white hover:bg-teal-700"
-                                }`}
-                                style={{ fontFamily: "var(--font-chalk)" }}
-                              >
-                                {node.id}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      disabled={penaltyLockSeconds > 0}
-                      onClick={handleSubmitAnswer}
-                      className={`btn-chalk w-full justify-center py-3 text-2xl font-extrabold shadow-lg transition-all ${
-                        penaltyLockSeconds > 0
-                          ? "bg-rose-950/90 border-2 border-rose-500/80 text-rose-300 opacity-90 cursor-not-allowed"
-                          : "cursor-pointer"
-                      }`}
-                      style={{ fontFamily: "var(--font-chalk)", letterSpacing: penaltyLockSeconds > 0 ? "0.02em" : "0.35em" }}
-                    >
-                      {penaltyLockSeconds > 0 ? (
-                        <div className="flex items-center justify-center gap-2 py-0.5">
-                          <Lock size={22} className="text-yellow-400 animate-pulse flex-shrink-0" />
-                          <span className="text-rose-200 text-base font-bold" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
-                            {penaltyLockSeconds}초 동안 정답을 입력할 수 없습니다.
-                          </span>
-                        </div>
-                      ) : (
-                        <span>제출하기</span>
-                      )}
-                    </button>
-                  </>
-                )}
-              </div>
-            ) : mode === "player" ? (
-              /* 플레이어 모드 연습용 컨트롤 */
+            {/* 하단: 플레이어 수식 제출 컨트롤 (딜러 Host가 아닐 때 노출) */}
+            {!isDealerHost ? (
               <div className="flex flex-col gap-4 w-full">
                 <div
                   className={`w-full rounded-md border border-dashed transition-all duration-200 flex items-center justify-between min-h-[58px] h-[58px] ${
@@ -1299,10 +1226,10 @@ export default function FormulaPyramidPage() {
                 </button>
               </div>
             ) : (
-              /* 딜러 모드 방 생성 전 대기 안내 */
-              <div className="flex items-center justify-center p-4 bg-teal-900/60 rounded-xl border border-teal-700/60 text-center">
+              /* 딜러 모드일 때는 수식 선택 및 제출 버튼 숨김 안내 */
+              <div className="flex items-center justify-center p-3.5 bg-teal-900/60 rounded-xl border border-teal-700/60 text-center">
                 <span className="text-sm text-yellow-300 font-extrabold" style={{ fontFamily: "var(--font-chalk)" }}>
-                  📢 우측 [입장 코드 생성하기]를 클릭하면 딜러 대시보드가 실시간으로 연결됩니다.
+                  📢 딜러 화면입니다. 상단 실시간 점수판 및 정답 현황을 실시간 모니터링할 수 있습니다.
                 </span>
               </div>
             )}
