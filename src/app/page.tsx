@@ -262,8 +262,6 @@ function Footer() {
     >
       <p style={{ fontFamily: "var(--font-body)", color: "var(--chalk-dim)", fontSize: "0.85rem" }}>
         © {year} ∞ 무한대 수학반. All rights reserved.
-        <span className="mx-2" aria-hidden="true">✦</span>
-        수학으로 무한한 가능성을 열어드립니다.
       </p>
     </footer>
   );

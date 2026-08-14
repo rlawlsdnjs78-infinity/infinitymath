@@ -9,27 +9,87 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, LogIn, UserPlus, Brain } from "lucide-react";
+import { ChevronDown, LogIn, UserPlus, Brain, Gamepad2 } from "lucide-react";
 
 export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isBrainOpen, setIsBrainOpen] = useState(false);
+  const [isMiniOpen, setIsMiniOpen] = useState(false);
 
-  // mode="center": 중앙 브레인 서바이벌
+  // mode="center": 중앙 미니게임 & 브레인 서바이벌
   if (mode === "center") {
     return (
-      <nav aria-label="메인 네비게이션" className="relative">
+      <nav aria-label="메인 네비게이션" className="flex items-center gap-6 sm:gap-8">
+        {/* ── 1. 미니게임 드롭다운 ── */}
         <div
           className="relative py-1"
-          onMouseEnter={() => setIsDropdownOpen(true)}
-          onMouseLeave={() => setIsDropdownOpen(false)}
+          onMouseEnter={() => setIsMiniOpen(true)}
+          onMouseLeave={() => setIsMiniOpen(false)}
         >
           <button
             type="button"
-            className="flex items-center gap-2 px-4 py-1.5 rounded-md transition-all duration-200 hover:bg-teal-900/60"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 hover:bg-teal-900/60"
             style={{
               fontFamily: "var(--font-chalk)",
               fontSize: "1.45rem",
-              color: isDropdownOpen ? "var(--chalk-yellow)" : "var(--chalk-white)",
+              color: isMiniOpen ? "var(--chalk-yellow)" : "var(--chalk-white)",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              letterSpacing: "0.04em",
+            }}
+          >
+            <Gamepad2 size={22} className="text-yellow-400" />
+            <span>미니게임</span>
+            <ChevronDown
+              size={18}
+              className={`transition-transform duration-200 ${
+                isMiniOpen ? "rotate-180 text-yellow-400" : "text-gray-300"
+              }`}
+            />
+          </button>
+
+          {/* 미니게임 상세메뉴 드롭다운 (메뉴와 상세창 사이 여백 pt-3 적용) */}
+          {isMiniOpen && (
+            <div
+              className="absolute left-1/2 -translate-x-1/2 top-full pt-3 z-50 min-w-[200px]"
+              style={{ animation: "slideInUp 0.2s ease forwards" }}
+            >
+              <div
+                className="chalk-box-straight shadow-2xl p-3 rounded flex flex-col gap-1.5"
+                style={{
+                  background: "rgba(20, 48, 48, 0.98)",
+                  backdropFilter: "blur(12px)",
+                  border: "2px dashed var(--chalk-yellow)",
+                }}
+              >
+                <div
+                  className="flex items-center gap-2.5 px-4 py-3 text-lg rounded text-gray-300"
+                  style={{
+                    fontFamily: "var(--font-chalk)",
+                    letterSpacing: "-0.015em",
+                  }}
+                >
+                  <span className="w-2 h-2 rounded-full bg-teal-400 inline-block flex-shrink-0" />
+                  <span className="text-sm font-medium text-gray-300" style={{ fontFamily: "var(--font-body)" }}>준비 중입니다</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── 2. 브레인 서바이벌 드롭다운 ── */}
+        <div
+          className="relative py-1"
+          onMouseEnter={() => setIsBrainOpen(true)}
+          onMouseLeave={() => setIsBrainOpen(false)}
+        >
+          <button
+            type="button"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 hover:bg-teal-900/60"
+            style={{
+              fontFamily: "var(--font-chalk)",
+              fontSize: "1.45rem",
+              color: isBrainOpen ? "var(--chalk-yellow)" : "var(--chalk-white)",
               background: "transparent",
               border: "none",
               cursor: "pointer",
@@ -41,15 +101,15 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
             <ChevronDown
               size={18}
               className={`transition-transform duration-200 ${
-                isDropdownOpen ? "rotate-180 text-yellow-400" : "text-gray-300"
+                isBrainOpen ? "rotate-180 text-yellow-400" : "text-gray-300"
               }`}
             />
           </button>
 
-          {/* 드롭다운 메뉴 (수식 피라미드) */}
-          {isDropdownOpen && (
+          {/* 브레인 서바이벌 상세메뉴 드롭다운 (메뉴와 상세창 사이 여백 pt-3 적용) */}
+          {isBrainOpen && (
             <div
-              className="absolute left-1/2 -translate-x-1/2 top-full pt-2 z-50 min-w-[200px]"
+              className="absolute left-1/2 -translate-x-1/2 top-full pt-3 z-50 min-w-[200px]"
               style={{ animation: "slideInUp 0.2s ease forwards" }}
             >
               <div
@@ -68,7 +128,7 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
                     color: "var(--chalk-yellow)",
                     textDecoration: "none",
                   }}
-                  onClick={() => setIsDropdownOpen(false)}
+                  onClick={() => setIsBrainOpen(false)}
                 >
                   <span className="w-2.5 h-2.5 rounded-full bg-yellow-400 inline-block flex-shrink-0" />
                   <span>수식 피라미드</span>
