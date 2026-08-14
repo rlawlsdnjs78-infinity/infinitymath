@@ -252,16 +252,34 @@ export default function FormulaPyramidPage() {
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [selectedBoardId, setSelectedBoardId] = useState<number>(1);
   const [players, setPlayers] = useState<{ name: string; score: number; isHost?: boolean }[]>([]);
-  const [activityLogs, setActivityLogs] = useState<string[]>([]);
+  const [activityLogs, setActivityLogs] = useState<{ id: string; tag: string; text: string; ts: number }[]>([]);
   const [submittedAnswersList, setSubmittedAnswersList] = useState<{ nodes: string; formula: string }[]>([]);
   const [roomTimerSeconds, setRoomTimerSeconds] = useState(180);
   const [roomEndTime, setRoomEndTime] = useState<number | null>(null);
 
-  /* ── 중복 안내 문구 방지 헬퍼 ── */
-  const addActivityLog = (msg: string) => {
+  /* ── 타임스탬프 기반 중복 방지 및 시간순 공지 로그 헬퍼 ── */
+  const addActivityLog = (rawMsg: string, explicitTs?: number) => {
+    const match = rawMsg.match(/^(\[[^\]]+\])\s*(.*)$/);
+    const tag = match ? match[1] : "[안내]";
+    const text = match ? match[2] : rawMsg;
+    const ts = explicitTs || Date.now();
+
     setActivityLogs((prev) => {
-      if (prev.length > 0 && prev[0] === msg) return prev;
-      return [msg, ...prev];
+      // 동일한 태그와 텍스트가 1.5초 이내에 연속 추가되는 경우 중복 방지
+      const isDuplicate = prev.some(
+        (item) => item.tag === tag && item.text === text && Math.abs(item.ts - ts) < 1500
+      );
+      if (isDuplicate) return prev;
+
+      const newEntry = {
+        id: `${ts}_${Math.random().toString(36).slice(2, 7)}`,
+        tag,
+        text,
+        ts,
+      };
+
+      // 시간 순서(과거 -> 최신)로 정렬하여 반환
+      return [...prev, newEntry].sort((a, b) => a.ts - b.ts);
     });
   };
 
@@ -668,10 +686,9 @@ export default function FormulaPyramidPage() {
               });
             }
 
-            setActivityLogs((prev) => {
-              const msg = `[입장] ${data.player?.name || "플레이어"} 님이 입장하였습니다.`;
-              return prev.includes(msg) ? prev : [msg, ...prev];
-            });
+            if (data.player?.name) {
+              addActivityLog(`[입장] ${data.player.name} 님이 입장하였습니다.`);
+            }
 
             // 3. 상대방에게 "나도 여기 있어" 하고 내 정보 + 전체 플레이어 목록 즉시 응답 (PONG)
             sendPresence("PRESENCE_PONG");
@@ -1063,7 +1080,7 @@ export default function FormulaPyramidPage() {
 
     const me = { name: nickname.trim(), score: 0 };
     setPlayers([me]);
-    setActivityLogs([`[입장] ${nickname.trim()} 님이 입장하였습니다.`]);
+    setActivityLogs([{ id: `init_${Date.now()}`, tag: "[입장]", text: `${nickname.trim()} 님이 입장하였습니다.`, ts: Date.now() }]);
 
     // 서버에 입장 알림 (다른 기기 동기화)
     postRoomAction("JOIN", { playerName: nickname.trim() }, cleanCode);
@@ -1083,7 +1100,7 @@ export default function FormulaPyramidPage() {
     setGeneratedRoomCode(code); setActiveRoomCode(code); setMyNickname("딜러(선생님)"); setMyScore(0); setIsDealerHost(true); setInGameRoom(true); setUsedBoardIds([]);
     const host = { name: "딜러(선생님)", score: 0, isHost: true };
     setPlayers([host]);
-    setActivityLogs([`[안내] 딜러 방 [${code}] 가 생성되었습니다.`]);
+    setActivityLogs([{ id: `init_${Date.now()}`, tag: "[안내]", text: `딜러 방 [${code}] 가 생성되었습니다.`, ts: Date.now() }]);
 
     // 서버에 방 생성 알림 (다른 기기 동기화)
     postRoomAction("CREATE", {
@@ -1989,13 +2006,12 @@ export default function FormulaPyramidPage() {
                   </div>
                   <div className="w-full border-t border-dashed border-teal-700" style={{ marginTop: "0.5rem", marginBottom: "0.75rem" }} />
 
-                  {/* 말머리 기준 들여쓰기된 실시간 공지 리스트 (고정 높이 스크롤) */}
+                  {/* 말머리 기준 들여쓰기된 실시간 공지 리스트 (시간순 위->아래 배치 & 스크롤) */}
                   <div className="flex-1 flex flex-col gap-2.5 overflow-y-auto pr-1.5 max-h-[420px]">
                     {activityLogs.length > 0 ? (
-                      activityLogs.map((log, idx) => {
-                        const match = log.match(/^(\[[^\]]+\])\s*(.*)$/);
-                        const tag = match ? match[1] : "[안내]";
-                        const text = match ? match[2] : log;
+                      activityLogs.map((log) => {
+                        const tag = log.tag || "[안내]";
+                        const text = log.text || "";
 
                         const isCorrect = tag === "[정답]";
                         const isWrong = tag === "[오답]";
@@ -2004,7 +2020,7 @@ export default function FormulaPyramidPage() {
 
                         return (
                           <div
-                            key={idx}
+                            key={log.id}
                             className="flex items-start gap-2.5 text-base sm:text-lg leading-relaxed py-0.5"
                             style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
                           >
