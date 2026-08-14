@@ -14,8 +14,9 @@ import { ChevronDown, LogIn, UserPlus, Brain, Gamepad2 } from "lucide-react";
 export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
   const [isBrainOpen, setIsBrainOpen] = useState(false);
   const [isMiniOpen, setIsMiniOpen] = useState(false);
+  const [isClubOpen, setIsClubOpen] = useState(false);
 
-  // mode="center": 중앙 미니게임 & 브레인 서바이벌
+  // mode="center": 중앙 미니게임 & 브레인 서바이벌 & 동아리
   if (mode === "center") {
     return (
       <nav aria-label="메인 네비게이션" className="flex items-center gap-6 sm:gap-8">
@@ -137,6 +138,66 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
                   <span className="w-2.5 h-2.5 rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
                   <span>수식 피라미드</span>
                 </Link>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── 3. 동아리 드롭다운 ── */}
+        <div
+          className="relative py-1"
+          onMouseEnter={() => setIsClubOpen(true)}
+          onMouseLeave={() => setIsClubOpen(false)}
+        >
+          <button
+            type="button"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 hover:bg-gray-100"
+            style={{
+              fontFamily: "var(--font-chalk)",
+              fontSize: "1.45rem",
+              color: isClubOpen ? "var(--chalk-yellow)" : "var(--chalk-white)",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              letterSpacing: "0.04em",
+            }}
+          >
+            <span style={{ fontSize: "1.65rem", fontWeight: "bold", lineHeight: 1 }} className="text-[var(--chalk-yellow)]">∞</span>
+            <span>동아리</span>
+            <ChevronDown
+              size={18}
+              className={`transition-transform duration-200 ${
+                isClubOpen ? "rotate-180 text-[var(--chalk-yellow)]" : "text-gray-400"
+              }`}
+            />
+          </button>
+
+          {/* 동아리 상세메뉴 드롭다운 */}
+          {isClubOpen && (
+            <div
+              className="absolute left-1/2 -translate-x-1/2 top-full pt-3 z-50 min-w-[200px]"
+              style={{ animation: "slideInUp 0.2s ease forwards" }}
+            >
+              <div
+                className="chalk-box-straight shadow-md p-3 flex flex-col gap-1.5"
+                style={{
+                  background: "rgba(255, 255, 255, 0.9)",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  border: "1px solid rgba(0,0,0,0.05)",
+                  borderRadius: "1rem",
+                }}
+              >
+                <div
+                  className="flex items-center gap-2.5 px-4 py-3 text-lg rounded text-gray-700"
+                  style={{
+                    fontFamily: "var(--font-chalk)",
+                    letterSpacing: "-0.015em",
+                  }}
+                >
+                  <span className="w-2 h-2 rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
+                  <span className="text-sm font-medium text-gray-600" style={{ fontFamily: "var(--font-body)" }}>준비 중입니다</span>
+                </div>
               </div>
             </div>
           )}
