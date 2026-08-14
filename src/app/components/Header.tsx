@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Header.tsx
  * 단일 행(1줄) 헤더
@@ -8,9 +10,17 @@
  */
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import NavMenu from "./NavMenu";
 
 export default function Header() {
+  const pathname = usePathname();
+
+  // '수식 피라미드' 페이지에서는 전역 헤더 숨김
+  if (pathname === "/formula-pyramid") {
+    return null;
+  }
+
   return (
     <header
       id="header"

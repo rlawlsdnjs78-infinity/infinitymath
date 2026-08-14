@@ -12,6 +12,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Pencil,
   AlertTriangle,
@@ -27,6 +28,7 @@ import {
   Pyramid,
   ChevronDown,
   ChevronUp,
+  ArrowLeft,
 } from "lucide-react";
 
 /* ─── 피라미드 칸 데이터 (A ~ J) ─────────────────────────────────────────── */
@@ -295,6 +297,16 @@ export default function FormulaPyramidPage() {
               수식 피라미드 (Formula Pyramid)
             </h1>
           </div>
+
+          {/* [요구사항] '← 홈으로' 버튼 */}
+          <Link
+            href="/"
+            className="flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-teal-900/90 hover:bg-teal-800 border-2 border-dashed border-yellow-400/80 text-yellow-300 text-base sm:text-lg font-bold transition-all shadow-md hover:scale-105 cursor-pointer"
+            style={{ fontFamily: "var(--font-chalk)", textDecoration: "none" }}
+          >
+            <ArrowLeft size={20} className="text-yellow-400" />
+            <span>홈으로</span>
+          </Link>
         </div>
 
         {/* 상단 게임 소개와 UI 사이의 점선 구분선 */}
