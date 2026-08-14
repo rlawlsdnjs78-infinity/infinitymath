@@ -389,7 +389,19 @@ export default function FormulaPyramidPage() {
               return [logMsg, ...prev];
             });
 
-            // 기존 참가자(방장/딜러)가 새로 들어온 참가자에게 현재 방 설정 및 roomEndTime 전송
+            // 방의 단하나의 타임스탬프(roomEndTime)를 localStorage 또는 ref에서 조회 (fallback 신규 생성 금지)
+            let exactEndTime = curr.roomEndTime;
+            if (!exactEndTime && typeof window !== "undefined") {
+              try {
+                const confStr = localStorage.getItem(`pyramid-room-config-${activeRoomCode}`);
+                if (confStr) {
+                  const conf = JSON.parse(confStr);
+                  if (conf.roomEndTime) exactEndTime = conf.roomEndTime;
+                }
+              } catch (err) {}
+            }
+
+            // 기존 참가자(방장/딜러)가 새로 들어온 참가자에게 절대 시각 roomEndTime 전송
             bc?.postMessage({
               type: "SYNC_PRESENCE",
               player: { name: curr.myNickname, score: curr.myScore, isHost: curr.isDealerHost },
@@ -397,7 +409,7 @@ export default function FormulaPyramidPage() {
                 selectedRound: curr.selectedRound,
                 selectedTime: curr.selectedTime,
                 selectedPenalty: curr.selectedPenalty,
-                roomEndTime: curr.roomEndTime || Date.now() + curr.selectedTime * 60 * 1000,
+                roomEndTime: exactEndTime,
               },
             });
           } else if (data.type === "SYNC_PRESENCE") {
