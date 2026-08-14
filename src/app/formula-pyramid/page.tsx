@@ -264,10 +264,24 @@ export default function FormulaPyramidPage() {
       );
       triggerNotice("정답입니다! (+1점)", "success", 1200);
 
+      const nodesArr = selectedNodes.map((id) => ALL_NODES[id]);
+      const formulaStr = `${nodesArr[0].num} ${nodesArr[1].op} ${nodesArr[1].num} ${nodesArr[2].op} ${nodesArr[2].num} = 9`;
+      const ansObj = { nodes: selectedNodes.join(" "), formula: formulaStr };
+
+      setSubmittedAnswersList((prev) => {
+        if (prev.some((a) => a.nodes === ansObj.nodes)) return prev;
+        return [...prev, ansObj];
+      });
+
       if (inGameRoom && activeRoomCode && typeof window !== "undefined" && "BroadcastChannel" in window) {
         try {
           const bc = new BroadcastChannel(`pyramid-room-${activeRoomCode}`);
-          bc.postMessage({ type: "SCORE_UPDATE", playerName: myNickname, newScore: nextScore });
+          bc.postMessage({
+            type: "SCORE_UPDATE",
+            playerName: myNickname,
+            newScore: nextScore,
+            submittedAnswer: ansObj,
+          });
           bc.close();
         } catch (err) {}
       }
@@ -299,6 +313,7 @@ export default function FormulaPyramidPage() {
   const [isDealerHost, setIsDealerHost] = useState(false);
   const [players, setPlayers] = useState<{ name: string; score: number; isHost?: boolean }[]>([]);
   const [activityLogs, setActivityLogs] = useState<string[]>([]);
+  const [submittedAnswersList, setSubmittedAnswersList] = useState<{ nodes: string; formula: string }[]>([]);
 
   // BroadcastChannel 실시간 멀티플레이어 동기화 (같은 방 코드로 참가한 탭/창 실시간 연동)
   useEffect(() => {
@@ -332,8 +347,14 @@ export default function FormulaPyramidPage() {
             setPlayers((prev) =>
               prev.map((p) => (p.name === data.playerName ? { ...p, score: data.newScore } : p))
             );
+            if (data.submittedAnswer) {
+              setSubmittedAnswersList((prev) => {
+                if (prev.some((a) => a.nodes === data.submittedAnswer.nodes)) return prev;
+                return [...prev, data.submittedAnswer];
+              });
+            }
             setActivityLogs((prev) => [
-              `[정답] ${data.playerName} 님이 정답 제출! (현재 ${data.newScore}점)`,
+              `[정답] ${data.playerName} 님이 정답 제출! (${data.submittedAnswer?.nodes || ""} -> ${data.newScore}점)`,
               ...prev,
             ]);
           }
@@ -499,7 +520,8 @@ export default function FormulaPyramidPage() {
                     <Trophy size={22} className="text-yellow-400" />
                     <span>실시간 점수판</span>
                   </div>
-                  <span className="text-xs sm:text-sm text-gray-300 font-medium bg-teal-900/80 px-2.5 py-1 rounded-full border border-teal-700/80">({players.length}명 접속 중)</span>
+                  {/* [요구사항 1] '(n명 접속 중)' 테두리 및 뱃지 배경 제거 */}
+                  <span className="text-xs sm:text-sm text-gray-300 font-medium select-none">({players.length}명 접속 중)</span>
                 </div>
 
                 <div className="flex flex-col gap-3">
@@ -509,21 +531,32 @@ export default function FormulaPyramidPage() {
                     .map((p, idx) => (
                       <div
                         key={idx}
-                        className={`flex items-center justify-between px-4 py-3.5 rounded-lg border-2 ${
+                        className={`flex items-center justify-between rounded-lg border-2 transition-all ${
                           p.name === myNickname
                             ? "bg-yellow-400/20 border-yellow-400 text-yellow-200 shadow-md"
                             : "bg-teal-900/70 border-teal-700/80 text-gray-200"
                         }`}
+                        style={{
+                          paddingTop: "0.85rem",
+                          paddingBottom: "0.85rem",
+                          paddingLeft: "1.75rem",
+                          paddingRight: "1.75rem",
+                        }}
                       >
-                        <div className="flex items-center gap-3">
-                          <span className="font-extrabold text-base text-yellow-400 w-6">
+                        {/* [요구사항 2] 좌측 메달(🥇)에 paddingLeft: 0.5rem (총 36px 좌측 절연 여백) 지정 */}
+                        <div className="flex items-center gap-3.5" style={{ paddingLeft: "0.5rem" }}>
+                          <span className="font-extrabold text-lg text-yellow-400 w-6 flex-shrink-0 flex items-center justify-center">
                             {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}`}
                           </span>
                           <span className="font-bold text-sm sm:text-base" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
                             {p.name} {p.isHost && "(딜러)"}
                           </span>
                         </div>
-                        <span className="font-extrabold text-lg text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
+                        {/* [요구사항 3] 우측 '0점'에 paddingRight: 0.5rem (총 36px 우측 절연 여백) 지정 */}
+                        <span
+                          className="font-extrabold text-xl text-yellow-300 flex-shrink-0"
+                          style={{ fontFamily: "var(--font-chalk)", paddingRight: "0.5rem" }}
+                        >
                           {p.score}점
                         </span>
                       </div>
@@ -551,6 +584,94 @@ export default function FormulaPyramidPage() {
                       </div>
                     ))}
                   </div>
+
+                  {/* [요구사항 5] 피라미드 우측 공간에 '이미 제출된 정답' 표시 박스 (플레이어 모드 디자인 반영) */}
+                  <div className="relative flex-1 w-full flex flex-col items-stretch gap-3">
+                    <div className="flex items-center justify-between border-b border-dashed border-teal-700 pb-2">
+                      <div className="flex items-center gap-2 text-yellow-300 font-extrabold text-xl" style={{ fontFamily: "var(--font-chalk)" }}>
+                        <Sparkles size={20} className="text-yellow-400 animate-pulse" />
+                        <span>이미 제출된 정답</span>
+                      </div>
+                      <span className="text-xs text-teal-300 font-bold bg-teal-900 px-2 py-0.5 rounded border border-teal-700">
+                        {validSolutions.length}개 중 {submittedAnswersList.length}개
+                      </span>
+                    </div>
+
+                    <div
+                      className="w-full bg-teal-900/98 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-lg flex flex-col backdrop-blur-md overflow-hidden min-h-[160px] max-h-[220px] overflow-y-auto"
+                      style={{
+                        padding: "0.65rem 0.75rem",
+                        gap: "0.4rem",
+                      }}
+                    >
+                      {submittedAnswersList.length > 0 ? (
+                        submittedAnswersList.map((sol, idx) => (
+                          <div
+                            key={idx}
+                            className="w-full flex items-center justify-between rounded-lg bg-teal-950/95 text-white transition-all border border-teal-700/80 shadow-sm"
+                            style={{
+                              padding: "0.5rem 0.85rem",
+                              fontFamily: "var(--font-chalk)",
+                            }}
+                          >
+                            <span className="text-lg sm:text-xl font-black text-yellow-300 tracking-widest">
+                              {sol.nodes}
+                            </span>
+                            <span className="text-sm sm:text-base text-teal-200 font-extrabold tracking-wide">
+                              {sol.formula}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="py-8 text-center text-gray-400 text-sm font-medium" style={{ fontFamily: "var(--font-body)" }}>
+                          아직 제출된 정답이 없습니다.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* [요구사항 4] '제출할 수식 칸 선택' 부분을 대기창 플레이어 모드의 '선택한 수식:' 박스로 교체 */}
+                <div
+                  className={`w-full rounded-md border border-dashed transition-all duration-200 flex items-center justify-between min-h-[64px] h-[64px] ${
+                    tempNotice
+                      ? tempNotice.type === "success"
+                        ? "bg-emerald-950/90 border-emerald-500 text-emerald-200 px-6 py-3"
+                        : "bg-rose-950/90 border-rose-500 text-rose-200 px-6 py-3"
+                      : "bg-teal-950 border-teal-600 text-yellow-300 px-6 py-3"
+                  }`}
+                >
+                  {tempNotice ? (
+                    <div
+                      className={`flex items-center gap-3 w-full justify-center text-xl sm:text-2xl font-bold ${
+                        tempNotice.type === "success" ? "text-emerald-300" : "text-rose-300"
+                      }`}
+                    >
+                      {tempNotice.type === "success" ? (
+                        <CheckCircle2 size={24} className="text-emerald-400 flex-shrink-0 animate-bounce" />
+                      ) : tempNotice.type === "error" ? (
+                        <XCircle size={24} className="text-rose-400 flex-shrink-0 animate-bounce" />
+                      ) : (
+                        <AlertTriangle size={24} className="text-rose-400 flex-shrink-0 animate-bounce" />
+                      )}
+                      <span style={{ fontFamily: "var(--font-chalk)" }}>{tempNotice.msg}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-4" style={{ paddingLeft: "1rem" }}>
+                      <span
+                        className="text-2xl sm:text-3xl text-teal-300 font-extrabold"
+                        style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.02em" }}
+                      >
+                        선택한 수식:
+                      </span>
+                      <span
+                        className="text-3xl sm:text-4xl font-black text-yellow-300 tracking-widest min-h-[40px] flex items-center"
+                        style={{ fontFamily: "var(--font-chalk)", paddingLeft: "0.75rem" }}
+                      >
+                        {exprStr || "\u00A0"}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* TARGET 표시 및 A~J 선택 버튼 */}
@@ -565,9 +686,6 @@ export default function FormulaPyramidPage() {
                   </div>
 
                   <div className="flex-1 flex flex-col justify-between gap-3">
-                    <div className="text-xl sm:text-2xl text-yellow-300 font-bold mb-0.5" style={{ fontFamily: "var(--font-chalk)" }}>
-                      제출할 수식 칸 선택
-                    </div>
                     <div className="grid grid-cols-5 gap-2.5">
                       {Object.values(ALL_NODES).map((node) => {
                         const isSel = selectedNodes.includes(node.id);
