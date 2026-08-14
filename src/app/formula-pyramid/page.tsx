@@ -555,12 +555,14 @@ export default function FormulaPyramidPage() {
     };
   });
 
+  const lastStartedGameTsRef = useRef<number>(0);
+
   /* ── MQTT over WebSocket 실시간 크로스 디바이스(PC, 태블릿) 양방향 동기화 ── */
   useEffect(() => {
     if (!inGameRoom || !activeRoomCode) return;
 
     let client: MqttClient | null = null;
-    const topic = `infinitymath/pyramid/${activeRoomCode}`;
+    const topic = `infinitymath/v2/pyramid/${activeRoomCode}`;
 
     try {
       client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", {
@@ -568,7 +570,7 @@ export default function FormulaPyramidPage() {
         protocolId: "MQTT",
         protocolVersion: 4,
         clean: true,
-        reconnectPeriod: 1500,
+        reconnectPeriod: 2000,
         connectTimeout: 5000,
         clientId: `pyr_${Math.random().toString(16).slice(2, 10)}`,
       });
@@ -583,6 +585,7 @@ export default function FormulaPyramidPage() {
               topic,
               JSON.stringify({
                 type: "JOIN",
+                sender: curr.myNickname,
                 player: { name: curr.myNickname, score: curr.myScore, isHost: curr.isDealerHost },
               })
             );
@@ -614,6 +617,7 @@ export default function FormulaPyramidPage() {
                 topic,
                 JSON.stringify({
                   type: "SYNC_PRESENCE",
+                  sender: curr.myNickname,
                   player: { name: curr.myNickname, score: curr.myScore, isHost: true },
                   roomConfig: {
                     selectedRound: curr.selectedRound,
@@ -647,6 +651,12 @@ export default function FormulaPyramidPage() {
               }
             }
           } else if (data.type === "START_GAME") {
+            // 중복 실행 방지: 이미 처리된 게임 시작 이벤트면 무시
+            if (data.gameStartTs && data.gameStartTs === lastStartedGameTsRef.current) {
+              return;
+            }
+            lastStartedGameTsRef.current = data.gameStartTs || Date.now();
+
             setSelectedBoardId(data.selectedBoardId || 1);
             if (data.currentRound) setCurrentRound(data.currentRound);
             if (data.roomEndTime) {
@@ -710,17 +720,27 @@ export default function FormulaPyramidPage() {
     };
   }, [inGameRoom, activeRoomCode]);
 
-  /* ── 카운트다운 로직 ── */
+  /* ── 고정밀 3초 카운트다운 로직 (타임스탬프 기반: 중복/루프 절대 방지) ── */
   useEffect(() => {
     if (countdownValue === null) return;
-    if (countdownValue <= 0) {
-      setCountdownValue(null);
-      setIsGameStarted(true);
-      return;
-    }
-    const timer = setTimeout(() => setCountdownValue((prev) => (prev !== null ? prev - 1 : null)), 1000);
-    return () => clearTimeout(timer);
-  }, [countdownValue]);
+    const startTs = Date.now();
+    const totalCount = 3;
+
+    const interval = setInterval(() => {
+      const elapsed = (Date.now() - startTs) / 1000;
+      const remaining = Math.max(0, Math.ceil(totalCount - elapsed));
+
+      if (remaining <= 0) {
+        setCountdownValue(null);
+        setIsGameStarted(true);
+        clearInterval(interval);
+      } else {
+        setCountdownValue(remaining);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [countdownValue !== null]);
 
   /* ── unload 처리 ── */
   useEffect(() => {
@@ -874,6 +894,9 @@ export default function FormulaPyramidPage() {
     // 딜러 본인도 카운트다운 시작
     setCountdownValue(3);
 
+    const gameStartTs = Date.now();
+    lastStartedGameTsRef.current = gameStartTs;
+
     // 모든 기기로 게임 시작 전송
     broadcastRoomEvent({
       type: "START_GAME",
@@ -882,6 +905,7 @@ export default function FormulaPyramidPage() {
       roomEndTime: calculatedEndTime,
       target: chosenBoard.target,
       usedBoardIds: nextUsed,
+      gameStartTs,
     });
   };
 
