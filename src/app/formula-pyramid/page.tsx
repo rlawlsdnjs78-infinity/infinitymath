@@ -437,7 +437,7 @@ export default function FormulaPyramidPage() {
     );
 
     if (isAlreadySubmitted) {
-      const nextScore = Math.max(0, myScore - 1);
+      const nextScore = myScore - 1;
       setMyScore(nextScore);
       setPlayers((prev) => prev.map((p) => (p.name === myNickname ? { ...p, score: nextScore } : p)));
       if (penaltySec > 0) {
@@ -497,7 +497,7 @@ export default function FormulaPyramidPage() {
       });
       broadcastScoreUpdate(myNickname, nextScore, ansObj, false, logMsg);
     } else {
-      const nextScore = Math.max(0, myScore - 1);
+      const nextScore = myScore - 1;
       setMyScore(nextScore);
       setPlayers((prev) => prev.map((p) => (p.name === myNickname ? { ...p, score: nextScore } : p)));
       if (penaltySec > 0) {
