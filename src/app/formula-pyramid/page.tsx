@@ -1456,12 +1456,12 @@ export default function FormulaPyramidPage() {
                     style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.1rem", paddingBottom: "1.1rem" }}
                   >
                     <span className="font-black text-lg sm:text-xl text-yellow-300 flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
-                      👑 딜러 방 [{activeRoomCode}] 운영 중
+                      👑 입장 코드 : {activeRoomCode}
                     </span>
                   </div>
                 ) : (
                   <div className="invisible flex items-center rounded-xl" style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.1rem", paddingBottom: "1.1rem" }}>
-                    <span className="font-black text-lg sm:text-xl" style={{ fontFamily: "var(--font-chalk)" }}>👑 딜러 방 [000000] 운영 중</span>
+                    <span className="font-black text-lg sm:text-xl" style={{ fontFamily: "var(--font-chalk)" }}>👑 입장 코드 : 000000</span>
                   </div>
                 )}
               </div>
@@ -2019,35 +2019,8 @@ export default function FormulaPyramidPage() {
                       className="btn-chalk w-full justify-center py-2 text-base sm:text-lg font-bold cursor-pointer"
                       style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
                     >
-                      입장 코드 생성하기
+                      방 생성하기
                     </button>
-
-                    <div
-                      className="chalk-box-straight bg-teal-950 flex items-center justify-center min-h-[56px] h-[56px] border-dashed border-teal-600 rounded-md"
-                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.4rem", paddingBottom: "0.4rem" }}
-                    >
-                      {generatedRoomCode || activeRoomCode ? (
-                        <div className="flex items-center gap-3">
-                          <span className="text-2.5xl sm:text-3xl text-yellow-300 font-extrabold leading-none" style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.2em" }}>
-                            {activeRoomCode || generatedRoomCode}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const code = activeRoomCode || generatedRoomCode;
-                              if (code) { navigator.clipboard.writeText(code); alert(`입장 코드 [${code}] 가 복사되었습니다!`); }
-                            }}
-                            className="p-1 text-yellow-400 hover:text-yellow-200 transition-colors cursor-pointer hover:scale-110"
-                          >
-                            <Copy size={18} />
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="text-xs sm:text-sm text-gray-400 font-medium" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
-                          버튼을 클릭하면 입장 코드가 생성됩니다.
-                        </span>
-                      )}
-                    </div>
                   </div>
                 </div>
               </>
