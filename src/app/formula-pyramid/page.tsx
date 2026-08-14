@@ -953,6 +953,59 @@ export default function FormulaPyramidPage() {
     };
   }, [inGameRoom, activeRoomCode, selectedTime]);
 
+  /* ── 탭 복귀 / 화면 활성화 시 즉각 재동기화 (화면 꺼짐 및 백그라운드 복귀 완벽 대응) ── */
+  useEffect(() => {
+    if (!inGameRoom || !activeRoomCode) return;
+
+    const handleSyncOnVisible = async () => {
+      if (document.visibilityState === "visible") {
+        // 1. MQTT PING 즉시 재전송하여 딜러에게 최신 방 상태 요청
+        if (mqttClientRef.current && mqttClientRef.current.connected) {
+          const topic = `infinitymath/v2/pyramid/${activeRoomCode}`;
+          mqttClientRef.current.publish(
+            topic,
+            JSON.stringify({
+              type: "PRESENCE_PING",
+              sender: myNickname,
+              player: { name: myNickname, score: myScore, isHost: isDealerHost },
+            })
+          );
+        }
+        // 2. 서버 HTTP 상태 즉시 1회 조회 및 동기화
+        try {
+          const res = await fetch(`/api/pyramid?roomCode=${encodeURIComponent(activeRoomCode)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.exists && data.room) {
+              const r = data.room;
+              if (r.players) {
+                setPlayers((prev) => {
+                  const map = new Map<string, { name: string; score: number; isHost?: boolean }>();
+                  prev.forEach((p) => map.set(p.name, p));
+                  r.players.forEach((p: { name: string; score: number; isHost?: boolean }) => map.set(p.name, p));
+                  return Array.from(map.values());
+                });
+              }
+              if (r.isGameStarted && !isDealerHost) {
+                setIsGameStarted(true);
+                if (r.selectedBoardId) setSelectedBoardId(r.selectedBoardId);
+                if (r.currentRound) setCurrentRound(r.currentRound);
+              }
+            }
+          }
+        } catch {}
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleSyncOnVisible);
+    window.addEventListener("focus", handleSyncOnVisible);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleSyncOnVisible);
+      window.removeEventListener("focus", handleSyncOnVisible);
+    };
+  }, [inGameRoom, activeRoomCode, myNickname, myScore, isDealerHost]);
+
   /* ── 태블릿 & 모바일 환경을 위한 탄탄한 백그라운드 HTTP 서버 동기화 폴링 (1.2초) ── */
   useEffect(() => {
     if (!inGameRoom || !activeRoomCode || isDealerHost) return;
