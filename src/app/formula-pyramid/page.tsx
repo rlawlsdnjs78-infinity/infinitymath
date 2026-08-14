@@ -35,6 +35,8 @@ import {
   LogOut,
   Clock,
   Lock,
+  BookOpen,
+  Play,
 } from "lucide-react";
 
 /* ─── 피라미드 칸 데이터 (A ~ J) ─────────────────────────────────────────── */
@@ -373,6 +375,7 @@ export default function FormulaPyramidPage() {
   const [myNickname, setMyNickname] = useState("");
   const [myScore, setMyScore] = useState(0);
   const [isDealerHost, setIsDealerHost] = useState(false);
+  const [isGameStarted, setIsGameStarted] = useState(false);
   const [players, setPlayers] = useState<{ name: string; score: number; isHost?: boolean }[]>([]);
   const [activityLogs, setActivityLogs] = useState<string[]>([]);
   const [submittedAnswersList, setSubmittedAnswersList] = useState<{ nodes: string; formula: string }[]>([]);
@@ -382,6 +385,7 @@ export default function FormulaPyramidPage() {
   useEffect(() => {
     if (!inGameRoom) return;
     const interval = setInterval(() => {
+      if (!isGameStarted) return;
       if (roomEndTime) {
         const rem = Math.max(0, Math.ceil((roomEndTime - Date.now()) / 1000));
         setRoomTimerSeconds(rem);
@@ -390,7 +394,7 @@ export default function FormulaPyramidPage() {
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, [inGameRoom, roomEndTime]);
+  }, [inGameRoom, isGameStarted, roomEndTime]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -406,6 +410,7 @@ export default function FormulaPyramidPage() {
     selectedRound,
     selectedTime,
     selectedPenalty,
+    isGameStarted,
     roomEndTime,
   });
 
@@ -417,6 +422,7 @@ export default function FormulaPyramidPage() {
       selectedRound,
       selectedTime,
       selectedPenalty,
+      isGameStarted,
       roomEndTime,
     };
   });
@@ -463,7 +469,7 @@ export default function FormulaPyramidPage() {
               } catch (err) {}
             }
 
-            // 기존 참가자(방장/딜러)가 새로 들어온 참가자에게 절대 시각 roomEndTime 전송
+            // 기존 참가자(방장/딜러)가 새로 들어온 참가자에게 현재 방 설정 및 roomEndTime 전송
             bc?.postMessage({
               type: "SYNC_PRESENCE",
               player: { name: curr.myNickname, score: curr.myScore, isHost: curr.isDealerHost },
@@ -471,6 +477,7 @@ export default function FormulaPyramidPage() {
                 selectedRound: curr.selectedRound,
                 selectedTime: curr.selectedTime,
                 selectedPenalty: curr.selectedPenalty,
+                isGameStarted: curr.isGameStarted,
                 roomEndTime: exactEndTime,
               },
             });
@@ -486,12 +493,21 @@ export default function FormulaPyramidPage() {
               if (data.roomConfig.selectedRound) setSelectedRound(data.roomConfig.selectedRound);
               if (data.roomConfig.selectedTime) setSelectedTime(data.roomConfig.selectedTime);
               if (data.roomConfig.selectedPenalty) setSelectedPenalty(data.roomConfig.selectedPenalty);
+              if (data.roomConfig.isGameStarted !== undefined) setIsGameStarted(data.roomConfig.isGameStarted);
               if (data.roomConfig.roomEndTime) {
                 setRoomEndTime(data.roomConfig.roomEndTime);
                 const rem = Math.max(0, Math.ceil((data.roomConfig.roomEndTime - Date.now()) / 1000));
                 setRoomTimerSeconds(rem);
               }
             }
+          } else if (data.type === "START_GAME") {
+            setIsGameStarted(true);
+            if (data.roomEndTime) {
+              setRoomEndTime(data.roomEndTime);
+              const rem = Math.max(0, Math.ceil((data.roomEndTime - Date.now()) / 1000));
+              setRoomTimerSeconds(rem);
+            }
+            setActivityLogs((prev) => ["[실시간] 딜러가 게임을 시작했습니다!", ...prev]);
           } else if (data.type === "SCORE_UPDATE") {
             if (data.playerName === curr.myNickname) return;
 
@@ -614,10 +630,13 @@ export default function FormulaPyramidPage() {
           if (savedConfig.selectedRound) setSelectedRound(savedConfig.selectedRound);
           if (savedConfig.selectedTime) setSelectedTime(savedConfig.selectedTime);
           if (savedConfig.selectedPenalty) setSelectedPenalty(savedConfig.selectedPenalty);
+          if (savedConfig.isGameStarted !== undefined) setIsGameStarted(savedConfig.isGameStarted);
           if (savedConfig.roomEndTime) {
             setRoomEndTime(savedConfig.roomEndTime);
             const rem = Math.max(0, Math.ceil((savedConfig.roomEndTime - Date.now()) / 1000));
             setRoomTimerSeconds(rem);
+          } else {
+            setRoomTimerSeconds(savedConfig.selectedTime ? savedConfig.selectedTime * 60 : 180);
           }
         }
       } catch (err) {}
@@ -645,13 +664,13 @@ export default function FormulaPyramidPage() {
   const handleCreateGame = () => {
     const randomNum = Math.floor(10000 + Math.random() * 90000);
     const code = `P${randomNum}`;
-    const calculatedEndTime = Date.now() + selectedTime * 60 * 1000;
 
     const currentRoomConfig = {
       selectedRound,
       selectedTime,
       selectedPenalty,
-      roomEndTime: calculatedEndTime,
+      isGameStarted: false,
+      roomEndTime: null,
     };
 
     if (typeof window !== "undefined") {
@@ -660,7 +679,8 @@ export default function FormulaPyramidPage() {
       } catch (err) {}
     }
 
-    setRoomEndTime(calculatedEndTime);
+    setRoomEndTime(null);
+    setIsGameStarted(false);
     setRoomTimerSeconds(selectedTime * 60);
     setGeneratedRoomCode(code);
     setActiveRoomCode(code);
@@ -671,12 +691,46 @@ export default function FormulaPyramidPage() {
 
     const host = { name: "딜러(선생님)", score: 0, isHost: true };
     setPlayers([host]);
-    setActivityLogs([`[안내] 딜러 방 [${code}] 가 생성 및 입장되었습니다.`]);
+    setActivityLogs([`[안내] 딜러 방 [${code}] 가 생성되었습니다. 플레이어가 입장하면 [게임 시작하기]를 눌러주세요.`]);
 
     if (typeof window !== "undefined" && "BroadcastChannel" in window) {
       try {
         const bc = new BroadcastChannel(`pyramid-room-${code}`);
         bc.postMessage({ type: "JOIN", player: host, roomConfig: currentRoomConfig });
+        bc.close();
+      } catch (err) {}
+    }
+  };
+
+  const handleStartGame = () => {
+    if (!activeRoomCode) return;
+    const calculatedEndTime = Date.now() + selectedTime * 60 * 1000;
+    setRoomEndTime(calculatedEndTime);
+    setIsGameStarted(true);
+
+    const currentRoomConfig = {
+      selectedRound,
+      selectedTime,
+      selectedPenalty,
+      isGameStarted: true,
+      roomEndTime: calculatedEndTime,
+    };
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(`pyramid-room-config-${activeRoomCode}`, JSON.stringify(currentRoomConfig));
+      } catch (err) {}
+    }
+
+    setActivityLogs((prev) => ["[실시간] 딜러가 게임을 시작했습니다!", ...prev]);
+
+    if (inGameRoom && activeRoomCode && typeof window !== "undefined" && "BroadcastChannel" in window) {
+      try {
+        const bc = new BroadcastChannel(`pyramid-room-${activeRoomCode}`);
+        bc.postMessage({
+          type: "START_GAME",
+          roomEndTime: calculatedEndTime,
+        });
         bc.close();
       } catch (err) {}
     }
@@ -768,14 +822,21 @@ export default function FormulaPyramidPage() {
                   </span>
                 </div>
 
-                {/* 박스 2: 남은 시간 */}
+                {/* 박스 2: 남은 시간 (30초 이하 시 빨간색 강조) */}
                 <div
-                  className="flex items-center gap-2 bg-teal-900/90 rounded-md border border-teal-700/80 shadow-sm"
+                  className={`flex items-center gap-2 rounded-md border shadow-sm transition-all ${
+                    roomTimerSeconds <= 30 && isGameStarted
+                      ? "bg-rose-950/90 border-rose-500/90 text-rose-300 animate-pulse"
+                      : "bg-teal-900/90 border-teal-700/80"
+                  }`}
                   style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
                 >
-                  <Clock className="text-yellow-400" size={18} />
-                  <span className="text-yellow-300 font-extrabold text-base sm:text-lg" style={{ fontFamily: "var(--font-chalk)" }}>
-                    남은 시간 : <span className="text-white ml-1 tracking-wider">{formatTime(roomTimerSeconds)}</span>
+                  <Clock className={roomTimerSeconds <= 30 && isGameStarted ? "text-rose-400 animate-spin" : "text-yellow-400"} size={18} />
+                  <span className={roomTimerSeconds <= 30 && isGameStarted ? "text-rose-300 font-extrabold text-base sm:text-lg" : "text-yellow-300 font-extrabold text-base sm:text-lg"} style={{ fontFamily: "var(--font-chalk)" }}>
+                    남은 시간 :{" "}
+                    <span className={roomTimerSeconds <= 30 && isGameStarted ? "text-rose-100 ml-1 tracking-wider font-black" : "text-white ml-1 tracking-wider"}>
+                      {!isGameStarted ? `${formatTime(roomTimerSeconds)} (대기 중)` : formatTime(roomTimerSeconds)}
+                    </span>
                   </span>
                 </div>
 
@@ -789,6 +850,19 @@ export default function FormulaPyramidPage() {
                     오답 페널티 : <span className="text-white ml-1">{selectedPenalty}</span>
                   </span>
                 </div>
+
+                {/* 딜러 전용 '게임 시작하기' 버튼 (게임 시작 전에만 노출) */}
+                {isDealerHost && !isGameStarted && (
+                  <button
+                    type="button"
+                    onClick={handleStartGame}
+                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-md text-sm sm:text-base border-2 border-emerald-400 shadow-lg cursor-pointer animate-pulse transition-all"
+                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
+                  >
+                    <Play size={18} className="fill-white flex-shrink-0" />
+                    <span>게임 시작하기</span>
+                  </button>
+                )}
 
                 {/* '방 나가기' 버튼 (좌우 여백 1.25rem) */}
                 <button
@@ -810,7 +884,7 @@ export default function FormulaPyramidPage() {
                 className="xl:col-span-3 chalk-box content-box bg-teal-950/80 flex flex-col gap-4.5"
                 style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.25rem", paddingBottom: "1.25rem" }}
               >
-                <div className="flex items-center justify-between border-b-2 border-dashed border-teal-700 pb-3">
+                <div className="flex items-center justify-between border-b border-dashed border-teal-700/70 pb-3">
                   <div className="flex items-center gap-2.5 text-yellow-300 font-extrabold text-xl sm:text-2xl" style={{ fontFamily: "var(--font-chalk)" }}>
                     <Trophy size={22} className="text-yellow-400" />
                     <span>실시간 점수판</span>
@@ -889,11 +963,11 @@ export default function FormulaPyramidPage() {
                     ))}
                   </div>
 
-                  {/* 이미 제출된 정답 수량 표기 */}
+                  {/* 이미 제출된 정답 수량 표기 (펼쳐진 공책 아이콘 BookOpen으로 변경) */}
                   <div className="relative flex-1 w-full flex flex-col items-stretch gap-3">
-                    <div className="flex items-center justify-between border-b border-dashed border-teal-700 pb-2">
+                    <div className="flex items-center justify-between border-b border-dashed border-teal-700/70 pb-2">
                       <div className="flex items-center gap-2 text-yellow-300 font-extrabold text-xl" style={{ fontFamily: "var(--font-chalk)" }}>
-                        <Sparkles size={20} className="text-yellow-400 animate-pulse" />
+                        <BookOpen size={20} className="text-yellow-400" />
                         <span>이미 제출된 정답</span>
                       </div>
                       <span
