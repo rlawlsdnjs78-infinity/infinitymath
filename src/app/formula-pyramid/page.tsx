@@ -884,7 +884,7 @@ export default function FormulaPyramidPage() {
                 className="xl:col-span-3 chalk-box content-box bg-teal-950/80 flex flex-col gap-4.5"
                 style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.25rem", paddingBottom: "1.25rem" }}
               >
-                <div className="flex items-center justify-between border-b border-dashed border-teal-700/70 pb-3">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5 text-yellow-300 font-extrabold text-xl sm:text-2xl" style={{ fontFamily: "var(--font-chalk)" }}>
                     <Trophy size={22} className="text-yellow-400" />
                     <span>실시간 점수판</span>
@@ -893,6 +893,11 @@ export default function FormulaPyramidPage() {
                     ({players.filter((p) => !p.isHost).length}명 접속 중)
                   </span>
                 </div>
+                {/* [요구사항 1] 녹색 점선 구분선 간격을 사진과 100% 동일하게 조율 */}
+                <div
+                  className="w-full border-t border-dashed border-teal-600/70"
+                  style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}
+                />
 
                 <div className="flex flex-col gap-3">
                   {players.filter((p) => !p.isHost).length > 0 ? (
@@ -963,9 +968,9 @@ export default function FormulaPyramidPage() {
                     ))}
                   </div>
 
-                  {/* 이미 제출된 정답 수량 표기 (펼쳐진 공책 아이콘 BookOpen으로 변경) */}
+                  {/* 이미 제출된 정답 수량 표기 (펼쳐진 공책 아이콘 BookOpen) */}
                   <div className="relative flex-1 w-full flex flex-col items-stretch gap-3">
-                    <div className="flex items-center justify-between border-b border-dashed border-teal-700/70 pb-2">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-yellow-300 font-extrabold text-xl" style={{ fontFamily: "var(--font-chalk)" }}>
                         <BookOpen size={20} className="text-yellow-400" />
                         <span>이미 제출된 정답</span>
@@ -977,6 +982,11 @@ export default function FormulaPyramidPage() {
                         {submittedAnswersList.length}개
                       </span>
                     </div>
+                    {/* [요구사항 1] 녹색 점선 구분선 간격을 사진과 100% 동일하게 조율 */}
+                    <div
+                      className="w-full border-t border-dashed border-teal-600/70"
+                      style={{ marginTop: "0.4rem", marginBottom: "0.5rem" }}
+                    />
 
                     <div
                       className="w-full bg-teal-900/98 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-lg flex flex-col backdrop-blur-md overflow-hidden min-h-[160px] max-h-[220px] overflow-y-auto"
@@ -1018,112 +1028,117 @@ export default function FormulaPyramidPage() {
                   </div>
                 </div>
 
-                {/* 선택한 수식: 박스 (좌우 여백 1.25rem) */}
-                <div
-                  className={`w-full rounded-md border border-dashed transition-all duration-200 flex items-center justify-between min-h-[64px] h-[64px] ${
-                    tempNotice
-                      ? tempNotice.type === "success"
-                        ? "bg-emerald-950/90 border-emerald-500 text-emerald-200"
-                        : "bg-rose-950/90 border-rose-500 text-rose-200"
-                      : "bg-teal-950 border-teal-600 text-yellow-300"
-                  }`}
-                  style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.75rem", paddingBottom: "0.75rem" }}
-                >
-                  {tempNotice ? (
+                {/* [요구사항 2] 딜러 모드로 입장 시 '선택한 수식', A~J 칸 선택, '제출하기' 버튼 숨김 */}
+                {!isDealerHost && (
+                  <>
+                    {/* 선택한 수식: 박스 (좌우 여백 1.25rem) */}
                     <div
-                      className={`flex items-center gap-3 w-full justify-center text-xl sm:text-2xl font-bold ${
-                        tempNotice.type === "success" ? "text-emerald-300" : "text-rose-300"
+                      className={`w-full rounded-md border border-dashed transition-all duration-200 flex items-center justify-between min-h-[64px] h-[64px] ${
+                        tempNotice
+                          ? tempNotice.type === "success"
+                            ? "bg-emerald-950/90 border-emerald-500 text-emerald-200"
+                            : "bg-rose-950/90 border-rose-500 text-rose-200"
+                          : "bg-teal-950 border-teal-600 text-yellow-300"
                       }`}
+                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.75rem", paddingBottom: "0.75rem" }}
                     >
-                      {tempNotice.type === "success" ? (
-                        <CheckCircle2 size={24} className="text-emerald-400 flex-shrink-0 animate-bounce" />
-                      ) : tempNotice.type === "error" ? (
-                        <XCircle size={24} className="text-rose-400 flex-shrink-0 animate-bounce" />
+                      {tempNotice ? (
+                        <div
+                          className={`flex items-center gap-3 w-full justify-center text-xl sm:text-2xl font-bold ${
+                            tempNotice.type === "success" ? "text-emerald-300" : "text-rose-300"
+                          }`}
+                        >
+                          {tempNotice.type === "success" ? (
+                            <CheckCircle2 size={24} className="text-emerald-400 flex-shrink-0 animate-bounce" />
+                          ) : tempNotice.type === "error" ? (
+                            <XCircle size={24} className="text-rose-400 flex-shrink-0 animate-bounce" />
+                          ) : (
+                            <AlertTriangle size={24} className="text-rose-400 flex-shrink-0 animate-bounce" />
+                          )}
+                          <span style={{ fontFamily: "var(--font-chalk)" }}>{tempNotice.msg}</span>
+                        </div>
                       ) : (
-                        <AlertTriangle size={24} className="text-rose-400 flex-shrink-0 animate-bounce" />
-                      )}
-                      <span style={{ fontFamily: "var(--font-chalk)" }}>{tempNotice.msg}</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-4">
-                      <span
-                        className="text-2xl sm:text-3xl text-teal-300 font-extrabold"
-                        style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.02em" }}
-                      >
-                        선택한 수식:
-                      </span>
-                      <span
-                        className="text-3xl sm:text-4xl font-black text-yellow-300 tracking-widest min-h-[40px] flex items-center"
-                        style={{ fontFamily: "var(--font-chalk)", paddingLeft: "0.5rem" }}
-                      >
-                        {exprStr || "\u00A0"}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* TARGET 표시 및 A~J 선택 버튼 */}
-                <div className="flex flex-col sm:flex-row items-stretch gap-5">
-                  <div
-                    className="chalk-box-straight bg-teal-950 flex flex-col items-center justify-center min-w-[145px] border-2 border-yellow-400/80 shadow-md"
-                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.25rem", paddingBottom: "1.25rem" }}
-                  >
-                    <span className="text-xl sm:text-2xl text-yellow-400 font-extrabold tracking-widest mb-1" style={{ fontFamily: "var(--font-chalk)" }}>
-                      TARGET
-                    </span>
-                    <span className="text-5xl sm:text-6xl text-white font-black" style={{ fontFamily: "var(--font-chalk)" }}>
-                      9
-                    </span>
-                  </div>
-
-                  <div className="flex-1 flex flex-col justify-between gap-3">
-                    <div className="grid grid-cols-5 gap-2.5">
-                      {Object.values(ALL_NODES).map((node) => {
-                        const isSel = selectedNodes.includes(node.id);
-                        return (
-                          <button
-                            key={node.id}
-                            type="button"
-                            onClick={() => handleNodeClick(node.id)}
-                            className={`py-3 px-3 rounded-md text-xl sm:text-2xl font-black transition-all ${
-                              isSel
-                                ? "bg-yellow-400 text-teal-950 scale-105 shadow-md"
-                                : "bg-teal-800/90 text-white hover:bg-teal-700"
-                            }`}
-                            style={{ fontFamily: "var(--font-chalk)" }}
+                        <div className="flex items-center gap-4">
+                          <span
+                            className="text-2xl sm:text-3xl text-teal-300 font-extrabold"
+                            style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.02em" }}
                           >
-                            {node.id}
-                          </button>
-                        );
-                      })}
+                            선택한 수식:
+                          </span>
+                          <span
+                            className="text-3xl sm:text-4xl font-black text-yellow-300 tracking-widest min-h-[40px] flex items-center"
+                            style={{ fontFamily: "var(--font-chalk)", paddingLeft: "0.5rem" }}
+                          >
+                            {exprStr || "\u00A0"}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                </div>
 
-                <div className="w-full mt-1">
-                  <button
-                    type="button"
-                    disabled={penaltyLockSeconds > 0}
-                    onClick={handleSubmitAnswer}
-                    className={`btn-chalk w-full justify-center py-3.5 text-2.5xl sm:text-3xl font-extrabold shadow-lg transition-all ${
-                      penaltyLockSeconds > 0
-                        ? "bg-rose-950/90 border-2 border-rose-500/80 text-rose-300 opacity-90 cursor-not-allowed"
-                        : "cursor-pointer"
-                    }`}
-                    style={{ fontFamily: "var(--font-chalk)", letterSpacing: penaltyLockSeconds > 0 ? "0.02em" : "0.35em" }}
-                  >
-                    {penaltyLockSeconds > 0 ? (
-                      <div className="flex items-center justify-center gap-2.5 py-0.5">
-                        <Lock size={26} className="text-yellow-400 animate-pulse flex-shrink-0" />
-                        <span className="text-rose-200 text-lg sm:text-xl font-bold" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
-                          {penaltyLockSeconds}초 동안 정답을 입력할 수 없습니다.
+                    {/* TARGET 표시 및 A~J 선택 버튼 */}
+                    <div className="flex flex-col sm:flex-row items-stretch gap-5">
+                      <div
+                        className="chalk-box-straight bg-teal-950 flex flex-col items-center justify-center min-w-[145px] border-2 border-yellow-400/80 shadow-md"
+                        style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.25rem", paddingBottom: "1.25rem" }}
+                      >
+                        <span className="text-xl sm:text-2xl text-yellow-400 font-extrabold tracking-widest mb-1" style={{ fontFamily: "var(--font-chalk)" }}>
+                          TARGET
+                        </span>
+                        <span className="text-5xl sm:text-6xl text-white font-black" style={{ fontFamily: "var(--font-chalk)" }}>
+                          9
                         </span>
                       </div>
-                    ) : (
-                      <span>제출하기</span>
-                    )}
-                  </button>
-                </div>
+
+                      <div className="flex-1 flex flex-col justify-between gap-3">
+                        <div className="grid grid-cols-5 gap-2.5">
+                          {Object.values(ALL_NODES).map((node) => {
+                            const isSel = selectedNodes.includes(node.id);
+                            return (
+                              <button
+                                key={node.id}
+                                type="button"
+                                onClick={() => handleNodeClick(node.id)}
+                                className={`py-3 px-3 rounded-md text-xl sm:text-2xl font-black transition-all ${
+                                  isSel
+                                    ? "bg-yellow-400 text-teal-950 scale-105 shadow-md"
+                                    : "bg-teal-800/90 text-white hover:bg-teal-700"
+                                }`}
+                                style={{ fontFamily: "var(--font-chalk)" }}
+                              >
+                                {node.id}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="w-full mt-1">
+                      <button
+                        type="button"
+                        disabled={penaltyLockSeconds > 0}
+                        onClick={handleSubmitAnswer}
+                        className={`btn-chalk w-full justify-center py-3.5 text-2.5xl sm:text-3xl font-extrabold shadow-lg transition-all ${
+                          penaltyLockSeconds > 0
+                            ? "bg-rose-950/90 border-2 border-rose-500/80 text-rose-300 opacity-90 cursor-not-allowed"
+                            : "cursor-pointer"
+                        }`}
+                        style={{ fontFamily: "var(--font-chalk)", letterSpacing: penaltyLockSeconds > 0 ? "0.02em" : "0.35em" }}
+                      >
+                        {penaltyLockSeconds > 0 ? (
+                          <div className="flex items-center justify-center gap-2.5 py-0.5">
+                            <Lock size={26} className="text-yellow-400 animate-pulse flex-shrink-0" />
+                            <span className="text-rose-200 text-lg sm:text-xl font-bold" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
+                              {penaltyLockSeconds}초 동안 정답을 입력할 수 없습니다.
+                            </span>
+                          </div>
+                        ) : (
+                          <span>제출하기</span>
+                        )}
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* [우측: 실시간 활동 피드] (좌우 여백 1.25rem) */}
@@ -1131,10 +1146,15 @@ export default function FormulaPyramidPage() {
                 className="xl:col-span-3 chalk-box content-box bg-teal-950/80 flex flex-col gap-4.5"
                 style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.25rem", paddingBottom: "1.25rem" }}
               >
-                <div className="flex items-center gap-2.5 text-yellow-300 font-extrabold text-xl sm:text-2xl border-b-2 border-dashed border-teal-700 pb-3" style={{ fontFamily: "var(--font-chalk)" }}>
+                <div className="flex items-center gap-2.5 text-yellow-300 font-extrabold text-xl sm:text-2xl" style={{ fontFamily: "var(--font-chalk)" }}>
                   <Users size={22} className="text-yellow-400" />
                   <span>실시간 활동 현황</span>
                 </div>
+                {/* [요구사항 1] 녹색 점선 구분선 간격을 사진과 100% 동일하게 조율 */}
+                <div
+                  className="w-full border-t border-dashed border-teal-600/70"
+                  style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}
+                />
 
                 {/* [요구사항 7] 실시간 활동 현황 [안내] 좌측 26px 여백 부여 (paddingLeft: 1.6rem) */}
                 <div className="flex flex-col gap-3 max-h-[360px] overflow-y-auto pr-1">
