@@ -1259,21 +1259,12 @@ export default function FormulaPyramidPage() {
 
           {/* ════════════════════ [좌측 박스] ════════════════════ */}
           <div className="xl:col-span-3 chalk-box content-box flex flex-col bg-teal-950/80 backdrop-blur-md h-full p-4 sm:p-5">
-            {inGameRoom && isDealerHost ? (
-              <div className="flex items-center gap-3 w-full min-h-[44px]">
-                <Activity className="text-yellow-400 flex-shrink-0 animate-pulse" size={28} />
-                <h2 className="text-yellow-300 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "2.3rem", lineHeight: 1.1 }}>
-                  실시간 현황판
-                </h2>
-              </div>
-            ) : (
-              <div className="flex items-center gap-3 w-full min-h-[44px]">
-                <LogIn className="text-yellow-400 flex-shrink-0" size={28} />
-                <h2 className="text-yellow-300 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "2.3rem", lineHeight: 1.1 }}>
-                  {mode === "player" ? "게임 입장하기" : "게임 생성하기"}
-                </h2>
-              </div>
-            )}
+            <div className="flex items-center gap-3 w-full min-h-[44px]">
+              <LogIn className="text-yellow-400 flex-shrink-0" size={28} />
+              <h2 className="text-yellow-300 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "2.5rem", lineHeight: 1.1 }}>
+                게임 입장하기
+              </h2>
+            </div>
             <div className="w-full border-t border-dashed border-teal-600/70" style={{ marginTop: "0.5rem", marginBottom: "0.85rem" }} />
 
             {/* 탭 버튼: 방에 입장 중이 아닐 때만 표시 */}
@@ -1362,103 +1353,46 @@ export default function FormulaPyramidPage() {
                 )}
               </div>
             ) : (
-              /* ── 딜러 모드: 방 생성 전 vs 방 생성 후(실시간 현황판) ── */
-              <div className="flex flex-col justify-between flex-1 gap-3 text-sm text-gray-200 leading-relaxed py-1" style={{ fontFamily: "var(--font-body)" }}>
-                {inGameRoom && isDealerHost ? (
-                  /* ── 방 생성 후: 실시간 현황판 ── */
-                  <div className="flex flex-col flex-1 gap-3">
-                    {/* 실시간 활동 로그 박스 */}
-                    <div
-                      className="flex-1 w-full rounded-xl bg-teal-900/95 border-2 border-dashed border-teal-600/80 shadow-inner flex flex-col overflow-hidden"
-                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.75rem", paddingBottom: "0.75rem", minHeight: "180px", maxHeight: "250px" }}
-                    >
-                      <div className="flex items-center gap-2 text-yellow-300 font-bold text-sm mb-1 pb-1 border-b border-dashed border-teal-700/80" style={{ fontFamily: "var(--font-chalk)" }}>
-                        <Activity size={16} className="text-yellow-400 animate-pulse flex-shrink-0" />
-                        <span>실시간 활동 기록 ({activityLogs.length}건)</span>
-                      </div>
-                      <div className="flex-1 flex flex-col gap-1.5 overflow-y-auto pr-1">
-                        {activityLogs.length > 0 ? (
-                          activityLogs.map((log, idx) => {
-                            const isCorrect = log.startsWith("[정답]");
-                            const isWrong = log.startsWith("[오답]");
-                            const isJoin = log.startsWith("[입장]");
-                            const isLeave = log.startsWith("[퇴장]");
-                            return (
-                              <div
-                                key={idx}
-                                className={`text-xs sm:text-sm py-1 px-2 rounded font-medium transition-all ${
-                                  isCorrect
-                                    ? "bg-emerald-950/80 text-emerald-200 border border-emerald-500/60 font-bold"
-                                    : isWrong
-                                    ? "bg-rose-950/80 text-rose-200 border border-rose-500/60 font-bold"
-                                    : isJoin
-                                    ? "bg-teal-950/70 text-cyan-300 border border-cyan-600/50"
-                                    : isLeave
-                                    ? "bg-gray-950/70 text-gray-400 border border-gray-700/50"
-                                    : "bg-teal-950/60 text-yellow-200 border border-yellow-600/40"
-                                }`}
-                                style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.01em" }}
-                              >
-                                {log}
-                              </div>
-                            );
-                          })
-                        ) : (
-                          <div className="py-8 text-center text-gray-400 text-xs">활동 기록이 여기에 실시간으로 표시됩니다.</div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* 상단 점선 안내 상자 */}
-                    <div
-                      className="w-full rounded-xl shadow-lg border-2 border-dashed border-yellow-400/90 bg-teal-900/95"
-                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.85rem", paddingBottom: "0.85rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}
-                    >
-                      <div className="flex items-start gap-2 text-yellow-300 text-sm sm:text-base font-medium" style={{ lineHeight: "1.4", wordBreak: "break-all" }}>
-                        <Megaphone size={18} className="flex-shrink-0 text-yellow-400 mt-0.5" />
-                        <span>생성된 방 코드를 플레이어들에게 공유하세요.</span>
-                      </div>
-                    </div>
-
-                    {/* 중간 버튼 (게임 시작하기 / 다음 라운드 시작하기) */}
-                    {!isGameStarted && !isRoundLocked && (
-                      <button
-                        type="button" onClick={() => handleStartGame(currentRound)}
-                        className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-base border-2 border-emerald-400 shadow-lg cursor-pointer animate-pulse transition-all"
-                        style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.85rem", paddingBottom: "0.85rem", fontFamily: "var(--font-chalk)" }}
-                      >
-                        <Play size={18} className="fill-white flex-shrink-0" />
-                        <span>게임 시작하기</span>
-                      </button>
-                    )}
-                    {isRoundLocked && !isLastRound && (
-                      <button
-                        type="button" onClick={handleNextRound}
-                        className="w-full flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-500 text-white font-extrabold rounded-xl text-base border-2 border-sky-400 shadow-lg cursor-pointer transition-all"
-                        style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.85rem", paddingBottom: "0.85rem", fontFamily: "var(--font-chalk)" }}
-                      >
-                        <Play size={18} className="fill-white flex-shrink-0" />
-                        <span>다음 라운드 시작하기 ({currentRound + 1} / {selectedRound})</span>
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  /* ── 방 생성 전: 딜러 설정 설명 ── */
-                  <div className="flex flex-col gap-3">
-                    <p className="leading-loose text-base sm:text-lg">
-                      딜러 모드에서는 라운드 수, 제한 시간, 오답 패널티를 설정하여 방을 생성할 수 있습니다.
-                    </p>
-                    <div
-                      className="w-full rounded-xl shadow-lg border-2 border-dashed border-yellow-400/90 bg-teal-900/95"
-                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.25rem", paddingBottom: "1.25rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}
-                    >
-                      <div className="flex items-start gap-3 text-yellow-300 text-base sm:text-lg font-medium" style={{ lineHeight: "1.5", wordBreak: "break-all" }}>
-                        <Megaphone size={20} className="flex-shrink-0 text-yellow-400 mt-0.5" />
-                        <span>우측 패널에서 방 설정을 완료하고 방을 생성하세요.</span>
-                      </div>
+              /* ── 딜러 모드 대기 정보 ── */
+              <div className="flex flex-col justify-between flex-1 gap-4 text-sm text-gray-200 leading-relaxed py-1" style={{ fontFamily: "var(--font-body)" }}>
+                <div className="flex flex-col gap-3">
+                  <p className="leading-loose text-base sm:text-lg">
+                    딜러 모드에서는 라운드 수, 제한 시간, 오답 패널티를 설정하여 방을 생성할 수 있습니다.
+                  </p>
+                  
+                  {/* 상단 점선 안내 상자 */}
+                  <div
+                    className="w-full rounded-xl shadow-lg border-2 border-dashed border-yellow-400/90 bg-teal-900/95"
+                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.25rem", paddingBottom: "1.25rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}
+                  >
+                    <div className="flex items-start gap-3 text-yellow-300 text-base sm:text-lg font-medium" style={{ lineHeight: "1.5", wordBreak: "break-all" }}>
+                      <Megaphone size={20} className="flex-shrink-0 text-yellow-400 mt-0.5" />
+                      <span>생성된 방 코드를 플레이어들에게 공유하세요.</span>
                     </div>
                   </div>
-                )}
+
+                  {/* 중간 버튼 (두 블록 사이에 독립 위치) */}
+                  {inGameRoom && isDealerHost && !isGameStarted && !isRoundLocked && (
+                    <button
+                      type="button" onClick={() => handleStartGame(currentRound)}
+                      className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-base border-2 border-emerald-400 shadow-lg cursor-pointer animate-pulse transition-all"
+                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.85rem", paddingBottom: "0.85rem", fontFamily: "var(--font-chalk)" }}
+                    >
+                      <Play size={18} className="fill-white flex-shrink-0" />
+                      <span>게임 시작하기</span>
+                    </button>
+                  )}
+                  {inGameRoom && isDealerHost && isRoundLocked && !isLastRound && (
+                    <button
+                      type="button" onClick={handleNextRound}
+                      className="w-full flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-500 text-white font-extrabold rounded-xl text-base border-2 border-sky-400 shadow-lg cursor-pointer transition-all"
+                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.85rem", paddingBottom: "0.85rem", fontFamily: "var(--font-chalk)" }}
+                    >
+                      <Play size={18} className="fill-white flex-shrink-0" />
+                      <span>다음 라운드 시작하기 ({currentRound + 1} / {selectedRound})</span>
+                    </button>
+                  )}
+                </div>
 
                 {/* 하단 딜러 방 운영 중 상자 */}
                 {inGameRoom && isDealerHost ? (
@@ -1858,7 +1792,7 @@ export default function FormulaPyramidPage() {
                     </p>
                   </div>
 
-                  {/* ③ 조합 규칙 (②와 ④ 사이로 이동) */}
+                  {/* ③ 조합 규칙 (②와 ④ 사이) */}
                   <div className="flex flex-col gap-2">
                     <div className="flex items-start gap-2.5">
                       <span className="flex-shrink-0 font-bold text-yellow-300 w-5">③</span>
@@ -1895,7 +1829,63 @@ export default function FormulaPyramidPage() {
                   </div>
                 </div>
               </>
+            ) : inGameRoom && isDealerHost ? (
+              /* ── 딜러 방 생성 후: 실시간 현황판 ── */
+              <div className="flex flex-col flex-1 h-full">
+                <div className="flex items-center gap-3 w-full min-h-[44px]">
+                  <Activity className="text-yellow-400 flex-shrink-0 animate-pulse" size={28} />
+                  <h2 className="text-yellow-300 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "2.3rem", lineHeight: 1.1 }}>
+                    실시간 현황판
+                  </h2>
+                </div>
+                <div className="w-full border-t border-dashed border-teal-700" style={{ marginTop: "0.5rem", marginBottom: "0.75rem" }} />
+
+                <div
+                  className="flex-1 w-full rounded-xl bg-teal-900/95 border-2 border-dashed border-teal-600/80 shadow-inner flex flex-col overflow-hidden"
+                  style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.75rem", paddingBottom: "0.75rem", minHeight: "260px" }}
+                >
+                  <div className="flex items-center justify-between text-yellow-300 font-bold text-sm mb-2 pb-1.5 border-b border-dashed border-teal-700/80" style={{ fontFamily: "var(--font-chalk)" }}>
+                    <div className="flex items-center gap-2">
+                      <Activity size={16} className="text-yellow-400 animate-pulse flex-shrink-0" />
+                      <span>실시간 활동 기록</span>
+                    </div>
+                    <span className="text-xs text-gray-300 font-normal">총 {activityLogs.length}건</span>
+                  </div>
+                  <div className="flex-1 flex flex-col gap-1.5 overflow-y-auto pr-1">
+                    {activityLogs.length > 0 ? (
+                      activityLogs.map((log, idx) => {
+                        const isCorrect = log.startsWith("[정답]");
+                        const isWrong = log.startsWith("[오답]");
+                        const isJoin = log.startsWith("[입장]");
+                        const isLeave = log.startsWith("[퇴장]");
+                        return (
+                          <div
+                            key={idx}
+                            className={`text-xs sm:text-sm py-1 px-2 rounded font-medium transition-all ${
+                              isCorrect
+                                ? "bg-emerald-950/80 text-emerald-200 border border-emerald-500/60 font-bold shadow-sm"
+                                : isWrong
+                                ? "bg-rose-950/80 text-rose-200 border border-rose-500/60 font-bold shadow-sm"
+                                : isJoin
+                                ? "bg-teal-950/70 text-cyan-300 border border-cyan-600/50"
+                                : isLeave
+                                ? "bg-gray-950/70 text-gray-400 border border-gray-700/50"
+                                : "bg-teal-950/60 text-yellow-200 border border-yellow-600/40"
+                            }`}
+                            style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.01em" }}
+                          >
+                            {log}
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="py-12 text-center text-gray-400 text-xs">활동 기록이 여기에 실시간으로 표시됩니다.</div>
+                    )}
+                  </div>
+                </div>
+              </div>
             ) : (
+              /* ── 딜러 방 생성 전: 게임 생성 옵션 ── */
               <>
                 <div className="flex items-center gap-3">
                   <Settings className="text-yellow-400 flex-shrink-0" size={28} />
@@ -1939,7 +1929,7 @@ export default function FormulaPyramidPage() {
                   {/* 페널티 설정 */}
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center justify-between w-full text-sm text-gray-200 font-medium" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
-                      <span>오답 패널티</span>
+                      <span>오답 페널티</span>
                       <span className="text-yellow-300 font-bold">({selectedPenalty})</span>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
