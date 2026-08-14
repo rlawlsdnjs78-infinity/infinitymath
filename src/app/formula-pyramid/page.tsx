@@ -895,12 +895,24 @@ export default function FormulaPyramidPage() {
                 </button>
 
                 {inGameRoom && !isDealerHost && (
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-950/90 border border-emerald-500/80 text-emerald-300 text-xs sm:text-sm font-bold mt-1">
-                    <span>🟢 [{activeRoomCode}] 접속 완료 ({myNickname})</span>
+                  <div
+                    className="flex items-center justify-between rounded-xl bg-emerald-950/95 border-2 border-emerald-500/90 text-emerald-200 shadow-md"
+                    style={{
+                      paddingLeft: "1.25rem",
+                      paddingRight: "1.25rem",
+                      paddingTop: "1rem",
+                      paddingBottom: "1rem",
+                      marginTop: "1.25rem",
+                    }}
+                  >
+                    <span className="font-extrabold text-sm sm:text-base flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
+                      🟢 [{activeRoomCode}] 접속 완료 ({myNickname})
+                    </span>
                     <button
                       type="button"
                       onClick={handleLeaveRoom}
-                      className="text-rose-400 hover:text-rose-200 underline font-extrabold cursor-pointer ml-2"
+                      className="bg-rose-900/90 hover:bg-rose-800 text-rose-200 font-extrabold text-xs sm:text-sm rounded-md border border-rose-600/80 cursor-pointer shadow flex-shrink-0"
+                      style={{ paddingLeft: "1rem", paddingRight: "1rem", paddingTop: "0.4rem", paddingBottom: "0.4rem" }}
                     >
                       퇴장
                     </button>
@@ -916,8 +928,11 @@ export default function FormulaPyramidPage() {
                 <div
                   className="w-full rounded-xl shadow-lg border-2 border-dashed border-yellow-400/90 bg-teal-900/95"
                   style={{
-                    padding: "0.8rem 1.25rem",
-                    marginTop: "0.25rem",
+                    paddingLeft: "1.25rem",
+                    paddingRight: "1.25rem",
+                    paddingTop: "1.25rem",
+                    paddingBottom: "1.25rem",
+                    marginTop: "0.5rem",
                     display: "flex",
                     flexDirection: "column",
                     gap: "0.75rem",
@@ -928,18 +943,30 @@ export default function FormulaPyramidPage() {
                     className="flex items-start gap-3 text-yellow-300 text-base sm:text-lg font-medium"
                     style={{ lineHeight: "1.5", wordBreak: "break-all", letterSpacing: "-0.015em" }}
                   >
-                    <Megaphone size={18} className="flex-shrink-0 text-yellow-400 mt-0.5" />
+                    <Megaphone size={20} className="flex-shrink-0 text-yellow-400 mt-0.5" />
                     <span style={{ wordBreak: "break-all" }}>생성된 방 코드를 플레이어들에게 공유하세요.</span>
                   </div>
                 </div>
 
                 {inGameRoom && isDealerHost && (
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-amber-950/90 border border-amber-500/80 text-amber-300 text-xs sm:text-sm font-bold mt-1">
-                    <span>👑 딜러 방 [{activeRoomCode}] 운영 중</span>
+                  <div
+                    className="flex items-center justify-between rounded-xl bg-amber-950/95 border-2 border-amber-500/90 text-amber-200 shadow-md"
+                    style={{
+                      paddingLeft: "1.25rem",
+                      paddingRight: "1.25rem",
+                      paddingTop: "1rem",
+                      paddingBottom: "1rem",
+                      marginTop: "1.25rem",
+                    }}
+                  >
+                    <span className="font-extrabold text-sm sm:text-base flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
+                      👑 딜러 방 [{activeRoomCode}] 운영 중
+                    </span>
                     <button
                       type="button"
                       onClick={handleLeaveRoom}
-                      className="text-rose-400 hover:text-rose-200 underline font-extrabold cursor-pointer ml-2"
+                      className="bg-rose-900/90 hover:bg-rose-800 text-rose-200 font-extrabold text-xs sm:text-sm rounded-md border border-rose-600/80 cursor-pointer shadow flex-shrink-0"
+                      style={{ paddingLeft: "1rem", paddingRight: "1rem", paddingTop: "0.4rem", paddingBottom: "0.4rem" }}
                     >
                       퇴장
                     </button>
@@ -1301,11 +1328,11 @@ export default function FormulaPyramidPage() {
               /* 👑 [딜러 모드 전용 가운데 UI] - 플레이어 모드 변경 시 영향 받지 않음  */
               /* =================================================================== */
               <div className="flex flex-col gap-4 w-full h-full">
-                {/* 1. [요구사항 1] 입장 코드 생성 전 (대기 상태) 최상단 안내창 배치 및 글씨 크기 확대 */}
+                {/* 1. [요구사항 1 & 2] 딜러 대기 / 접속 상태 안내 박스를 최상단에 큰 글씨로 배치 (확성기 노란색 복원 & 여백 확장) */}
                 {!inGameRoom ? (
                   <div
-                    className="w-full flex items-center justify-center p-4 bg-teal-900/95 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-lg text-center"
-                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
+                    className="w-full flex items-center justify-center bg-teal-900/95 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-lg text-center"
+                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.25rem", paddingBottom: "1.25rem" }}
                   >
                     <div
                       className="text-lg sm:text-xl text-yellow-300 font-extrabold flex items-center justify-center gap-3 py-1"
@@ -1316,49 +1343,64 @@ export default function FormulaPyramidPage() {
                     </div>
                   </div>
                 ) : (
-                  /* 딜러 상태 컨트롤 바 (방 코드 생성 완료 시) */
-                  <div
-                    className="chalk-box-straight bg-teal-900/90 flex flex-wrap items-center justify-between gap-3 border border-yellow-400/80 shadow-md rounded-xl"
-                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.75rem", paddingBottom: "0.75rem" }}
-                  >
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span className="text-yellow-300 font-extrabold text-sm sm:text-base" style={{ fontFamily: "var(--font-chalk)" }}>
-                        라운드: <span className="text-white">{currentRound} / {selectedRound}</span>
-                      </span>
-                      <span className="text-teal-600">|</span>
-                      <span className={`font-extrabold text-sm sm:text-base flex items-center gap-1.5 ${roomTimerSeconds <= 30 && isGameStarted ? "text-rose-300 animate-pulse" : "text-yellow-300"}`} style={{ fontFamily: "var(--font-chalk)" }}>
-                        <Clock size={16} className={roomTimerSeconds <= 30 && isGameStarted ? "text-rose-400 animate-spin" : "text-yellow-400"} />
-                        남은 시간: <span className="text-white ml-0.5">{!isGameStarted ? `${formatTime(roomTimerSeconds)} (대기 중)` : formatTime(roomTimerSeconds)}</span>
-                      </span>
-                      <span className="text-teal-600">|</span>
-                      <span className="text-yellow-300 font-extrabold text-sm sm:text-base" style={{ fontFamily: "var(--font-chalk)" }}>
-                        오답 페널티: <span className="text-white">{selectedPenalty}</span>
-                      </span>
+                  <div className="flex flex-col gap-3 w-full">
+                    {/* [요구사항 1] 딜러 접속 후 최상단 딜러 전용 안내창 (노란색 텍스트가 아닌 오리지널 색상 & 큰 글씨) */}
+                    <div
+                      className="w-full flex items-center justify-center bg-teal-900/95 rounded-xl border-2 border-dashed border-teal-600 shadow-lg text-center"
+                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1rem", paddingBottom: "1rem" }}
+                    >
+                      <div
+                        className="text-lg sm:text-xl text-teal-100 font-extrabold flex items-center justify-center gap-3 py-0.5"
+                        style={{ fontFamily: "var(--font-chalk)", wordBreak: "keep-all" }}
+                      >
+                        <Megaphone size={24} className="text-yellow-400 flex-shrink-0 animate-bounce" />
+                        <span>딜러 화면입니다. 상단 실시간 점수판 및 정답 현황을 실시간 모니터링할 수 있습니다.</span>
+                      </div>
                     </div>
 
-                    {/* 2. [요구사항 2] '게임 시작하기' 및 '퇴장' 버튼 내부 여백 1.25rem (20px / px-5) 100% 동일하게 통일 적용 */}
-                    <div className="flex items-center gap-3">
-                      {!isGameStarted && (
+                    {/* 딜러 상태 컨트롤 바 */}
+                    <div
+                      className="chalk-box-straight bg-teal-900/90 flex flex-wrap items-center justify-between gap-3 border border-yellow-400/80 shadow-md rounded-xl"
+                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.75rem", paddingBottom: "0.75rem" }}
+                    >
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className="text-yellow-300 font-extrabold text-sm sm:text-base" style={{ fontFamily: "var(--font-chalk)" }}>
+                          라운드: <span className="text-white">{currentRound} / {selectedRound}</span>
+                        </span>
+                        <span className="text-teal-600">|</span>
+                        <span className={`font-extrabold text-sm sm:text-base flex items-center gap-1.5 ${roomTimerSeconds <= 30 && isGameStarted ? "text-rose-300 animate-pulse" : "text-yellow-300"}`} style={{ fontFamily: "var(--font-chalk)" }}>
+                          <Clock size={16} className={roomTimerSeconds <= 30 && isGameStarted ? "text-rose-400 animate-spin" : "text-yellow-400"} />
+                          남은 시간: <span className="text-white ml-0.5">{!isGameStarted ? `${formatTime(roomTimerSeconds)} (대기 중)` : formatTime(roomTimerSeconds)}</span>
+                        </span>
+                        <span className="text-teal-600">|</span>
+                        <span className="text-yellow-300 font-extrabold text-sm sm:text-base" style={{ fontFamily: "var(--font-chalk)" }}>
+                          오답 페널티: <span className="text-white">{selectedPenalty}</span>
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        {!isGameStarted && (
+                          <button
+                            type="button"
+                            onClick={handleStartGame}
+                            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-md text-sm sm:text-base border border-emerald-400 shadow-md cursor-pointer animate-pulse"
+                            style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.6rem", paddingBottom: "0.6rem" }}
+                          >
+                            <Play size={18} className="fill-white flex-shrink-0" />
+                            <span>게임 시작하기</span>
+                          </button>
+                        )}
+
                         <button
                           type="button"
-                          onClick={handleStartGame}
-                          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-md text-sm sm:text-base border border-emerald-400 shadow-md cursor-pointer animate-pulse"
+                          onClick={handleLeaveRoom}
+                          className="flex items-center gap-2 bg-rose-900/90 hover:bg-rose-800 text-rose-200 rounded-md text-sm sm:text-base font-bold border border-rose-600/70 cursor-pointer shadow-md"
                           style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.6rem", paddingBottom: "0.6rem" }}
                         >
-                          <Play size={18} className="fill-white flex-shrink-0" />
-                          <span>게임 시작하기</span>
+                          <LogOut size={18} />
+                          <span>퇴장</span>
                         </button>
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={handleLeaveRoom}
-                        className="flex items-center gap-2 bg-rose-900/90 hover:bg-rose-800 text-rose-200 rounded-md text-sm sm:text-base font-bold border border-rose-600/70 cursor-pointer shadow-md"
-                        style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.6rem", paddingBottom: "0.6rem" }}
-                      >
-                        <LogOut size={18} />
-                        <span>퇴장</span>
-                      </button>
+                      </div>
                     </div>
                   </div>
                 )}
