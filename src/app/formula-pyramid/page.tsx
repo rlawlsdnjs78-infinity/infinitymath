@@ -194,20 +194,17 @@ const getAllValidSolutions = (
 function HexagonCell({
   node,
   isSelected,
-  onClick,
   masked = false,
 }: {
   node: PyramidNode;
   isSelected: boolean;
-  onClick?: () => void;
   masked?: boolean;
 }) {
   return (
     <div
-      onClick={onClick}
-      className={`relative transition-all duration-200 select-none w-[64px] h-[73.9px] sm:w-[68px] sm:h-[78.5px] flex items-center justify-center ${
-        onClick ? "cursor-pointer hover:scale-105" : ""
-      } ${isSelected ? "drop-shadow-[0_0_16px_rgba(245,230,66,0.95)]" : ""}`}
+      className={`relative select-none w-[64px] h-[73.9px] sm:w-[68px] sm:h-[78.5px] flex items-center justify-center ${
+        isSelected ? "drop-shadow-[0_0_16px_rgba(245,230,66,0.95)]" : ""
+      }`}
     >
       <svg viewBox="0 0 100 115.47" className="w-full h-full absolute inset-0 filter drop-shadow-md">
         <polygon
@@ -257,6 +254,7 @@ export default function FormulaPyramidPage() {
   const [showRoundEndPopup, setShowRoundEndPopup] = useState(false);
   const [isRoundLocked, setIsRoundLocked] = useState(false);
   const [showFinalRanking, setShowFinalRanking] = useState(false);
+  const [usedBoardIds, setUsedBoardIds] = useState<number[]>([]);
 
   /* ── 게임판 결정 로직 ──
      - 딜러: 방 생성 후 게임 시작 전에는 연습판 표시 (A~J / TARGET을 ?로 마스킹)
@@ -416,14 +414,26 @@ export default function FormulaPyramidPage() {
       setSubmittedAnswersList((prev) => {
         if (prev.some((a) => a.nodes === ansObj.nodes)) return prev;
         const next = [...prev, ansObj];
-        // 모든 정답 조합이 다 제출되었으면 즉시 라운드 종료
+        // 모든 정답 조합이 다 제출되었으면 즉시 남은 시간 0초 및 라운드 종료
         const allSolutions = getAllValidSolutions(currentTargetNumber, currentAllNodes);
         const allSubmittedKeys = next.map((a) => a.nodes);
         const allSolKeys = allSolutions.map((s) => s.nodes.join(" "));
-        const allDone = allSolKeys.every((k) => allSubmittedKeys.includes(k));
+        const allDone = allSolKeys.length > 0 && allSolKeys.every((k) => allSubmittedKeys.includes(k));
         if (allDone) {
           setIsRoundLocked(true);
           setShowRoundEndPopup(true);
+          setRoomTimerSeconds(0);
+          setRoomEndTime(Date.now());
+          if (activeRoomCode && typeof window !== "undefined") {
+            try {
+              const confStr = localStorage.getItem(`pyramid-room-config-${activeRoomCode}`);
+              if (confStr) {
+                const conf = JSON.parse(confStr);
+                conf.roomEndTime = Date.now();
+                localStorage.setItem(`pyramid-room-config-${activeRoomCode}`, JSON.stringify(conf));
+              }
+            } catch (err) {}
+          }
         }
         return next;
       });
@@ -455,10 +465,32 @@ export default function FormulaPyramidPage() {
 
   /* ── 최신 방 상태값을 useRef로 관리 ── */
   const roomStateRef = useRef({
-    myNickname, myScore, isDealerHost, selectedRound, selectedTime, selectedPenalty, selectedBoardId, isGameStarted, roomEndTime,
+    myNickname,
+    myScore,
+    isDealerHost,
+    selectedRound,
+    selectedTime,
+    selectedPenalty,
+    selectedBoardId,
+    isGameStarted,
+    roomEndTime,
+    currentTargetNumber,
+    currentAllNodes,
   });
   useEffect(() => {
-    roomStateRef.current = { myNickname, myScore, isDealerHost, selectedRound, selectedTime, selectedPenalty, selectedBoardId, isGameStarted, roomEndTime };
+    roomStateRef.current = {
+      myNickname,
+      myScore,
+      isDealerHost,
+      selectedRound,
+      selectedTime,
+      selectedPenalty,
+      selectedBoardId,
+      isGameStarted,
+      roomEndTime,
+      currentTargetNumber,
+      currentAllNodes,
+    };
   });
 
   /* ── BroadcastChannel 실시간 멀티플레이어 동기화 ── */
@@ -518,11 +550,33 @@ export default function FormulaPyramidPage() {
             setCountdownValue(3);
           } else if (data.type === "SCORE_UPDATE") {
             if (data.playerName === curr.myNickname) return;
-            setPlayers((prev) => prev.map((p) => (p.name === data.playerName ? { ...p, score: data.newScore } : p)));
+
+            setPlayers((prev) =>
+              prev.map((p) => (p.name === data.playerName ? { ...p, score: data.newScore } : p))
+            );
             if (data.submittedAnswer) {
-              setSubmittedAnswersList((prev) => prev.some((a) => a.nodes === data.submittedAnswer.nodes) ? prev : [...prev, data.submittedAnswer]);
+              setSubmittedAnswersList((prev) => {
+                const nextList = prev.some((a) => a.nodes === data.submittedAnswer.nodes)
+                  ? prev
+                  : [...prev, data.submittedAnswer];
+                // 모든 정답이 맞춰졌는지 확인하여 모든 클라이언트에서 즉시 0초 및 라운드 종료
+                const allSolutions = getAllValidSolutions(curr.currentTargetNumber, curr.currentAllNodes);
+                const allSubmittedKeys = nextList.map((a) => a.nodes);
+                const allSolKeys = allSolutions.map((s) => s.nodes.join(" "));
+                const allDone = allSolKeys.length > 0 && allSolKeys.every((k) => allSubmittedKeys.includes(k));
+                if (allDone) {
+                  setIsRoundLocked(true);
+                  setShowRoundEndPopup(true);
+                  setRoomTimerSeconds(0);
+                  setRoomEndTime(Date.now());
+                }
+                return nextList;
+              });
             }
-            setActivityLogs((prev) => [`[정답] ${data.playerName} 님이 정답 제출! (${data.submittedAnswer?.nodes || ""} -> ${data.newScore}점)`, ...prev]);
+            setActivityLogs((prev) => [
+              `[정답] ${data.playerName} 님이 정답 제출! (${data.submittedAnswer?.nodes || ""} -> ${data.newScore}점)`,
+              ...prev,
+            ]);
           } else if (data.type === "LEAVE") {
             if (data.playerName === curr.myNickname) return;
             setPlayers((prev) => {
@@ -581,7 +635,7 @@ export default function FormulaPyramidPage() {
       setSelectedRound(1); setSelectedTime(3); setSelectedPenalty("없음"); setSelectedBoardId(1); setRoomTimerSeconds(180); setRoomEndTime(null);
     }
     setInGameRoom(false); setIsGameStarted(false); setActiveRoomCode(""); setPlayers([]); setActivityLogs([]); setSubmittedAnswersList([]);
-    setShowRoundEndPopup(false); setIsRoundLocked(false); setCountdownValue(null); setShowFinalRanking(false); setCurrentRound(1);
+    setShowRoundEndPopup(false); setIsRoundLocked(false); setCountdownValue(null); setShowFinalRanking(false); setCurrentRound(1); setUsedBoardIds([]);
   };
 
   const handleJoinGameRoom = (e?: React.FormEvent) => {
@@ -621,7 +675,7 @@ export default function FormulaPyramidPage() {
     const currentRoomConfig = { selectedRound, selectedTime, selectedPenalty, selectedBoardId: 1, isGameStarted: false, roomEndTime: null };
     try { localStorage.setItem(`pyramid-room-config-${code}`, JSON.stringify(currentRoomConfig)); } catch {}
     setRoomEndTime(null); setIsGameStarted(false); setRoomTimerSeconds(selectedTime * 60);
-    setGeneratedRoomCode(code); setActiveRoomCode(code); setMyNickname("딜러(선생님)"); setMyScore(0); setIsDealerHost(true); setInGameRoom(true);
+    setGeneratedRoomCode(code); setActiveRoomCode(code); setMyNickname("딜러(선생님)"); setMyScore(0); setIsDealerHost(true); setInGameRoom(true); setUsedBoardIds([]);
     const host = { name: "딜러(선생님)", score: 0, isHost: true };
     setPlayers([host]);
     setActivityLogs([`[안내] 딜러 방 [${code}] 가 생성되었습니다. 플레이어가 입장하면 [게임 시작하기]를 눌러주세요.`]);
@@ -630,11 +684,18 @@ export default function FormulaPyramidPage() {
     }
   };
 
-  /* ── 딜러가 '게임 생성하기' 클릭 시 랜덤 추첨 후 카운트다운 시작 ── */
+  /* ── 딜러가 '게임 시작하기' 클릭 시 중복 없이 랜덤 추첨 후 카운트다운 시작 ── */
   const handleStartGame = (nextRound?: number) => {
     if (!activeRoomCode) return;
-    const chosenBoard = GAME_BOARDS[Math.floor(Math.random() * GAME_BOARDS.length)];
+    
+    // 아직 사용되지 않은 게임판 중에서 랜덤 선택 (전부 사용 시 리셋)
+    const availableBoards = GAME_BOARDS.filter((b) => !usedBoardIds.includes(b.id));
+    const pool = availableBoards.length > 0 ? availableBoards : GAME_BOARDS;
+    const chosenBoard = pool[Math.floor(Math.random() * pool.length)];
     const chosenBoardId = chosenBoard.id;
+    const nextUsed = availableBoards.length > 0 ? [...usedBoardIds, chosenBoard.id] : [chosenBoard.id];
+    setUsedBoardIds(nextUsed);
+
     const calculatedEndTime = Date.now() + 3000 + selectedTime * 60 * 1000; // 카운트다운 3초 포함
 
     const roundNum = nextRound ?? currentRound;
@@ -1020,39 +1081,42 @@ export default function FormulaPyramidPage() {
                   <p className="leading-loose text-base sm:text-lg">
                     딜러 모드에서는 라운드 수, 제한 시간, 오답 패널티를 설정하여 방을 생성할 수 있습니다.
                   </p>
+                  
+                  {/* 상단 점선 안내 상자 */}
                   <div
                     className="w-full rounded-xl shadow-lg border-2 border-dashed border-yellow-400/90 bg-teal-900/95"
-                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1rem", paddingBottom: "1rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}
+                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.25rem", paddingBottom: "1.25rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}
                   >
                     <div className="flex items-start gap-3 text-yellow-300 text-base sm:text-lg font-medium" style={{ lineHeight: "1.5", wordBreak: "break-all" }}>
                       <Megaphone size={20} className="flex-shrink-0 text-yellow-400 mt-0.5" />
                       <span>생성된 방 코드를 플레이어들에게 공유하세요.</span>
                     </div>
-                    {/* 게임 생성하기 버튼 - 방 생성 후 && 게임 시작 전 && 라운드 종료 아닐 때 */}
-                    {inGameRoom && isDealerHost && !isGameStarted && !isRoundLocked && (
-                      <button
-                        type="button" onClick={() => handleStartGame(currentRound)}
-                        className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-base border-2 border-emerald-400 shadow-lg cursor-pointer animate-pulse transition-all"
-                        style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.75rem", paddingBottom: "0.75rem", fontFamily: "var(--font-chalk)" }}
-                      >
-                        <Play size={18} className="fill-white flex-shrink-0" />
-                        <span>게임 생성하기</span>
-                      </button>
-                    )}
-                    {/* 다음 라운드 시작하기 버튼 - 라운드 종료 후 && 마지막 라운드 아닐 때 */}
-                    {inGameRoom && isDealerHost && isRoundLocked && !isLastRound && (
-                      <button
-                        type="button" onClick={handleNextRound}
-                        className="w-full flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-500 text-white font-extrabold rounded-xl text-base border-2 border-sky-400 shadow-lg cursor-pointer transition-all"
-                        style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.75rem", paddingBottom: "0.75rem", fontFamily: "var(--font-chalk)" }}
-                      >
-                        <Play size={18} className="fill-white flex-shrink-0" />
-                        <span>다음 라운드 시작하기 ({currentRound + 1} / {selectedRound})</span>
-                      </button>
-                    )}
                   </div>
+
+                  {/* 중간 버튼 (두 블록 사이에 독립 위치) */}
+                  {inGameRoom && isDealerHost && !isGameStarted && !isRoundLocked && (
+                    <button
+                      type="button" onClick={() => handleStartGame(currentRound)}
+                      className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-base border-2 border-emerald-400 shadow-lg cursor-pointer animate-pulse transition-all"
+                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.85rem", paddingBottom: "0.85rem", fontFamily: "var(--font-chalk)" }}
+                    >
+                      <Play size={18} className="fill-white flex-shrink-0" />
+                      <span>게임 시작하기</span>
+                    </button>
+                  )}
+                  {inGameRoom && isDealerHost && isRoundLocked && !isLastRound && (
+                    <button
+                      type="button" onClick={handleNextRound}
+                      className="w-full flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-500 text-white font-extrabold rounded-xl text-base border-2 border-sky-400 shadow-lg cursor-pointer transition-all"
+                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.85rem", paddingBottom: "0.85rem", fontFamily: "var(--font-chalk)" }}
+                    >
+                      <Play size={18} className="fill-white flex-shrink-0" />
+                      <span>다음 라운드 시작하기 ({currentRound + 1} / {selectedRound})</span>
+                    </button>
+                  )}
                 </div>
 
+                {/* 하단 딜러 방 운영 중 상자 */}
                 {inGameRoom && isDealerHost ? (
                   <div
                     className="flex items-center justify-between rounded-xl bg-amber-950/95 border-2 border-amber-500/90 text-amber-200 shadow-md"
@@ -1116,7 +1180,7 @@ export default function FormulaPyramidPage() {
                       {currentPyramidData.map((row, rowIndex) => (
                         <div key={rowIndex} className="flex justify-center gap-2 sm:gap-2.5" style={{ marginTop: rowIndex === 0 ? "0px" : "-10px" }}>
                           {row.map((node) => (
-                            <HexagonCell key={node.id} node={node} isSelected={selectedNodes.includes(node.id)} onClick={() => handleNodeClick(node.id)} />
+                            <HexagonCell key={node.id} node={node} isSelected={selectedNodes.includes(node.id)} />
                           ))}
                         </div>
                       ))}
@@ -1170,8 +1234,8 @@ export default function FormulaPyramidPage() {
                       {currentPyramidData.map((row, rowIndex) => (
                         <div key={rowIndex} className="flex justify-center gap-2 sm:gap-2.5" style={{ marginTop: rowIndex === 0 ? "0px" : "-10px" }}>
                           {row.map((node) => (
-                            // 플레이어 대기 중에는 피라미드 칸 연산 기호를 ? 로 마스킹
-                            <HexagonCell key={node.id} node={node} isSelected={selectedNodes.includes(node.id)} onClick={() => handleNodeClick(node.id)} masked={!isGameStarted} />
+                            // 플레이어 대기 중에는 피라미드 칸 연산 기호를 ? 로 마스킹 (피라미드 칸 클릭 입력 비활성화)
+                            <HexagonCell key={node.id} node={node} isSelected={selectedNodes.includes(node.id)} masked={!isGameStarted} />
                           ))}
                         </div>
                       ))}
@@ -1358,38 +1422,44 @@ export default function FormulaPyramidPage() {
                           <span>전체 정답 보기</span>
                         </div>
                         <span className="text-xs sm:text-sm text-yellow-300 font-extrabold bg-teal-900 rounded-md border border-teal-700/80 shadow-sm" style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.25rem", paddingBottom: "0.25rem" }}>
-                          총 {validSolutions.length}개
+                          총 {isGameStarted ? `${validSolutions.length}개` : "?개"}
                         </span>
                       </div>
                       <div className="w-full border-t border-dashed border-teal-600/70" style={{ marginTop: "0.4rem", marginBottom: "0.5rem" }} />
-                      {/* 3열 그리드: 칸 번호만 표시, 제출된 정답은 초록 강조 */}
+                      {/* 3열 그리드: 게임 시작 전에는 목록 비움, 게임 시작 후에는 칸 번호만 표시 및 맞춘 정답 초록 강조 */}
                       <div
                         className="w-full bg-teal-900/98 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-lg backdrop-blur-md overflow-y-auto min-h-[120px] max-h-[180px]"
                         style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
                       >
-                        {validSolutions.length > 0 ? (
-                          <div className="grid grid-cols-3 gap-1.5">
-                            {validSolutions.map((sol, idx) => {
-                              const key = sol.nodes.join(" ");
-                              const isSubmitted = submittedAnswersList.some((a) => a.nodes === key);
-                              return (
-                                <div
-                                  key={idx}
-                                  className={`flex items-center justify-center rounded-lg text-center font-black text-base tracking-widest transition-all ${
-                                    isSubmitted
-                                      ? "bg-emerald-700/90 border-2 border-emerald-400 text-emerald-200 shadow-md"
-                                      : "bg-teal-950/80 border border-teal-700/70 text-gray-300"
-                                  }`}
-                                  style={{ paddingTop: "0.45rem", paddingBottom: "0.45rem", paddingLeft: "0.5rem", paddingRight: "0.5rem", fontFamily: "var(--font-chalk)" }}
-                                >
-                                  {sol.nodes.join(" ")}
-                                </div>
-                              );
-                            })}
-                          </div>
+                        {isGameStarted ? (
+                          validSolutions.length > 0 ? (
+                            <div className="grid grid-cols-3 gap-1.5">
+                              {validSolutions.map((sol, idx) => {
+                                const key = sol.nodes.join(" ");
+                                const isSubmitted = submittedAnswersList.some((a) => a.nodes === key);
+                                return (
+                                  <div
+                                    key={idx}
+                                    className={`flex items-center justify-center rounded-lg text-center font-black text-base tracking-widest transition-all ${
+                                      isSubmitted
+                                        ? "bg-emerald-700/90 border-2 border-emerald-400 text-emerald-200 shadow-md"
+                                        : "bg-teal-950/80 border border-teal-700/70 text-gray-300"
+                                    }`}
+                                    style={{ paddingTop: "0.45rem", paddingBottom: "0.45rem", paddingLeft: "0.5rem", paddingRight: "0.5rem", fontFamily: "var(--font-chalk)" }}
+                                  >
+                                    {sol.nodes.join(" ")}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <div className="py-6 text-center text-gray-400 text-sm font-medium" style={{ fontFamily: "var(--font-body)" }}>
+                              정답 조합 없음
+                            </div>
+                          )
                         ) : (
                           <div className="py-6 text-center text-gray-400 text-sm font-medium" style={{ fontFamily: "var(--font-body)" }}>
-                            {isGameStarted ? "정답 조합 없음" : "게임이 시작되면 전체 정답이 표시됩니다."}
+                            게임이 시작되면 전체 정답이 표시됩니다.
                           </div>
                         )}
                       </div>
