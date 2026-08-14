@@ -949,7 +949,7 @@ export default function FormulaPyramidPage() {
                   </div>
                 </div>
 
-                {inGameRoom && isDealerHost && (
+                {inGameRoom && isDealerHost ? (
                   <div
                     className="flex items-center justify-between rounded-xl bg-amber-950/95 border-2 border-amber-500/90 text-amber-200 shadow-md"
                     style={{
@@ -967,6 +967,29 @@ export default function FormulaPyramidPage() {
                       type="button"
                       onClick={handleLeaveRoom}
                       className="bg-rose-900/90 hover:bg-rose-800 text-rose-200 font-extrabold text-sm sm:text-base rounded-md border border-rose-600/80 cursor-pointer shadow flex-shrink-0"
+                      style={{ paddingLeft: "1.1rem", paddingRight: "1.1rem", paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
+                    >
+                      퇴장
+                    </button>
+                  </div>
+                ) : (
+                  /* 방 생성 전: Photo 2와 동일한 외곽 흰색 박스 크기를 유지하기 위한 하단 투명 빈 공간 예약 */
+                  <div
+                    className="invisible flex items-center justify-between rounded-xl"
+                    style={{
+                      paddingLeft: "1.25rem",
+                      paddingRight: "1.25rem",
+                      paddingTop: "1.1rem",
+                      paddingBottom: "1.1rem",
+                      marginTop: "1.25rem",
+                    }}
+                  >
+                    <span className="font-black text-lg sm:text-xl flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
+                      👑 딜러 방 [000000] 운영 중
+                    </span>
+                    <button
+                      type="button"
+                      className="text-sm sm:text-base rounded-md flex-shrink-0"
                       style={{ paddingLeft: "1.1rem", paddingRight: "1.1rem", paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
                     >
                       퇴장
