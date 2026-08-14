@@ -414,7 +414,17 @@ export default function FormulaPyramidPage() {
       const ansObj = { nodes: nodesStr, formula: formulaStr };
       setSubmittedAnswersList((prev) => {
         if (prev.some((a) => a.nodes === ansObj.nodes)) return prev;
-        return [...prev, ansObj];
+        const next = [...prev, ansObj];
+        // 모든 정답 조합이 다 제출되었으면 즉시 라운드 종료
+        const allSolutions = getAllValidSolutions(currentTargetNumber, currentAllNodes);
+        const allSubmittedKeys = next.map((a) => a.nodes);
+        const allSolKeys = allSolutions.map((s) => s.nodes.join(" "));
+        const allDone = allSolKeys.every((k) => allSubmittedKeys.includes(k));
+        if (allDone) {
+          setIsRoundLocked(true);
+          setShowRoundEndPopup(true);
+        }
+        return next;
       });
       broadcastScoreUpdate(myNickname, nextScore, ansObj);
     } else {
@@ -825,24 +835,28 @@ export default function FormulaPyramidPage() {
             </div>
             <div className="w-full border-t border-dashed border-teal-600/70" style={{ marginTop: "0.5rem", marginBottom: "0.85rem" }} />
 
-            {/* 탭 버튼 */}
-            <div className="w-full flex justify-center" style={{ marginTop: "0.5rem", marginBottom: "2.5rem" }}>
-              <div className="flex items-center rounded-full select-none bg-teal-950/95 border-2 border-yellow-400/70 shadow-lg w-full p-1.5 gap-2">
-                {(["player", "dealer"] as const).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setMode(m)}
-                    className={`flex-1 py-2.5 rounded-full text-base sm:text-lg font-bold transition-all duration-200 cursor-pointer text-center ${
-                      mode === m ? "bg-yellow-400 text-teal-950 shadow-md scale-102" : "text-gray-300 hover:text-white"
-                    }`}
-                    style={{ fontFamily: "var(--font-chalk)" }}
-                  >
-                    {m === "player" ? "플레이어 모드" : "딜러 모드"}
-                  </button>
-                ))}
+            {/* 탭 버튼: 방에 입장 중이 아닐 때만 표시 */}
+            {!inGameRoom && (
+              <div className="w-full flex justify-center" style={{ marginTop: "0.5rem", marginBottom: "2.5rem" }}>
+                <div className="flex items-center rounded-full select-none bg-teal-950/95 border-2 border-yellow-400/70 shadow-lg w-full p-1.5 gap-2">
+                  {(["player", "dealer"] as const).map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setMode(m)}
+                      className={`flex-1 py-2.5 rounded-full text-base sm:text-lg font-bold transition-all duration-200 cursor-pointer text-center ${
+                        mode === m ? "bg-yellow-400 text-teal-950 shadow-md scale-102" : "text-gray-300 hover:text-white"
+                      }`}
+                      style={{ fontFamily: "var(--font-chalk)" }}
+                    >
+                      {m === "player" ? "플레이어 모드" : "딜러 모드"}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+            {/* 방 입장 중일 때 탭 대신 상단 간격 보정 */}
+            {inGameRoom && <div style={{ marginBottom: "0.5rem" }} />}
 
             {mode === "player" ? (
               /* ── 플레이어 모드 입장 양식 ── */
@@ -885,7 +899,7 @@ export default function FormulaPyramidPage() {
                       style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.1rem", paddingBottom: "1.1rem" }}
                     >
                       <span className="font-black text-lg sm:text-xl text-yellow-300 flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
-                        🟢 [{activeRoomCode}] ({myNickname})
+                        🪪 {myNickname}
                       </span>
                       <button
                         type="button" onClick={handleLeaveRoom}
@@ -1049,7 +1063,8 @@ export default function FormulaPyramidPage() {
                       {currentPyramidData.map((row, rowIndex) => (
                         <div key={rowIndex} className="flex justify-center gap-2 sm:gap-2.5" style={{ marginTop: rowIndex === 0 ? "0px" : "-10px" }}>
                           {row.map((node) => (
-                            <HexagonCell key={node.id} node={node} isSelected={selectedNodes.includes(node.id)} onClick={() => handleNodeClick(node.id)} />
+                            // 플레이어 대기 중에는 피라미드 칸 연산 기호를 ? 로 마스킹
+                            <HexagonCell key={node.id} node={node} isSelected={selectedNodes.includes(node.id)} onClick={() => handleNodeClick(node.id)} masked={!isGameStarted} />
                           ))}
                         </div>
                       ))}
@@ -1122,16 +1137,16 @@ export default function FormulaPyramidPage() {
                     </div>
                     <div className="flex-1 flex flex-col justify-between gap-2">
                       <div className="grid grid-cols-5 gap-2">
+                        {/* 정답 입력용 버튼: A~J ID는 항상 표시 (게임 전 대기 중에도 클릭 가능해야 함) */}
                         {Object.values(currentAllNodes).map((node) => {
                           const isSel = selectedNodes.includes(node.id);
-                          const showMasked = inGameRoom && !isGameStarted;
                           return (
                             <button
                               key={node.id} type="button" onClick={() => handleNodeClick(node.id)}
                               className={`py-2.5 px-2 rounded-md text-xl font-black transition-all ${isSel ? "bg-yellow-400 text-teal-950 scale-105 shadow-md" : "bg-teal-800/90 text-white hover:bg-teal-700"}`}
                               style={{ fontFamily: "var(--font-chalk)" }}
                             >
-                              {showMasked ? "?" : node.id}
+                              {node.id}
                             </button>
                           );
                         })}
@@ -1309,18 +1324,23 @@ export default function FormulaPyramidPage() {
                 </div>
                 <div className="w-full border-t border-dashed border-teal-700" style={{ marginTop: "1.1rem", marginBottom: "1.1rem" }} />
                 <div className="flex flex-col gap-4 text-sm text-gray-200 leading-relaxed py-1" style={{ fontFamily: "var(--font-body)", wordBreak: "break-all", letterSpacing: "-0.015em" }}>
-                  {[
-                    { num: "①", content: <><strong className="text-yellow-300 font-semibold">&lsquo;수식 피라미드&rsquo;</strong>는 문제 판에서 3개의 칸을 선택하여 타깃 넘버가 될 수 있도록 수식을 만드는 게임입니다.</> },
-                    { num: "②", content: <>라운드가 시작되면 피라미드 모양의 문제판과 타깃 넘버가 공개됩니다. 문제판은 총 10개의 칸으로 이루어져 있으며, 각 칸에는 사칙연산 기호 중 하나와 숫자가 한 쌍을 이루고 있습니다.</> },
-                    { num: "④", content: <>정답을 제출하면 1점을 획득하고, 오답을 제출하거나 이번 라운드에서 이미 제출된 정답을 다시 제출하는 경우 1점이 감점됩니다.</> },
-                    { num: "⑤", content: <>라운드 진행 시간이 지났거나 모든 정답이 제출되면 라운드가 종료됩니다.</> },
-                  ].map(({ num, content }) => (
-                    <div key={num} className="flex items-start gap-2.5">
-                      <span className="flex-shrink-0 font-bold text-yellow-300 w-5">{num}</span>
-                      <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>{content}</p>
-                    </div>
-                  ))}
+                  {/* ① 게임 소개 */}
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex-shrink-0 font-bold text-yellow-300 w-5">①</span>
+                    <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
+                      <strong className="text-yellow-300 font-semibold">&lsquo;수식 피라미드&rsquo;</strong>는 문제 판에서 3개의 칸을 선택하여 타깃 넘버가 될 수 있도록 수식을 만드는 게임입니다.
+                    </p>
+                  </div>
 
+                  {/* ② 문제판 설명 */}
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex-shrink-0 font-bold text-yellow-300 w-5">②</span>
+                    <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
+                      라운드가 시작되면 피라미드 모양의 문제판과 타깃 넘버가 공개됩니다. 문제판은 총 10개의 칸으로 이루어져 있으며, 각 칸에는 사칙연산 기호 중 하나와 숫자가 한 쌍을 이루고 있습니다.
+                    </p>
+                  </div>
+
+                  {/* ③ 조합 규칙 (②와 ④ 사이로 이동) */}
                   <div className="flex flex-col gap-2">
                     <div className="flex items-start gap-2.5">
                       <span className="flex-shrink-0 font-bold text-yellow-300 w-5">③</span>
@@ -1338,6 +1358,22 @@ export default function FormulaPyramidPage() {
                         </div>
                       ))}
                     </div>
+                  </div>
+
+                  {/* ④ 점수 */}
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex-shrink-0 font-bold text-yellow-300 w-5">④</span>
+                    <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
+                      정답을 제출하면 1점을 획득하고, 오답을 제출하거나 이번 라운드에서 이미 제출된 정답을 다시 제출하는 경우 1점이 감점됩니다.
+                    </p>
+                  </div>
+
+                  {/* ⑤ 종료 */}
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex-shrink-0 font-bold text-yellow-300 w-5">⑤</span>
+                    <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
+                      라운드 진행 시간이 지났거나 모든 정답이 제출되면 라운드가 종료됩니다.
+                    </p>
                   </div>
                 </div>
               </>
