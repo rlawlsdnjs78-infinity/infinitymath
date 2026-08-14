@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
         room.usedBoardIds = payload.usedBoardIds;
       }
       room.activityLogs = [
-        `[실시간] ${room.currentRound}라운드가 시작되었습니다! (TARGET: ${payload.target || 10})`,
+        `[안내] ${room.currentRound}라운드가 시작되었습니다! (TARGET: ${payload.target || 10})`,
         ...room.activityLogs.slice(0, 30),
       ];
       room.lastUpdated = Date.now();
