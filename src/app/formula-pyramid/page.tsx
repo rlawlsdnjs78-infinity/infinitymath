@@ -443,20 +443,19 @@ export default function FormulaPyramidPage() {
               </form>
             ) : (
               <div
-                className="flex flex-col gap-5 text-sm text-gray-200 leading-relaxed flex-1 justify-between py-1"
+                className="flex flex-col gap-5 text-sm text-gray-200 leading-relaxed flex-1 justify-start py-1"
                 style={{ fontFamily: "var(--font-body)" }}
               >
                 <div className="flex flex-col gap-4">
-                  <p className="leading-loose text-base">
+                  <p className="leading-loose text-base sm:text-lg">
                     딜러 모드에서는 라운드 수, 제한 시간, 오답 패널티를 설정하여 방을 생성할 수 있습니다.
                   </p>
-                  <div className="bg-teal-900/60 p-4.5 rounded-md border border-dashed border-yellow-400/50 text-sm text-yellow-300 leading-relaxed">
-                    💡 생성된 방 코드를 학생(플레이어)들에게 공유하세요.
+                  {/* [요구사항 1] '학생(플레이어)들에게' -> '플레이어들에게' 수정 */}
+                  <div className="bg-teal-900/60 p-4.5 rounded-md border border-dashed border-yellow-400/50 text-base text-yellow-300 leading-relaxed">
+                    💡 생성된 방 코드를 플레이어들에게 공유하세요.
                   </div>
                 </div>
-                <div className="p-4 bg-teal-900/40 rounded-md text-center text-sm text-gray-300 border border-dashed border-teal-700">
-                  현재 모드: <span className="text-yellow-400 font-bold">딜러 진행 관리</span>
-                </div>
+                {/* [요구사항 2] 하단의 '현재 모드: 딜러 진행 관리' 부분 삭제 */}
               </div>
             )}
           </div>
@@ -798,8 +797,9 @@ export default function FormulaPyramidPage() {
 
                 <div className="flex flex-col gap-6 flex-1 justify-between py-1">
                   <div className="flex flex-col gap-5">
+                    {/* [요구사항 3] 각 버튼 및 라벨 글씨 크기 확대 */}
                     <div className="flex flex-col gap-2.5">
-                      <label className="text-base text-gray-200 font-medium" style={{ fontFamily: "var(--font-chalk)" }}>
+                      <label className="text-lg sm:text-xl text-gray-200 font-bold" style={{ fontFamily: "var(--font-chalk)" }}>
                         라운드 설정 ({selectedRound}라운드)
                       </label>
                       <div className="grid grid-cols-5 gap-2">
@@ -808,7 +808,7 @@ export default function FormulaPyramidPage() {
                             key={r}
                             type="button"
                             onClick={() => setSelectedRound(r)}
-                            className={`py-2 text-sm font-bold rounded-md transition-all ${
+                            className={`py-2 text-base sm:text-lg font-bold rounded-md transition-all ${
                               selectedRound === r
                                 ? "bg-yellow-400 text-teal-950 shadow scale-105"
                                 : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
@@ -822,7 +822,7 @@ export default function FormulaPyramidPage() {
                     </div>
 
                     <div className="flex flex-col gap-2.5">
-                      <label className="text-base text-gray-200 font-medium" style={{ fontFamily: "var(--font-chalk)" }}>
+                      <label className="text-lg sm:text-xl text-gray-200 font-bold" style={{ fontFamily: "var(--font-chalk)" }}>
                         라운드 별 시간 ({selectedTime}분)
                       </label>
                       <div className="grid grid-cols-3 gap-2.5">
@@ -831,7 +831,7 @@ export default function FormulaPyramidPage() {
                             key={t}
                             type="button"
                             onClick={() => setSelectedTime(t)}
-                            className={`py-2.5 text-base font-bold rounded-md transition-all ${
+                            className={`py-2.5 text-lg sm:text-xl font-extrabold rounded-md transition-all ${
                               selectedTime === t
                                 ? "bg-yellow-400 text-teal-950 shadow scale-105"
                                 : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
@@ -845,7 +845,7 @@ export default function FormulaPyramidPage() {
                     </div>
 
                     <div className="flex flex-col gap-2.5">
-                      <label className="text-base text-gray-200 font-medium" style={{ fontFamily: "var(--font-chalk)" }}>
+                      <label className="text-lg sm:text-xl text-gray-200 font-bold" style={{ fontFamily: "var(--font-chalk)" }}>
                         오답 패널티 ({selectedPenalty})
                       </label>
                       <div className="grid grid-cols-3 gap-2.5">
@@ -854,7 +854,7 @@ export default function FormulaPyramidPage() {
                             key={p}
                             type="button"
                             onClick={() => setSelectedPenalty(p)}
-                            className={`py-2.5 text-sm font-bold rounded-md transition-all ${
+                            className={`py-2.5 text-base sm:text-lg font-bold rounded-md transition-all ${
                               selectedPenalty === p
                                 ? "bg-yellow-400 text-teal-950 shadow scale-105"
                                 : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
@@ -872,7 +872,7 @@ export default function FormulaPyramidPage() {
                     <button
                       type="button"
                       onClick={handleCreateGame}
-                      className="btn-chalk w-full justify-center py-3.5 text-xl"
+                      className="btn-chalk w-full justify-center py-3.5 text-2xl font-bold"
                     >
                       게임 방 생성하기
                     </button>
