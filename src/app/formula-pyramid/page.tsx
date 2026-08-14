@@ -17,6 +17,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import mqtt, { MqttClient } from "mqtt";
+import ScoreBoard from "../components/ScoreBoard";
 import {
   Pencil,
   AlertTriangle,
@@ -41,203 +42,9 @@ import {
   Activity,
 } from "lucide-react";
 
-/* ─── 피라미드 칸 데이터 타입 (A ~ J) ─────────────────────────────────────────── */
-export interface PyramidNode {
-  id: string;
-  op: string;
-  num: number;
-  display: string;
-}
-
-export interface GameBoardPreset {
-  id: number;
-  title: string;
-  target: number;
-  nodes: Record<string, PyramidNode>;
-  pyramidData: PyramidNode[][];
-  nodeList: PyramidNode[];
-}
-
-/* ─── 헬퍼: 10개 노드 구성 데이터로부터 피라미드 프리셋 생성 ─────────────────────── */
-const createBoardPreset = (
-  id: number,
-  title: string,
-  target: number,
-  nodeConfigs: { id: string; op: string; num: number }[]
-): GameBoardPreset => {
-  const nodesMap: Record<string, PyramidNode> = {};
-  const nodeList: PyramidNode[] = [];
-
-  nodeConfigs.forEach((c) => {
-    const nodeObj: PyramidNode = {
-      id: c.id,
-      op: c.op,
-      num: c.num,
-      display: `${c.op}${c.num}`,
-    };
-    nodesMap[c.id] = nodeObj;
-    nodeList.push(nodeObj);
-  });
-
-  const pyramidData: PyramidNode[][] = [
-    [nodesMap["A"]],
-    [nodesMap["B"], nodesMap["C"]],
-    [nodesMap["D"], nodesMap["E"], nodesMap["F"]],
-    [nodesMap["G"], nodesMap["H"], nodesMap["I"], nodesMap["J"]],
-  ];
-
-  return { id, title, target, nodes: nodesMap, pyramidData, nodeList };
-};
-
-/* ─── 0. 게임 시작 전 기본 연습용 게임판 (타깃 넘버: 9 고정) ────────────────────────── */
-export const PRACTICE_BOARD: GameBoardPreset = createBoardPreset(0, "연습 문제판", 9, [
-  { id: "A", op: "+", num: 1 },
-  { id: "B", op: "÷", num: 4 },
-  { id: "C", op: "×", num: 3 },
-  { id: "D", op: "-", num: 10 },
-  { id: "E", op: "÷", num: 5 },
-  { id: "F", op: "×", num: 6 },
-  { id: "G", op: "-", num: 11 },
-  { id: "H", op: "+", num: 7 },
-  { id: "I", op: "÷", num: 9 },
-  { id: "J", op: "+", num: 9 },
-]);
-
-/* ─── 1~10. 게임 시작 시 랜덤으로 적용되는 10가지 실전 게임판 리스트 ─────────────────── */
-export const GAME_BOARDS: GameBoardPreset[] = [
-  createBoardPreset(1, "게임판 1", 10, [
-    { id: "A", op: "×", num: 7 }, { id: "B", op: "÷", num: 5 }, { id: "C", op: "+", num: 9 },
-    { id: "D", op: "-", num: 5 }, { id: "E", op: "×", num: 2 }, { id: "F", op: "+", num: 2 },
-    { id: "G", op: "÷", num: 8 }, { id: "H", op: "÷", num: 3 }, { id: "I", op: "-", num: 8 }, { id: "J", op: "×", num: 3 },
-  ]),
-  createBoardPreset(2, "게임판 2", 1, [
-    { id: "A", op: "÷", num: 4 }, { id: "B", op: "+", num: 8 }, { id: "C", op: "×", num: 2 },
-    { id: "D", op: "-", num: 3 }, { id: "E", op: "+", num: 9 }, { id: "F", op: "+", num: 1 },
-    { id: "G", op: "×", num: 7 }, { id: "H", op: "÷", num: 11 }, { id: "I", op: "-", num: 6 }, { id: "J", op: "×", num: 8 },
-  ]),
-  createBoardPreset(3, "게임판 3", 8, [
-    { id: "A", op: "+", num: 7 }, { id: "B", op: "÷", num: 9 }, { id: "C", op: "×", num: 2 },
-    { id: "D", op: "-", num: 13 }, { id: "E", op: "+", num: 15 }, { id: "F", op: "÷", num: 5 },
-    { id: "G", op: "×", num: 1 }, { id: "H", op: "÷", num: 3 }, { id: "I", op: "-", num: 11 }, { id: "J", op: "×", num: 3 },
-  ]),
-  createBoardPreset(4, "게임판 4", 11, [
-    { id: "A", op: "×", num: 3 }, { id: "B", op: "×", num: 13 }, { id: "C", op: "-", num: 8 },
-    { id: "D", op: "-", num: 14 }, { id: "E", op: "÷", num: 2 }, { id: "F", op: "÷", num: 7 },
-    { id: "G", op: "×", num: 9 }, { id: "H", op: "÷", num: 5 }, { id: "I", op: "-", num: 1 }, { id: "J", op: "÷", num: 4 },
-  ]),
-  createBoardPreset(5, "게임판 5", 6, [
-    { id: "A", op: "÷", num: 14 }, { id: "B", op: "÷", num: 2 }, { id: "C", op: "-", num: 10 },
-    { id: "D", op: "÷", num: 7 }, { id: "E", op: "×", num: 8 }, { id: "F", op: "÷", num: 5 },
-    { id: "G", op: "÷", num: 12 }, { id: "H", op: "-", num: 5 }, { id: "I", op: "-", num: 6 }, { id: "J", op: "÷", num: 4 },
-  ]),
-  createBoardPreset(6, "게임판 6", 3, [
-    { id: "A", op: "÷", num: 9 }, { id: "B", op: "-", num: 2 }, { id: "C", op: "-", num: 10 },
-    { id: "D", op: "×", num: 6 }, { id: "E", op: "×", num: 3 }, { id: "F", op: "-", num: 8 },
-    { id: "G", op: "×", num: 2 }, { id: "H", op: "×", num: 5 }, { id: "I", op: "÷", num: 7 }, { id: "J", op: "×", num: 4 },
-  ]),
-  createBoardPreset(7, "게임판 7", 19, [
-    { id: "A", op: "-", num: 1 }, { id: "B", op: "+", num: 2 }, { id: "C", op: "+", num: 3 },
-    { id: "D", op: "-", num: 4 }, { id: "E", op: "×", num: 5 }, { id: "F", op: "×", num: 6 },
-    { id: "G", op: "×", num: 7 }, { id: "H", op: "-", num: 8 }, { id: "I", op: "×", num: 9 }, { id: "J", op: "-", num: 10 },
-  ]),
-  createBoardPreset(8, "게임판 8", 9, [
-    { id: "A", op: "-", num: 16 }, { id: "B", op: "-", num: 14 }, { id: "C", op: "÷", num: 2 },
-    { id: "D", op: "÷", num: 8 }, { id: "E", op: "×", num: 12 }, { id: "F", op: "×", num: 4 },
-    { id: "G", op: "÷", num: 7 }, { id: "H", op: "+", num: 10 }, { id: "I", op: "+", num: 3 }, { id: "J", op: "÷", num: 5 },
-  ]),
-  createBoardPreset(9, "게임판 9", 7, [
-    { id: "A", op: "-", num: 2 }, { id: "B", op: "+", num: 12 }, { id: "C", op: "÷", num: 6 },
-    { id: "D", op: "×", num: 4 }, { id: "E", op: "÷", num: 2 }, { id: "F", op: "+", num: 8 },
-    { id: "G", op: "×", num: 6 }, { id: "H", op: "÷", num: 10 }, { id: "I", op: "-", num: 4 }, { id: "J", op: "×", num: 2 },
-  ]),
-  createBoardPreset(10, "게임판 10", 17, [
-    { id: "A", op: "-", num: 10 }, { id: "B", op: "×", num: 4 }, { id: "C", op: "×", num: 9 },
-    { id: "D", op: "×", num: 5 }, { id: "E", op: "×", num: 2 }, { id: "F", op: "+", num: 3 },
-    { id: "G", op: "+", num: 1 }, { id: "H", op: "÷", num: 6 }, { id: "I", op: "÷", num: 8 }, { id: "J", op: "÷", num: 7 },
-  ]),
-];
-
-/* ─── TARGET을 만드는 모든 수학적 정답 조합 동적 계산 ───────────────────────────── */
-const getAllValidSolutions = (
-  target: number,
-  nodesMap: Record<string, PyramidNode>
-): { nodes: string[]; formulaStr: string; val: number }[] => {
-  const nodeKeys = Object.keys(nodesMap);
-  const solutions: { nodes: string[]; formulaStr: string; val: number }[] = [];
-
-  for (let i = 0; i < nodeKeys.length; i++) {
-    for (let j = 0; j < nodeKeys.length; j++) {
-      if (i === j) continue;
-      for (let k = 0; k < nodeKeys.length; k++) {
-        if (i === k || j === k) continue;
-        const n1 = nodesMap[nodeKeys[i]];
-        const n2 = nodesMap[nodeKeys[j]];
-        const n3 = nodesMap[nodeKeys[k]];
-        if (!n1 || !n2 || !n3) continue;
-
-        const op2 = n2.op === "×" ? "*" : n2.op === "÷" ? "/" : n2.op;
-        const op3 = n3.op === "×" ? "*" : n3.op === "÷" ? "/" : n3.op;
-        const calcExpr = `${n1.num} ${op2} ${n2.num} ${op3} ${n3.num}`;
-
-        try {
-          const val = Function(`"use strict"; return (${calcExpr})`)();
-          if (val === target) {
-            const formulaStr = `${n1.num} ${n2.op}${n2.num} ${n3.op}${n3.num} = ${target}`;
-            solutions.push({ nodes: [n1.id, n2.id, n3.id], formulaStr, val });
-          }
-        } catch {}
-      }
-    }
-  }
-  return solutions;
-};
-
-/* ─── 정육각형(Hexagon) SVG 컴포넌트 ────────────────────────────────────── */
-function HexagonCell({
-  node,
-  isSelected,
-  masked = false,
-}: {
-  node: PyramidNode;
-  isSelected: boolean;
-  masked?: boolean;
-}) {
-  return (
-    <div
-      className={`relative select-none w-[64px] h-[73.9px] sm:w-[68px] sm:h-[78.5px] flex items-center justify-center ${
-        isSelected ? "drop-shadow-[0_0_16px_rgba(245,230,66,0.95)]" : ""
-      }`}
-    >
-      <svg viewBox="0 0 100 115.47" className="w-full h-full absolute inset-0 filter drop-shadow-md">
-        <polygon
-          points="50,4.62 96,31.18 96,84.30 50,110.85 4,84.30 4,31.18"
-          fill={isSelected ? "rgba(245, 230, 66, 0.3)" : "rgba(20, 50, 50, 0.92)"}
-          stroke={isSelected ? "#f5e642" : "rgba(240, 237, 232, 0.65)"}
-          strokeWidth="3.5"
-          strokeDasharray={isSelected ? "none" : "4 2"}
-        />
-        <polygon
-          points="50,4.62 67.32,14.62 67.32,34.62 50,44.62 32.68,34.62 32.68,14.62"
-          fill={isSelected ? "#f5e642" : "rgba(245, 230, 66, 0.25)"}
-          stroke={isSelected ? "#1a3a3a" : "var(--chalk-yellow)"}
-          strokeWidth="2"
-        />
-        <text x="50" y="31" textAnchor="middle" fill={isSelected ? "#1a3a3a" : "var(--chalk-yellow)"} fontSize="28" fontWeight="bold" fontFamily="var(--font-chalk)">
-          {node.id}
-        </text>
-        <text x="50" y="85" textAnchor="middle" fill={isSelected ? "#f5e642" : "var(--chalk-white)"} fontSize={masked ? "52" : "44"} fontWeight="bold" fontFamily="var(--font-chalk)">
-          {masked ? "?" : node.display}
-        </text>
-      </svg>
-    </div>
-  );
-}
-
-/* ─── 노드 순서 무관 정답 비교를 위한 정규화 헬퍼 ─── */
-const normalizeNodesKey = (nodes: string | string[]): string => {
-  const arr = Array.isArray(nodes) ? nodes : nodes.trim().split(/\s+/);
-  return arr.slice().sort().join(" ");
-};
+import { GAME_BOARDS, PRACTICE_BOARD } from "./data";
+import { getAllValidSolutions, normalizeNodesKey } from "./utils";
+import HexagonCell from "../components/HexagonCell";
 
 /* ─── 메인 수식 피라미드 페이지 ─────────────────────────────────────────── */
 export default function FormulaPyramidPage() {
@@ -334,6 +141,43 @@ export default function FormulaPyramidPage() {
       return isRoundMatch && isValidSolution;
     });
   }, [submittedAnswersList, currentRound, validSolutions]);
+
+  /* ── 모든 정답 제출 시 자동 라운드 종료 처리 ── */
+  useEffect(() => {
+    if (!isGameStarted || isRoundLocked || validSolutions.length === 0) return;
+    if (currentRoundSubmittedAnswers.length === 0) return;
+
+    const allSolNormalized = validSolutions.map((s) => normalizeNodesKey(s.nodes));
+    const allSubmittedNormalized = currentRoundSubmittedAnswers.map((a) => normalizeNodesKey(a.nodes));
+    const allDone = allSolNormalized.every((k) => allSubmittedNormalized.includes(k));
+
+    if (allDone) {
+      setIsRoundLocked(true);
+      if (!isDealerHost) setShowRoundEndPopup(true);
+      setRoomTimerSeconds(0);
+      setRoomEndTime(Date.now());
+      addActivityLog(`[안내] 이번 라운드의 모든 정답이 제출되었습니다. ${currentRound}라운드를 종료합니다.`);
+
+      if (isDealerHost && activeRoomCode && typeof window !== "undefined") {
+        try {
+          const confStr = localStorage.getItem(`pyramid-room-config-${activeRoomCode}`);
+          if (confStr) {
+            const conf = JSON.parse(confStr);
+            conf.roomEndTime = Date.now();
+            localStorage.setItem(`pyramid-room-config-${activeRoomCode}`, JSON.stringify(conf));
+          }
+        } catch (err) {}
+      }
+    }
+  }, [
+    currentRoundSubmittedAnswers,
+    validSolutions,
+    isGameStarted,
+    isRoundLocked,
+    currentRound,
+    isDealerHost,
+    activeRoomCode,
+  ]);
 
   const triggerNotice = (msg: string, type: "warning" | "success" | "error" = "warning", durationMs = 1000) => {
     if (noticeTimer) clearTimeout(noticeTimer);
@@ -485,33 +329,7 @@ export default function FormulaPyramidPage() {
 
       setSubmittedAnswersList((prev) => {
         if (prev.some((a) => (a.round === undefined || a.round === currentRound) && normalizeNodesKey(a.nodes) === currentNormalizedKey)) return prev;
-        const next = [...prev.filter((a) => a.round === undefined || a.round === currentRound), ansObj];
-        // 모든 정답 조합이 다 제출되었는지 노드 순서 무관 정규화 검사
-        const allSolutions = getAllValidSolutions(currentTargetNumber, currentAllNodes);
-        const allSubmittedNormalized = next.map((a) => normalizeNodesKey(a.nodes));
-        const allSolNormalized = allSolutions.map((s) => normalizeNodesKey(s.nodes));
-        const allDone =
-          allSolNormalized.length > 0 &&
-          allSolNormalized.every((k) => allSubmittedNormalized.includes(k));
-
-        if (allDone) {
-          setIsRoundLocked(true);
-          setShowRoundEndPopup(true);
-          setRoomTimerSeconds(0);
-          setRoomEndTime(Date.now());
-          addActivityLog(`[안내] 이번 라운드의 모든 정답이 제출되었습니다. ${currentRound}라운드를 종료합니다.`);
-          if (activeRoomCode && typeof window !== "undefined") {
-            try {
-              const confStr = localStorage.getItem(`pyramid-room-config-${activeRoomCode}`);
-              if (confStr) {
-                const conf = JSON.parse(confStr);
-                conf.roomEndTime = Date.now();
-                localStorage.setItem(`pyramid-room-config-${activeRoomCode}`, JSON.stringify(conf));
-              }
-            } catch (err) {}
-          }
-        }
-        return next;
+        return [...prev.filter((a) => a.round === undefined || a.round === currentRound), ansObj];
       });
       broadcastScoreUpdate(myNickname, nextScore, ansObj, false, logMsg, currentRound);
     } else {
@@ -857,21 +675,7 @@ export default function FormulaPyramidPage() {
                 setSubmittedAnswersList((prev) => {
                   const filtered = prev.filter((a) => a.round === undefined || a.round === curr.currentRound);
                   const isDup = filtered.some((a) => normalizeNodesKey(a.nodes) === normalizeNodesKey(data.submittedAnswer.nodes));
-                  const nextList = isDup ? filtered : [...filtered, { ...data.submittedAnswer, round: curr.currentRound }];
-                  const allSolutions = getAllValidSolutions(curr.currentTargetNumber, curr.currentAllNodes);
-                  const allSubmittedNormalized = nextList.map((a) => normalizeNodesKey(a.nodes));
-                  const allSolNormalized = allSolutions.map((s) => normalizeNodesKey(s.nodes));
-                  const allDone =
-                    allSolNormalized.length > 0 &&
-                    allSolNormalized.every((k) => allSubmittedNormalized.includes(k));
-
-                  if (allDone) {
-                    setIsRoundLocked(true);
-                    if (!curr.isDealerHost) setShowRoundEndPopup(true);
-                    setRoomTimerSeconds(0);
-                    addActivityLog(`[안내] 이번 라운드의 모든 정답이 제출되었습니다. ${curr.currentRound}라운드를 종료합니다.`);
-                  }
-                  return nextList;
+                  return isDup ? filtered : [...filtered, { ...data.submittedAnswer, round: curr.currentRound }];
                 });
               }
             }
@@ -952,21 +756,7 @@ export default function FormulaPyramidPage() {
               setSubmittedAnswersList((prev) => {
                 const filtered = prev.filter((a) => a.round === undefined || a.round === curr.currentRound);
                 const isDup = filtered.some((a) => normalizeNodesKey(a.nodes) === normalizeNodesKey(data.submittedAnswer.nodes));
-                const nextList = isDup ? filtered : [...filtered, { ...data.submittedAnswer, round: curr.currentRound }];
-                const allSolutions = getAllValidSolutions(curr.currentTargetNumber, curr.currentAllNodes);
-                const allSubmittedNormalized = nextList.map((a) => normalizeNodesKey(a.nodes));
-                const allSolNormalized = allSolutions.map((s) => normalizeNodesKey(s.nodes));
-                const allDone =
-                  allSolNormalized.length > 0 &&
-                  allSolNormalized.every((k) => allSubmittedNormalized.includes(k));
-
-                if (allDone) {
-                  setIsRoundLocked(true);
-                  if (!curr.isDealerHost) setShowRoundEndPopup(true);
-                  setRoomTimerSeconds(0);
-                  addActivityLog(`[안내] 이번 라운드의 모든 정답이 제출되었습니다. ${curr.currentRound}라운드를 종료합니다.`);
-                }
-                return nextList;
+                return isDup ? filtered : [...filtered, { ...data.submittedAnswer, round: curr.currentRound }];
               });
             }
           }
@@ -1317,42 +1107,6 @@ export default function FormulaPyramidPage() {
   /* ── 마지막 라운드 여부 ── */
   const isLastRound = currentRound >= selectedRound;
 
-  /* ── 점수판 컴포넌트 (재사용) ── */
-  const ScoreBoard = ({ maxH = "120px" }: { maxH?: string }) => (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-yellow-300 font-extrabold text-lg" style={{ fontFamily: "var(--font-chalk)" }}>
-          <Trophy size={18} className="text-yellow-400" />
-          <span>실시간 점수판</span>
-        </div>
-        <span className="text-xs text-gray-300 font-medium">({players.filter((p) => !p.isHost).length}명)</span>
-      </div>
-      <div className="w-full border-t border-dashed border-teal-600/70" style={{ marginTop: "0.2rem", marginBottom: "0.3rem" }} />
-      <div className="flex flex-col gap-2 overflow-y-auto pr-1" style={{ maxHeight: maxH }}>
-        {players.filter((p) => !p.isHost).length > 0 ? (
-          players.filter((p) => !p.isHost).slice().sort((a, b) => b.score - a.score).map((p, idx) => (
-            <div
-              key={idx}
-              className={`flex items-center justify-between rounded-lg border transition-all ${
-                p.name === myNickname ? "bg-yellow-400/20 border-yellow-400 text-yellow-200 shadow-md" : "bg-teal-900/70 border-teal-700/80 text-gray-200"
-              }`}
-              style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-sm text-yellow-400 w-4 flex-shrink-0 text-center">
-                  {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}`}
-                </span>
-                <span className="font-bold text-xs sm:text-sm" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>{p.name}</span>
-              </div>
-              <span className="font-extrabold text-base text-yellow-300 flex-shrink-0" style={{ fontFamily: "var(--font-chalk)" }}>{p.score}점</span>
-            </div>
-          ))
-        ) : (
-          <div className="py-3 text-center text-gray-400 text-xs" style={{ fontFamily: "var(--font-body)" }}>플레이어 참가 대기 중...</div>
-        )}
-      </div>
-    </div>
-  );
 
   return (
     <div
@@ -1657,7 +1411,7 @@ export default function FormulaPyramidPage() {
                       className="flex-1 rounded-xl border-2 border-dashed border-teal-600/80 bg-teal-900/40"
                       style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1rem", paddingBottom: "1rem" }}
                     >
-                      <ScoreBoard maxH="calc(100% - 60px)" />
+                      <ScoreBoard players={players} myNickname={myNickname} maxH="calc(100% - 60px)" />
                     </div>
                   </div>
                 )}
@@ -2059,7 +1813,7 @@ export default function FormulaPyramidPage() {
                       </div>
 
                       {/* 딜러 점수판 */}
-                      <ScoreBoard maxH="130px" />
+                      <ScoreBoard players={players} myNickname={myNickname} maxH="130px" />
                     </div>
                   </div>
 
