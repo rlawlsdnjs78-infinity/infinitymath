@@ -382,7 +382,7 @@ export default function FormulaPyramidPage() {
                   e.preventDefault();
                   alert(`[${nickname || "손님"}] 님, 입장 코드 [${entryCode}] 로 입장을 시도합니다.`);
                 }}
-                className="flex flex-col flex-1 justify-between gap-6"
+                className="flex flex-col py-1"
               >
                 <div className="flex flex-col gap-6">
                   {/* [요구사항 2] '닉네임' 글씨 색상을 흰색으로 변경 */}
@@ -434,11 +434,11 @@ export default function FormulaPyramidPage() {
                   </div>
                 </div>
 
-                {/* [요구사항 2] '게임 방 입장하기' -> '입장하기' 수정 & 글씨 크기 확대 */}
+                {/* [요구사항] 입장코드 입력 박스 하단과 입장하기 버튼 사이 간격을 닉네임 박스 하단~입장코드 제목 간격(24px: gap-6)의 정확히 2배(48px = marginTop: 3rem)로 설정 */}
                 <button
                   type="submit"
-                  className="btn-chalk w-full justify-center text-2.5xl sm:text-3xl font-extrabold mt-6"
-                  style={{ padding: "16px 24px", fontFamily: "var(--font-chalk)" }}
+                  className="btn-chalk w-full justify-center text-2.5xl sm:text-3xl font-extrabold"
+                  style={{ marginTop: "3rem", padding: "16px 24px", fontFamily: "var(--font-chalk)" }}
                 >
                   입장하기
                 </button>
