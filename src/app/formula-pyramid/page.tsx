@@ -265,11 +265,10 @@ export default function FormulaPyramidPage() {
     const ts = explicitTs || Date.now();
 
     setActivityLogs((prev) => {
-      // 동일한 태그와 텍스트가 1.5초 이내에 연속 추가되는 경우 중복 방지
-      const isDuplicate = prev.some(
-        (item) => item.tag === tag && item.text === text && Math.abs(item.ts - ts) < 1500
-      );
-      if (isDuplicate) return prev;
+      // 동일한 내용의 공지가 이미 존재하면 100% 중복 추가 차단
+      if (prev.some((item) => item.text.trim() === text.trim())) {
+        return prev;
+      }
 
       const newEntry = {
         id: `${ts}_${Math.random().toString(36).slice(2, 7)}`,
@@ -1240,8 +1239,8 @@ export default function FormulaPyramidPage() {
           </div>
         )}
 
-        {/* ── 라운드 종료 팝업 ── */}
-        {showRoundEndPopup && (
+        {/* ── 라운드 종료 팝업 (딜러는 팝업 없이 전체 정답 보기 그리드 유지, 플레이어만 팝업 표시) ── */}
+        {showRoundEndPopup && !isDealerHost && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm">
             <div
               className="w-full max-w-2xl mx-4 rounded-2xl shadow-2xl border-2 border-yellow-400/80 bg-teal-950/98 flex flex-col"
