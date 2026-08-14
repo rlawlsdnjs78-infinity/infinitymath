@@ -27,8 +27,9 @@
   --chalk-border-bright: rgba(0, 0, 0, 0.3);
 
   /* 폰트 */
-  --font-chalk: "Nanum Pen Script", "Gowun Dodum", cursive;
-  --font-body: "Gowun Dodum", "Nanum Pen Script", sans-serif;
+  --font-chalk: var(--font-noto), "Noto Sans KR", sans-serif;
+  --font-body: var(--font-noto), "Noto Sans KR", sans-serif;
+  --font-number: var(--font-quicksand), "Quicksand", sans-serif;
 }
 
 /* =========================================
@@ -66,9 +67,7 @@ body {
    ========================================= */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-chalk);
-  /* 텍스트 특유의 번진 느낌 (화이트보드 톤) */
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.05);
-  letter-spacing: 0.02em;
+  letter-spacing: -0.01em;
 }
 
 /* =========================================
@@ -117,9 +116,6 @@ h1, h2, h3, h4, h5, h6 {
 .chalk-text {
   font-family: var(--font-chalk);
   color: var(--chalk-white);
-  text-shadow:
-    0 0 8px rgba(0,0,0,0.05),
-    1px 1px 0 rgba(0,0,0,0.1);
 }
 
 .chalk-yellow { color: var(--chalk-yellow); }
@@ -180,10 +176,7 @@ h1, h2, h3, h4, h5, h6 {
   width: 100%;
   height: 2px;
   background: var(--chalk-yellow);
-  opacity: 0.8;
   border-radius: 1px;
-  /* 분필 특유의 불균일한 선 */
-  clip-path: polygon(0 0, 100% 20%, 100% 80%, 0 100%);
 }
 
 /* 칠판 줄 (노트 라인) */

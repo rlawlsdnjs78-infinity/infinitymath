@@ -9,22 +9,22 @@
  */
 
 import type { Metadata } from "next";
-import { Nanum_Pen_Script, Gowun_Dodum } from "next/font/google";
+import { Noto_Sans_KR, Quicksand } from "next/font/google";
 import Header from "./components/Header";
 import "./globals.css";
 
 /* ─── 폰트 ─────────────────────────────────────────────────────────────── */
-const nanumPen = Nanum_Pen_Script({
-  weight: "400",
+const notoSansKR = Noto_Sans_KR({
+  weight: ["400", "500", "700", "900"],
   subsets: ["latin"],
-  variable: "--font-nanum-pen",
+  variable: "--font-noto",
   display: "swap",
 });
 
-const gowunDodum = Gowun_Dodum({
-  weight: "400",
+const quicksand = Quicksand({
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
-  variable: "--font-gowun",
+  variable: "--font-quicksand",
   display: "swap",
 });
 
@@ -44,7 +44,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko" className={`${nanumPen.variable} ${gowunDodum.variable}`}>
+    <html lang="ko" className={`${notoSansKR.variable} ${quicksand.variable}`}>
       <body>
         {/*
          * wrapper: flex 컬럼만 담당. 여백은 각 섹션이 직접 관리합니다.
