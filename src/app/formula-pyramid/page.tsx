@@ -446,7 +446,7 @@ export default function FormulaPyramidPage() {
           setRoomTimerSeconds(0);
           setRoomEndTime(Date.now());
           setActivityLogs((logPrev) => [
-            "[안내] 이번 라운드의 모든 정답이 제출되었습니다.",
+            `[안내] 이번 라운드의 모든 정답이 제출되었습니다. ${currentRound}라운드를 종료합니다.`,
             ...logPrev,
           ]);
           if (activeRoomCode && typeof window !== "undefined") {
@@ -504,7 +504,7 @@ export default function FormulaPyramidPage() {
     // 1. MQTT WebSocket (인터넷을 통한 PC ↔ 태블릿 0.05초 초고속 실시간 전파)
     if (mqttClientRef.current && activeRoomCode) {
       try {
-        const topic = `infinitymath/pyramid/${activeRoomCode}`;
+        const topic = `infinitymath/v2/pyramid/${activeRoomCode}`;
         mqttClientRef.current.publish(topic, JSON.stringify(fullData));
       } catch {}
     }
@@ -2011,71 +2011,73 @@ export default function FormulaPyramidPage() {
                 </div>
               </>
             ) : inGameRoom && isDealerHost ? (
-              /* ── 딜러 방 생성 후: 실시간 게임 공지 ── */
-              <div className="flex flex-col flex-1 h-full">
-                <div className="flex items-center gap-3 w-full min-h-[44px]">
-                  <Megaphone className="text-yellow-400 flex-shrink-0" size={28} />
-                  <h2 className="text-yellow-300 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "2.5rem", lineHeight: 1.1 }}>
-                    실시간 게임 공지
-                  </h2>
-                </div>
-                <div className="w-full border-t border-dashed border-teal-700" style={{ marginTop: "1.1rem", marginBottom: "1.1rem" }} />
+              /* ── 딜러 방 생성 후: 실시간 게임 공지 (게임 생성 폼과 동일한 크기 고정 및 스크롤) ── */
+              <div className="flex flex-col justify-between flex-1 h-full min-h-[460px]">
+                <div className="flex flex-col flex-1">
+                  <div className="flex items-center gap-3 w-full min-h-[44px]">
+                    <Megaphone className="text-yellow-400 flex-shrink-0" size={28} />
+                    <h2 className="text-yellow-300 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "2.5rem", lineHeight: 1.1 }}>
+                      실시간 게임 공지
+                    </h2>
+                  </div>
+                  <div className="w-full border-t border-dashed border-teal-700" style={{ marginTop: "0.5rem", marginBottom: "0.75rem" }} />
 
-                {/* 말머리 기준 들여쓰기된 실시간 공지 리스트 (작은 내부 박스 제거) */}
-                <div className="flex-1 flex flex-col gap-3 overflow-y-auto pr-1">
-                  {activityLogs.length > 0 ? (
-                    activityLogs.map((log, idx) => {
-                      const match = log.match(/^(\[[^\]]+\])\s*(.*)$/);
-                      const tag = match ? match[1] : "[안내]";
-                      const text = match ? match[2] : log;
+                  {/* 말머리 기준 들여쓰기된 실시간 공지 리스트 (고정 높이 스크롤) */}
+                  <div className="flex-1 flex flex-col gap-2.5 overflow-y-auto pr-1.5 max-h-[420px]">
+                    {activityLogs.length > 0 ? (
+                      activityLogs.map((log, idx) => {
+                        const match = log.match(/^(\[[^\]]+\])\s*(.*)$/);
+                        const tag = match ? match[1] : "[안내]";
+                        const text = match ? match[2] : log;
 
-                      const isCorrect = tag === "[정답]";
-                      const isWrong = tag === "[오답]";
-                      const isJoin = tag === "[입장]";
-                      const isLeave = tag === "[퇴장]";
+                        const isCorrect = tag === "[정답]";
+                        const isWrong = tag === "[오답]";
+                        const isJoin = tag === "[입장]";
+                        const isLeave = tag === "[퇴장]";
 
-                      return (
-                        <div
-                          key={idx}
-                          className="flex items-start gap-2.5 text-base sm:text-lg leading-relaxed py-0.5"
-                          style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
-                        >
-                          <span
-                            className={`flex-shrink-0 font-extrabold text-base sm:text-lg ${
-                              isCorrect
-                                ? "text-yellow-300"
-                                : isWrong
-                                ? "text-rose-400"
-                                : isJoin
-                                ? "text-emerald-400"
-                                : isLeave
-                                ? "text-gray-400"
-                                : "text-cyan-300"
-                            }`}
-                            style={{ fontFamily: "var(--font-chalk)" }}
+                        return (
+                          <div
+                            key={idx}
+                            className="flex items-start gap-2.5 text-base sm:text-lg leading-relaxed py-0.5"
+                            style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
                           >
-                            {tag}
-                          </span>
-                          <span
-                            className={`flex-1 ${
-                              isCorrect
-                                ? "text-yellow-100 font-bold"
-                                : isWrong
-                                ? "text-rose-200 font-semibold"
-                                : "text-gray-200"
-                            }`}
-                            style={{ wordBreak: "break-all" }}
-                          >
-                            {text}
-                          </span>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="py-12 text-center text-gray-400 text-sm font-medium" style={{ fontFamily: "var(--font-body)" }}>
-                      공지 내역이 여기에 실시간으로 표시됩니다.
-                    </div>
-                  )}
+                            <span
+                              className={`flex-shrink-0 font-extrabold text-base sm:text-lg ${
+                                isCorrect
+                                  ? "text-yellow-300"
+                                  : isWrong
+                                  ? "text-rose-400"
+                                  : isJoin
+                                  ? "text-emerald-400"
+                                  : isLeave
+                                  ? "text-gray-400"
+                                  : "text-cyan-300"
+                              }`}
+                              style={{ fontFamily: "var(--font-chalk)" }}
+                            >
+                              {tag}
+                            </span>
+                            <span
+                              className={`flex-1 ${
+                                isCorrect
+                                  ? "text-yellow-100 font-bold"
+                                  : isWrong
+                                  ? "text-rose-200 font-semibold"
+                                  : "text-gray-200"
+                              }`}
+                              style={{ wordBreak: "break-all" }}
+                            >
+                              {text}
+                            </span>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="py-16 text-center text-gray-400 text-sm font-medium" style={{ fontFamily: "var(--font-body)" }}>
+                        공지 내역이 여기에 실시간으로 표시됩니다.
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ) : (
