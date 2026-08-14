@@ -24,7 +24,7 @@ export default function Header() {
   return (
     <header
       id="header"
-      className="w-full relative z-30 flex items-center justify-between py-3.5 px-6"
+      className="w-full relative z-30 flex items-center justify-between py-3.5 px-8 md:px-12"
       style={{
         background: "rgba(255, 255, 255, 0.8)",
         backdropFilter: "blur(12px)",
@@ -42,7 +42,7 @@ export default function Header() {
               aria-hidden="true"
               style={{
                 fontFamily: "var(--font-chalk)",
-                fontSize: "1.65rem",
+                fontSize: "2.5rem",
                 lineHeight: 1,
                 color: "var(--chalk-yellow)",
                 textShadow:
