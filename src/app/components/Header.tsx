@@ -32,20 +32,15 @@ export default function Header() {
         borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
         boxShadow: "0 4px 20px -2px rgba(0, 0, 0, 0.03)",
         minHeight: "72px",
+        paddingLeft: "2.5rem",
+        paddingRight: "2.5rem",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between"
       }}
     >
-      <div 
-        className="w-full px-6 md:px-12 relative"
-        style={{
-          maxWidth: "1152px",
-          margin: "0 auto",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between"
-        }}
-      >
-        {/* ── [좌측] 로고 ─────────────────────────────────────────── */}
-        <div className="flex items-center gap-3 z-10">
+      {/* ── [좌측] 로고 ─────────────────────────────────────────── */}
+      <div className="flex items-center gap-3 z-10">
           <Link href="/" style={{ textDecoration: "none" }}>
             <div className="flex items-center gap-3">
               <span
@@ -89,7 +84,6 @@ export default function Header() {
         <div className="flex items-center gap-4 z-10">
           <NavMenu mode="auth" />
         </div>
-      </div>
-    </header>
+      </header>
   );
 }
