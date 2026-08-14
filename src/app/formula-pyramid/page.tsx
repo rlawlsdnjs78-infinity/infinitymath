@@ -1002,203 +1002,203 @@ export default function FormulaPyramidPage() {
                 게임 입장하기
               </h2>
             </div>
-
+            {/* 녹색 점선 구분선 */}
             <div
-              className="w-full border-t border-dashed border-teal-700"
-              style={{ marginTop: "1.1rem", marginBottom: "1.1rem" }}
+              className="w-full border-t border-dashed border-teal-600/70"
+              style={{ marginTop: "0.5rem", marginBottom: "0.85rem" }}
             />
 
-            {/* 역할 선택 탭 버튼 (플레이어 / 딜러) */}
-            <div className="flex rounded-xl bg-teal-900/60 p-1.5 border border-teal-700/80 mb-4">
-              <button
-                type="button"
-                onClick={() => setMode("player")}
-                className={`flex-1 py-2.5 rounded-lg text-base font-extrabold transition-all cursor-pointer ${
-                  mode === "player"
-                    ? "bg-yellow-400 text-teal-950 shadow-md scale-[1.02]"
-                    : "text-gray-300 hover:text-white"
-                }`}
-                style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.05em" }}
-              >
-                🎮 플레이어
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode("dealer")}
-                className={`flex-1 py-2.5 rounded-lg text-base font-extrabold transition-all cursor-pointer ${
-                  mode === "dealer"
-                    ? "bg-yellow-400 text-teal-950 shadow-md scale-[1.02]"
-                    : "text-gray-300 hover:text-white"
-                }`}
-                style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.05em" }}
-              >
-                👑 딜러 (선생님)
-              </button>
+            {/* [플레이어 모드 / 딜러 모드] 탭 선택 버튼 */}
+            <div className="w-full flex justify-center" style={{ marginTop: "0.5rem", marginBottom: "2.5rem" }}>
+              <div className="flex items-center rounded-full select-none bg-teal-950/95 border-2 border-yellow-400/70 shadow-lg w-full p-1.5 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMode("player")}
+                  className={`flex-1 py-2.5 rounded-full text-base sm:text-lg font-bold transition-all duration-200 cursor-pointer text-center ${
+                    mode === "player"
+                      ? "bg-yellow-400 text-teal-950 shadow-md scale-102"
+                      : "text-gray-300 hover:text-white"
+                  }`}
+                  style={{ fontFamily: "var(--font-chalk)" }}
+                >
+                  플레이어 모드
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode("dealer")}
+                  className={`flex-1 py-2.5 rounded-full text-base sm:text-lg font-bold transition-all duration-200 cursor-pointer text-center ${
+                    mode === "dealer"
+                      ? "bg-yellow-400 text-teal-950 shadow-md scale-102"
+                      : "text-gray-300 hover:text-white"
+                  }`}
+                  style={{ fontFamily: "var(--font-chalk)" }}
+                >
+                  딜러 모드
+                </button>
+              </div>
             </div>
 
+            {/* 탭 내용 영역 */}
             {mode === "player" ? (
-              /* 🎮 플레이어 모드 폼 */
-              <form onSubmit={handleJoinGameRoom} className="flex flex-col gap-4">
-                <div className="flex flex-col gap-1.5">
+              /* 플레이어 모드 입장 양식 */
+              <form onSubmit={handleJoinGameRoom} className="flex flex-col py-1 gap-5">
+                <div className="flex flex-col gap-2">
                   <label
-                    htmlFor="player-nickname"
-                    className="text-yellow-200 text-sm font-semibold flex items-center gap-2"
-                    style={{ fontFamily: "var(--font-body)" }}
-                  >
-                    <span>닉네임</span>
-                  </label>
-                  <input
-                    id="player-nickname"
-                    type="text"
-                    value={nickname}
-                    onChange={(e) => setNickname(e.target.value)}
-                    placeholder="참가자 닉네임을 입력하세요"
-                    className="input-chalk text-base"
-                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
-                    disabled={inGameRoom}
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label
-                    htmlFor="player-entry-code"
-                    className="text-yellow-200 text-sm font-semibold flex items-center gap-2"
-                    style={{ fontFamily: "var(--font-body)" }}
-                  >
-                    <span>입장 코드 (5자리)</span>
-                  </label>
-                  <input
-                    id="player-entry-code"
-                    type="text"
-                    value={entryCode}
-                    onChange={(e) => setEntryCode(e.target.value)}
-                    placeholder="예: P12345"
-                    className="input-chalk text-base uppercase font-mono font-bold tracking-wider"
-                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
-                    maxLength={6}
-                    disabled={inGameRoom}
-                  />
-                </div>
-
-                {!inGameRoom ? (
-                  <button
-                    type="submit"
-                    className="btn-chalk w-full justify-center py-3 text-lg font-bold mt-2 cursor-pointer"
+                    htmlFor="nickname-input"
+                    className="text-2xl sm:text-3xl text-white font-bold tracking-wide"
                     style={{ fontFamily: "var(--font-chalk)" }}
                   >
-                    게임 참가하기
-                  </button>
-                ) : (
-                  <div className="flex flex-col gap-2 mt-2">
-                    <div
-                      className="bg-emerald-950/80 border-2 border-emerald-500/80 rounded-xl p-3 flex items-center justify-between shadow-md"
-                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                        <span className="text-emerald-300 font-bold text-sm" style={{ fontFamily: "var(--font-chalk)" }}>
-                          접속 중: [{activeRoomCode}]
-                        </span>
-                      </div>
-                      <span className="text-yellow-300 font-black text-sm" style={{ fontFamily: "var(--font-chalk)" }}>
-                        {myScore}점
-                      </span>
-                    </div>
+                    닉네임
+                  </label>
+                  <input
+                    id="nickname-input"
+                    type="text"
+                    placeholder="닉네임을 입력해 주세요"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    className="w-full rounded-md bg-teal-900/90 border border-dashed border-teal-600 text-white text-lg focus:outline-none focus:border-yellow-400 placeholder:text-gray-400/80"
+                    style={{
+                      padding: "14px 20px",
+                      fontFamily: "var(--font-body)",
+                      lineHeight: "1.5",
+                    }}
+                  />
+                </div>
 
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="code-input"
+                    className="text-2xl sm:text-3xl text-white font-bold tracking-wide"
+                    style={{ fontFamily: "var(--font-chalk)" }}
+                  >
+                    입장 코드
+                  </label>
+                  <input
+                    id="code-input"
+                    type="text"
+                    placeholder="코드를 입력해주세요."
+                    value={entryCode}
+                    onChange={(e) => setEntryCode(e.target.value)}
+                    className="w-full rounded-md bg-teal-900/90 border border-dashed border-teal-600 text-white text-lg uppercase focus:outline-none focus:border-yellow-400 placeholder:text-gray-400/80"
+                    style={{
+                      padding: "14px 20px",
+                      fontFamily: "var(--font-body)",
+                      lineHeight: "1.5",
+                    }}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="btn-chalk w-full justify-center text-2.5xl sm:text-3xl font-extrabold cursor-pointer"
+                  style={{ marginTop: "1rem", padding: "16px 24px", fontFamily: "var(--font-chalk)" }}
+                >
+                  입장하기
+                </button>
+
+                {inGameRoom && !isDealerHost && (
+                  <div
+                    className="flex items-center justify-between rounded-xl bg-emerald-950/95 border-2 border-emerald-500/90 text-emerald-200 shadow-md"
+                    style={{
+                      paddingLeft: "1.25rem",
+                      paddingRight: "1.25rem",
+                      paddingTop: "1.1rem",
+                      paddingBottom: "1.1rem",
+                      marginTop: "1.25rem",
+                    }}
+                  >
+                    <span className="font-black text-lg sm:text-xl text-yellow-300 flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
+                      🟢 [{activeRoomCode}] 접속 완료 ({myNickname})
+                    </span>
                     <button
                       type="button"
                       onClick={handleLeaveRoom}
-                      className="flex items-center justify-center gap-2 bg-rose-900/90 hover:bg-rose-800 text-rose-100 rounded-xl py-2.5 text-sm font-bold border-2 border-rose-600/90 cursor-pointer shadow-md transition-all"
-                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", fontFamily: "var(--font-chalk)" }}
+                      className="bg-rose-900/90 hover:bg-rose-800 text-rose-200 font-extrabold text-sm sm:text-base rounded-md border border-rose-600/80 cursor-pointer shadow flex-shrink-0"
+                      style={{ paddingLeft: "1.1rem", paddingRight: "1.1rem", paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
                     >
-                      <LogOut size={16} />
-                      <span>방 나가기</span>
+                      퇴장
                     </button>
                   </div>
                 )}
-
-                {/* 실시간 게임방 활동 로그 */}
-                <div className="flex flex-col gap-1.5 mt-1">
-                  <span className="text-xs text-gray-300 font-medium">활동 내역</span>
-                  <div
-                    className="chalk-box-straight bg-teal-950/90 p-2.5 h-[130px] overflow-y-auto text-xs flex flex-col gap-1.5 text-gray-300 font-mono border-dashed border-teal-700/80 rounded-lg"
-                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
-                  >
-                    {activityLogs.length > 0 ? (
-                      activityLogs.map((log, idx) => (
-                        <div key={idx} className="leading-tight text-yellow-200/90">
-                          {log}
-                        </div>
-                      ))
-                    ) : (
-                      <span className="text-gray-500 italic">참가 대기 중...</span>
-                    )}
-                  </div>
-                </div>
               </form>
             ) : (
-              /* 👑 딜러 모드 설정 폼 */
-              <div className="flex flex-col gap-4">
-                <div
-                  className="bg-teal-900/70 border-2 border-dashed border-yellow-400/80 rounded-xl p-3.5 flex flex-col gap-2 shadow-md"
-                  style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
-                >
-                  <div className="flex items-center gap-2 text-yellow-300 font-bold text-base" style={{ fontFamily: "var(--font-chalk)" }}>
-                    <Settings size={18} className="text-yellow-400" />
-                    <span>딜러 콘솔 안내</span>
-                  </div>
-                  <p className="text-xs text-gray-200 leading-relaxed" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
-                    우측 <strong>[게임 생성]</strong> 패널에서 라운드, 제한 시간, 오답 패널티를 설정하고 <strong>[입장 코드 생성하기]</strong>를 클릭하세요.
+              /* 딜러 모드 대기 정보 */
+              <div className="flex flex-col justify-between flex-1 gap-4 text-sm text-gray-200 leading-relaxed py-1" style={{ fontFamily: "var(--font-body)" }}>
+                {/* 상단 콘텐츠 그룹 */}
+                <div className="flex flex-col gap-4">
+                  <p className="leading-loose text-base sm:text-lg">
+                    딜러 모드에서는 라운드 수, 제한 시간, 오답 패널티를 설정하여 방을 생성할 수 있습니다.
                   </p>
+                  <div
+                    className="w-full rounded-xl shadow-lg border-2 border-dashed border-yellow-400/90 bg-teal-900/95"
+                    style={{
+                      paddingLeft: "1.25rem",
+                      paddingRight: "1.25rem",
+                      paddingTop: "1.25rem",
+                      paddingBottom: "1.25rem",
+                      marginTop: "0.5rem",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.75rem",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    <div
+                      className="flex items-start gap-3 text-yellow-300 text-base sm:text-lg font-medium"
+                      style={{ lineHeight: "1.5", wordBreak: "break-all", letterSpacing: "-0.015em" }}
+                    >
+                      <Megaphone size={20} className="flex-shrink-0 text-yellow-400 mt-0.5" />
+                      <span style={{ wordBreak: "break-all" }}>생성된 방 코드를 플레이어들에게 공유하세요.</span>
+                    </div>
+                  </div>
                 </div>
 
-                {inGameRoom && (
-                  <div className="flex flex-col gap-2">
-                    <div
-                      className="bg-emerald-950/80 border-2 border-emerald-500/80 rounded-xl p-3 flex items-center justify-between shadow-md"
-                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                        <span className="text-emerald-300 font-bold text-sm" style={{ fontFamily: "var(--font-chalk)" }}>
-                          개설 방: [{activeRoomCode}]
-                        </span>
-                      </div>
-                      <span className="text-yellow-300 font-extrabold text-sm" style={{ fontFamily: "var(--font-chalk)" }}>
-                        {players.length}명 접속
-                      </span>
-                    </div>
-
+                {/* 하단 뱃지: 방 생성 전후 동일한 공간 예약 */}
+                {inGameRoom && isDealerHost ? (
+                  <div
+                    className="flex items-center justify-between rounded-xl bg-amber-950/95 border-2 border-amber-500/90 text-amber-200 shadow-md"
+                    style={{
+                      paddingLeft: "1.25rem",
+                      paddingRight: "1.25rem",
+                      paddingTop: "1.1rem",
+                      paddingBottom: "1.1rem",
+                    }}
+                  >
+                    <span className="font-black text-lg sm:text-xl text-yellow-300 flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
+                      👑 딜러 방 [{activeRoomCode}] 운영 중
+                    </span>
                     <button
                       type="button"
                       onClick={handleLeaveRoom}
-                      className="flex items-center justify-center gap-2 bg-rose-900/90 hover:bg-rose-800 text-rose-100 rounded-xl py-2.5 text-sm font-bold border-2 border-rose-600/90 cursor-pointer shadow-md transition-all"
-                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", fontFamily: "var(--font-chalk)" }}
+                      className="bg-rose-900/90 hover:bg-rose-800 text-rose-200 font-extrabold text-sm sm:text-base rounded-md border border-rose-600/80 cursor-pointer shadow flex-shrink-0"
+                      style={{ paddingLeft: "1.1rem", paddingRight: "1.1rem", paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
                     >
-                      <LogOut size={16} />
-                      <span>방 종료 (퇴장)</span>
+                      퇴장
+                    </button>
+                  </div>
+                ) : (
+                  /* 방 생성 전: 동일한 높이를 유지하기 위한 투명 placeholder */
+                  <div
+                    className="invisible flex items-center justify-between rounded-xl"
+                    style={{
+                      paddingLeft: "1.25rem",
+                      paddingRight: "1.25rem",
+                      paddingTop: "1.1rem",
+                      paddingBottom: "1.1rem",
+                    }}
+                  >
+                    <span className="font-black text-lg sm:text-xl flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
+                      👑 딜러 방 [000000] 운영 중
+                    </span>
+                    <button
+                      type="button"
+                      className="text-sm sm:text-base rounded-md flex-shrink-0"
+                      style={{ paddingLeft: "1.1rem", paddingRight: "1.1rem", paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
+                    >
+                      퇴장
                     </button>
                   </div>
                 )}
-
-                {/* 실시간 게임방 활동 로그 */}
-                <div className="flex flex-col gap-1.5 mt-1">
-                  <span className="text-xs text-gray-300 font-medium">활동 내역</span>
-                  <div
-                    className="chalk-box-straight bg-teal-950/90 p-2.5 h-[160px] overflow-y-auto text-xs flex flex-col gap-1.5 text-gray-300 font-mono border-dashed border-teal-700/80 rounded-lg"
-                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
-                  >
-                    {activityLogs.length > 0 ? (
-                      activityLogs.map((log, idx) => (
-                        <div key={idx} className="leading-tight text-yellow-200/90">
-                          {log}
-                        </div>
-                      ))
-                    ) : (
-                      <span className="text-gray-500 italic">활동 내역이 여기에 표시됩니다.</span>
-                    )}
-                  </div>
-                </div>
               </div>
             )}
           </div>
