@@ -821,7 +821,7 @@ export default function FormulaPyramidPage() {
                                 ? "bg-yellow-400 text-teal-950 shadow scale-105"
                                 : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
                             }`}
-                            style={{ fontFamily: "var(--font-chalk)" }}
+                            style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
                           >
                             {r}R
                           </button>
@@ -843,12 +843,12 @@ export default function FormulaPyramidPage() {
                             key={t}
                             type="button"
                             onClick={() => setSelectedTime(t)}
-                            className={`py-2.5 text-lg sm:text-xl font-extrabold rounded-md transition-all ${
+                            className={`py-2.5 text-base sm:text-lg font-bold rounded-md transition-all ${
                               selectedTime === t
                                 ? "bg-yellow-400 text-teal-950 shadow scale-105"
                                 : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
                             }`}
-                            style={{ fontFamily: "var(--font-chalk)" }}
+                            style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
                           >
                             {t}분
                           </button>
@@ -875,7 +875,7 @@ export default function FormulaPyramidPage() {
                                 ? "bg-yellow-400 text-teal-950 shadow scale-105"
                                 : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
                             }`}
-                            style={{ fontFamily: "var(--font-chalk)" }}
+                            style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
                           >
                             {p}
                           </button>
@@ -888,7 +888,8 @@ export default function FormulaPyramidPage() {
                     <button
                       type="button"
                       onClick={handleCreateGame}
-                      className="btn-chalk w-full justify-center py-3.5 text-2xl font-bold"
+                      className="btn-chalk w-full justify-center py-3.5 text-xl font-bold"
+                      style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
                     >
                       게임 방 생성하기
                     </button>
