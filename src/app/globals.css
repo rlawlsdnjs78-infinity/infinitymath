@@ -3,6 +3,7 @@
    (반드시 tailwindcss import 보다 먼저 위치해야 합니다)
    ========================================= */
 @import url("https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Gowun+Dodum&display=swap");
+@import url("https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css");
 
 /* =========================================
    Tailwind CSS v4 import (절대 삭제 금지)
@@ -27,8 +28,8 @@
   --chalk-border-bright: rgba(0, 0, 0, 0.3);
 
   /* 폰트 */
-  --font-chalk: var(--font-noto), "Noto Sans KR", sans-serif;
-  --font-body: var(--font-noto), "Noto Sans KR", sans-serif;
+  --font-chalk: "NanumSquare", var(--font-noto), "Noto Sans KR", sans-serif;
+  --font-body: "NanumSquare", var(--font-noto), "Noto Sans KR", sans-serif;
   --font-number: var(--font-quicksand), "Quicksand", sans-serif;
 }
 

@@ -143,7 +143,7 @@ function HeroSection() {
           {/* 소제목 */}
           <p className="slide-in-left mb-4 text-base md:text-lg"
             style={{ fontFamily: "var(--font-body)", color: "var(--chalk-green)", letterSpacing: "0.1em" }}>
-            ✦ Welcome to ∞ 무한대 수학반
+            ✦ Welcome to ∞ 무한대수학반
           </p>
 
           {/* 메인 타이틀 */}
@@ -259,7 +259,7 @@ function Footer() {
       }}
     >
       <p style={{ fontFamily: "var(--font-body)", color: "var(--chalk-dim)", fontSize: "0.85rem" }}>
-        © {year} ∞ 무한대 수학반. All rights reserved.
+        © {year} ∞ 무한대수학반. All rights reserved.
       </p>
     </footer>
   );

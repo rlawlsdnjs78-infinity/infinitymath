@@ -64,7 +64,7 @@ export default function Header() {
                 whiteSpace: "nowrap",
               }}
             >
-              무한대 수학반
+              무한대수학반
             </span>
           </div>
         </Link>
