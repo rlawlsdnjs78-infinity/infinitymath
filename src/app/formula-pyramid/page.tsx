@@ -996,135 +996,217 @@ export default function FormulaPyramidPage() {
               </div>
             )}
 
-            {/* 대칭 수식 피라미드 보드 & 이미 제출된 정답 모니터 & 실시간 점수판 */}
-            <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between gap-6 mb-1">
-              {/* 피라미드 보드 */}
-              <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0">
-                {PYRAMID_DATA.map((row, rowIndex) => (
-                  <div
-                    key={rowIndex}
-                    className="flex justify-center gap-2 sm:gap-2.5"
-                    style={{ marginTop: rowIndex === 0 ? "0px" : "-10px" }}
-                  >
-                    {row.map((node) => (
-                      <HexagonCell
-                        key={node.id}
-                        node={node}
-                        isSelected={selectedNodes.includes(node.id)}
-                      />
-                    ))}
-                  </div>
-                ))}
-              </div>
-
-              {/* 우측 모니터 영역: 이미 제출된 정답 + (방 접속 시) 실시간 점수판 */}
-              <div className="relative flex-1 w-full flex flex-col items-stretch gap-3">
-                {/* 이미 제출된 정답 수량 표기 */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-yellow-300 font-extrabold text-xl" style={{ fontFamily: "var(--font-chalk)" }}>
-                    <BookOpen size={20} className="text-yellow-400" />
-                    <span>이미 제출된 정답</span>
-                  </div>
-                  <span
-                    className="text-xs sm:text-sm text-yellow-300 font-extrabold bg-teal-900 rounded-md border border-teal-700/80 shadow-sm"
-                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.25rem", paddingBottom: "0.25rem" }}
-                  >
-                    {submittedAnswersList.length}개
-                  </span>
+            {/* 대칭 수식 피라미드 보드 및 우측 모니터 영역 */}
+            {mode === "player" && !inGameRoom ? (
+              /* 플레이어 모드 대기/연습용 상단: 피라미드 + 연습 문구 & 정답 확인 버튼 */
+              <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between gap-6 mb-1">
+                {/* 피라미드 보드 */}
+                <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0">
+                  {PYRAMID_DATA.map((row, rowIndex) => (
+                    <div
+                      key={rowIndex}
+                      className="flex justify-center gap-2 sm:gap-2.5"
+                      style={{ marginTop: rowIndex === 0 ? "0px" : "-10px" }}
+                    >
+                      {row.map((node) => (
+                        <HexagonCell
+                          key={node.id}
+                          node={node}
+                          isSelected={selectedNodes.includes(node.id)}
+                        />
+                      ))}
+                    </div>
+                  ))}
                 </div>
-                <div className="w-full border-t border-dashed border-teal-600/70" style={{ marginTop: "0.4rem", marginBottom: "0.5rem" }} />
 
-                <div
-                  className="w-full bg-teal-900/98 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-lg flex flex-col backdrop-blur-md overflow-hidden min-h-[140px] max-h-[180px] overflow-y-auto"
-                  style={{
-                    paddingTop: "0.65rem",
-                    paddingBottom: "0.65rem",
-                    paddingLeft: "1.25rem",
-                    paddingRight: "1.25rem",
-                    gap: "0.4rem",
-                  }}
-                >
-                  {submittedAnswersList.length > 0 ? (
-                    submittedAnswersList.map((sol, idx) => (
-                      <div
-                        key={idx}
-                        className="w-full flex items-center justify-between rounded-lg bg-teal-950/95 text-white transition-all border border-teal-700/80 shadow-sm"
-                        style={{
-                          paddingTop: "0.5rem",
-                          paddingBottom: "0.5rem",
-                          paddingLeft: "1.25rem",
-                          paddingRight: "1.25rem",
-                          fontFamily: "var(--font-chalk)",
-                        }}
-                      >
-                        <span className="text-lg sm:text-xl font-black text-yellow-300 tracking-widest">
-                          {sol.nodes}
-                        </span>
-                        <span className="text-sm sm:text-base text-teal-200 font-extrabold tracking-wide">
-                          {sol.formula}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="py-6 text-center text-gray-400 text-sm font-medium" style={{ fontFamily: "var(--font-body)" }}>
-                      {inGameRoom ? "아직 제출된 정답이 없습니다." : "입장 코드를 생성하면 실시간 정답 제출 현황이 표시됩니다."}
+                {/* 우측: 연습 설명글 & 정답확인 버튼 & absolute 펼침 창 */}
+                <div className="relative flex-1 w-full flex flex-col items-center xl:items-stretch gap-4">
+                  <div
+                    className="flex items-center gap-2 text-xs sm:text-sm md:text-base xl:text-lg text-gray-200 font-semibold justify-center xl:justify-start whitespace-nowrap"
+                    style={{ fontFamily: "var(--font-chalk)", wordBreak: "keep-all" }}
+                  >
+                    <Pencil size={18} className="text-yellow-400 flex-shrink-0" />
+                    <span className="whitespace-nowrap">게임 시작을 기다리는 동안 연습해 보세요.</span>
+                  </div>
+
+                  {/* '정답 확인' 버튼 */}
+                  <button
+                    type="button"
+                    onClick={() => setShowSolutions(!showSolutions)}
+                    className="w-full flex items-center justify-center gap-3 px-5 py-3 rounded-full bg-teal-900/90 hover:bg-teal-800 border-2 border-dashed border-yellow-400/80 text-yellow-300 text-base sm:text-lg font-bold transition-all cursor-pointer shadow-md text-center"
+                    style={{ fontFamily: "var(--font-chalk)" }}
+                  >
+                    <Sparkles size={18} className="text-yellow-400 animate-pulse" />
+                    <span>정답 확인 ({validSolutions.length}개 조합)</span>
+                    {showSolutions ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  </button>
+
+                  {/* 예시 정답 펼침 목록 */}
+                  {showSolutions && (
+                    <div
+                      className="absolute top-full left-0 mt-1.5 w-full bg-teal-900/98 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-2xl flex flex-col z-30 backdrop-blur-md overflow-hidden"
+                      style={{
+                        padding: "0.55rem 0.65rem",
+                        gap: "0.35rem",
+                      }}
+                    >
+                      {validSolutions.slice(0, 4).map((sol, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            setSelectedNodes(sol.nodes);
+                            setTempNotice(null);
+                          }}
+                          className="w-full flex items-center justify-between rounded-lg bg-teal-950/95 hover:bg-yellow-400 hover:text-teal-950 text-white transition-all border border-teal-700/80 cursor-pointer shadow-sm group"
+                          style={{
+                            padding: "0.4rem 0.75rem",
+                            fontFamily: "var(--font-chalk)",
+                          }}
+                        >
+                          <span className="text-lg sm:text-xl font-black text-yellow-300 group-hover:text-teal-950 tracking-widest">
+                            {sol.nodes.join(" ")}
+                          </span>
+                          <span className="text-sm sm:text-base text-teal-200 group-hover:text-teal-950 font-extrabold tracking-wide">
+                            {sol.formulaStr.split(" ( ")[1]?.replace(" )", "")}
+                          </span>
+                        </button>
+                      ))}
                     </div>
                   )}
                 </div>
-
-                {/* 방 접속 시: 실시간 점수판 모니터 추가 */}
-                {inGameRoom && (
-                  <div className="flex flex-col gap-2 mt-1">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-yellow-300 font-extrabold text-lg" style={{ fontFamily: "var(--font-chalk)" }}>
-                        <Trophy size={18} className="text-yellow-400" />
-                        <span>실시간 점수판</span>
-                      </div>
-                      <span className="text-xs text-gray-300 font-medium">
-                        ({players.filter((p) => !p.isHost).length}명 접속 중)
-                      </span>
+              </div>
+            ) : (
+              /* 딜러 모드 또는 방 접속 시: 피라미드 보드 + 이미 제출된 정답 모니터 */
+              <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between gap-6 mb-1">
+                {/* 피라미드 보드 */}
+                <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0">
+                  {PYRAMID_DATA.map((row, rowIndex) => (
+                    <div
+                      key={rowIndex}
+                      className="flex justify-center gap-2 sm:gap-2.5"
+                      style={{ marginTop: rowIndex === 0 ? "0px" : "-10px" }}
+                    >
+                      {row.map((node) => (
+                        <HexagonCell
+                          key={node.id}
+                          node={node}
+                          isSelected={selectedNodes.includes(node.id)}
+                        />
+                      ))}
                     </div>
-                    <div className="w-full border-t border-dashed border-teal-600/70" style={{ marginTop: "0.2rem", marginBottom: "0.3rem" }} />
+                  ))}
+                </div>
 
-                    <div className="flex flex-col gap-2 max-h-[140px] overflow-y-auto pr-1">
-                      {players.filter((p) => !p.isHost).length > 0 ? (
-                        players
-                          .filter((p) => !p.isHost)
-                          .slice()
-                          .sort((a, b) => b.score - a.score)
-                          .map((p, idx) => (
-                            <div
-                              key={idx}
-                              className={`flex items-center justify-between rounded-lg border transition-all px-4 py-2 ${
-                                p.name === myNickname
-                                  ? "bg-yellow-400/20 border-yellow-400 text-yellow-200 shadow-md"
-                                  : "bg-teal-900/70 border-teal-700/80 text-gray-200"
-                              }`}
-                              style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
-                            >
-                              <div className="flex items-center gap-2">
-                                <span className="font-extrabold text-sm text-yellow-400 w-4 flex-shrink-0 flex items-center justify-center">
-                                  {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}`}
-                                </span>
-                                <span className="font-bold text-xs sm:text-sm" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
-                                  {p.name}
+                {/* 우측 모니터 영역: 이미 제출된 정답 + (방 접속 시) 실시간 점수판 */}
+                <div className="relative flex-1 w-full flex flex-col items-stretch gap-3">
+                  {/* 이미 제출된 정답 수량 표기 */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-yellow-300 font-extrabold text-xl" style={{ fontFamily: "var(--font-chalk)" }}>
+                      <BookOpen size={20} className="text-yellow-400" />
+                      <span>이미 제출된 정답</span>
+                    </div>
+                    <span
+                      className="text-xs sm:text-sm text-yellow-300 font-extrabold bg-teal-900 rounded-md border border-teal-700/80 shadow-sm"
+                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.25rem", paddingBottom: "0.25rem" }}
+                    >
+                      {submittedAnswersList.length}개
+                    </span>
+                  </div>
+                  <div className="w-full border-t border-dashed border-teal-600/70" style={{ marginTop: "0.4rem", marginBottom: "0.5rem" }} />
+
+                  <div
+                    className="w-full bg-teal-900/98 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-lg flex flex-col backdrop-blur-md overflow-hidden min-h-[140px] max-h-[180px] overflow-y-auto"
+                    style={{
+                      paddingTop: "0.65rem",
+                      paddingBottom: "0.65rem",
+                      paddingLeft: "1.25rem",
+                      paddingRight: "1.25rem",
+                      gap: "0.4rem",
+                    }}
+                  >
+                    {submittedAnswersList.length > 0 ? (
+                      submittedAnswersList.map((sol, idx) => (
+                        <div
+                          key={idx}
+                          className="w-full flex items-center justify-between rounded-lg bg-teal-950/95 text-white transition-all border border-teal-700/80 shadow-sm"
+                          style={{
+                            paddingTop: "0.5rem",
+                            paddingBottom: "0.5rem",
+                            paddingLeft: "1.25rem",
+                            paddingRight: "1.25rem",
+                            fontFamily: "var(--font-chalk)",
+                          }}
+                        >
+                          <span className="text-lg sm:text-xl font-black text-yellow-300 tracking-widest">
+                            {sol.nodes}
+                          </span>
+                          <span className="text-sm sm:text-base text-teal-200 font-extrabold tracking-wide">
+                            {sol.formula}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="py-6 text-center text-gray-400 text-sm font-medium" style={{ fontFamily: "var(--font-body)" }}>
+                        {inGameRoom ? "아직 제출된 정답이 없습니다." : "입장 코드를 생성하면 실시간 정답 제출 현황이 표시됩니다."}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 방 접속 시: 실시간 점수판 모니터 추가 */}
+                  {inGameRoom && (
+                    <div className="flex flex-col gap-2 mt-1">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-yellow-300 font-extrabold text-lg" style={{ fontFamily: "var(--font-chalk)" }}>
+                          <Trophy size={18} className="text-yellow-400" />
+                          <span>실시간 점수판</span>
+                        </div>
+                        <span className="text-xs text-gray-300 font-medium">
+                          ({players.filter((p) => !p.isHost).length}명 접속 중)
+                        </span>
+                      </div>
+                      <div className="w-full border-t border-dashed border-teal-600/70" style={{ marginTop: "0.2rem", marginBottom: "0.3rem" }} />
+
+                      <div className="flex flex-col gap-2 max-h-[140px] overflow-y-auto pr-1">
+                        {players.filter((p) => !p.isHost).length > 0 ? (
+                          players
+                            .filter((p) => !p.isHost)
+                            .slice()
+                            .sort((a, b) => b.score - a.score)
+                            .map((p, idx) => (
+                              <div
+                                key={idx}
+                                className={`flex items-center justify-between rounded-lg border transition-all px-4 py-2 ${
+                                  p.name === myNickname
+                                    ? "bg-yellow-400/20 border-yellow-400 text-yellow-200 shadow-md"
+                                    : "bg-teal-900/70 border-teal-700/80 text-gray-200"
+                                }`}
+                                style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className="font-extrabold text-sm text-yellow-400 w-4 flex-shrink-0 flex items-center justify-center">
+                                    {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}`}
+                                  </span>
+                                  <span className="font-bold text-xs sm:text-sm" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
+                                    {p.name}
+                                  </span>
+                                </div>
+                                <span className="font-extrabold text-base text-yellow-300 flex-shrink-0" style={{ fontFamily: "var(--font-chalk)" }}>
+                                  {p.score}점
                                 </span>
                               </div>
-                              <span className="font-extrabold text-base text-yellow-300 flex-shrink-0" style={{ fontFamily: "var(--font-chalk)" }}>
-                                {p.score}점
-                              </span>
-                            </div>
-                          ))
-                      ) : (
-                        <div className="py-3 text-center text-gray-400 text-xs font-medium" style={{ fontFamily: "var(--font-body)" }}>
-                          플레이어 참가 대기 중...
-                        </div>
-                      )}
+                            ))
+                        ) : (
+                          <div className="py-3 text-center text-gray-400 text-xs font-medium" style={{ fontFamily: "var(--font-body)" }}>
+                            플레이어 참가 대기 중...
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* 중간 점선 구분선 */}
             <div className="w-full border-t border-dashed border-teal-600/70" style={{ marginTop: "0.2rem", marginBottom: "0.4rem" }} />
