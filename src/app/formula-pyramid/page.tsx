@@ -273,12 +273,12 @@ export default function FormulaPyramidPage() {
 
   return (
     <div
-      className="w-full flex-1 flex flex-col items-center justify-start pb-12"
+      className="w-full flex-1 flex flex-col items-center justify-start"
       style={{
-        paddingTop: "1.25rem",
-        paddingBottom: "3rem",
-        paddingLeft: "clamp(1.5rem, 5vw, 5rem)",
-        paddingRight: "clamp(1.5rem, 5vw, 5rem)",
+        paddingTop: "0.5rem",
+        paddingBottom: "1rem",
+        paddingLeft: "clamp(1rem, 4vw, 3rem)",
+        paddingRight: "clamp(1rem, 4vw, 3rem)",
       }}
     >
       <div className="w-full max-w-[1550px] flex flex-col mx-auto">
@@ -287,7 +287,7 @@ export default function FormulaPyramidPage() {
            ─────────────────────────────────────────────────────────────────── */}
         <div
           className="flex items-center justify-between w-full"
-          style={{ marginTop: "0.75rem", marginBottom: "1.25rem" }}
+          style={{ marginTop: "0.25rem", marginBottom: "0.75rem" }}
         >
           <div>
             <h1
@@ -318,8 +318,8 @@ export default function FormulaPyramidPage() {
 
         {/* 상단 게임 소개와 UI 사이의 점선 구분선 */}
         <div
-          className="w-full border-t border-dashed border-teal-700"
-          style={{ marginTop: "0.5rem", marginBottom: "1.25rem" }}
+          className="w-full border-t-2 border-dashed border-teal-700/80"
+          style={{ marginTop: "0.25rem", marginBottom: "1rem" }}
         />
 
         {/* ───────────────────────────────────────────────────────────────────
@@ -675,7 +675,7 @@ export default function FormulaPyramidPage() {
           </div>
 
           {/* ── [우측 박스] xl:col-span-3 ─────────────────────────────────── */}
-          <div className="xl:col-span-3 chalk-box content-box flex flex-col bg-teal-950/80 backdrop-blur-md h-full min-h-[640px] p-6 sm:p-7">
+          <div className="xl:col-span-3 chalk-box content-box flex flex-col bg-teal-950/80 backdrop-blur-md h-full min-h-[480px] p-4 sm:p-5">
             {mode === "player" ? (
               <>
                 {/* [요구사항 3] 카드 헤더 높이 및 정렬 통일 */}
@@ -797,13 +797,13 @@ export default function FormulaPyramidPage() {
 
                 <div
                   className="w-full border-t border-dashed border-teal-700"
-                  style={{ marginTop: "0.75rem", marginBottom: "0.75rem" }}
+                  style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}
                 />
 
-                <div className="flex flex-col py-1">
-                  <div className="flex flex-col gap-3.5">
+                <div className="flex flex-col py-0.5">
+                  <div className="flex flex-col gap-3">
                     {/* [요구사항] 게임 설명 본문 항목과 100% 동일한 글씨 크기(text-sm) & 폰트(var(--font-body)) 적용 */}
-                    <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-col gap-1">
                       <div
                         className="flex items-center justify-between w-full text-sm text-gray-200 font-medium"
                         style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
@@ -817,7 +817,7 @@ export default function FormulaPyramidPage() {
                             key={r}
                             type="button"
                             onClick={() => setSelectedRound(r)}
-                            className={`py-1.5 text-sm font-medium rounded-md transition-all ${
+                            className={`py-1 text-sm font-medium rounded-md transition-all ${
                               selectedRound === r
                                 ? "bg-yellow-400 text-teal-950 shadow scale-105"
                                 : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
@@ -831,7 +831,7 @@ export default function FormulaPyramidPage() {
                     </div>
 
                     {/* [요구사항 1] 라운드 별 시간 3분, 5분, 7분 3개로 구성 */}
-                    <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-col gap-1">
                       <div
                         className="flex items-center justify-between w-full text-sm text-gray-200 font-medium"
                         style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
@@ -845,7 +845,7 @@ export default function FormulaPyramidPage() {
                             key={t}
                             type="button"
                             onClick={() => setSelectedTime(t)}
-                            className={`py-2 text-sm font-medium rounded-md transition-all ${
+                            className={`py-1.5 text-sm font-medium rounded-md transition-all ${
                               selectedTime === t
                                 ? "bg-yellow-400 text-teal-950 shadow scale-105"
                                 : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
@@ -858,7 +858,7 @@ export default function FormulaPyramidPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-col gap-1">
                       <div
                         className="flex items-center justify-between w-full text-sm text-gray-200 font-medium"
                         style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
@@ -872,7 +872,7 @@ export default function FormulaPyramidPage() {
                             key={p}
                             type="button"
                             onClick={() => setSelectedPenalty(p)}
-                            className={`py-1.5 text-sm font-medium rounded-md transition-all ${
+                            className={`py-1 text-sm font-medium rounded-md transition-all ${
                               selectedPenalty === p
                                 ? "bg-yellow-400 text-teal-950 shadow scale-105"
                                 : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
@@ -886,22 +886,22 @@ export default function FormulaPyramidPage() {
                     </div>
                   </div>
 
-                  {/* [요구사항] 11R~15R과 라운드별 시간 사이 간격(14px)의 정확히 2배(28px = marginTop: 1.75rem) 적용 */}
-                  <div className="flex flex-col gap-2.5" style={{ marginTop: "1.75rem" }}>
+                  {/* [요구사항] 11R~15R과 라운드별 시간 사이 간격(12px: gap-3)의 정확히 2배(24px = marginTop: 1.5rem) 적용 */}
+                  <div className="flex flex-col gap-2" style={{ marginTop: "1.5rem" }}>
                     <button
                       type="button"
                       onClick={handleCreateGame}
-                      className="btn-chalk w-full justify-center py-2.5 text-base sm:text-lg font-bold"
+                      className="btn-chalk w-full justify-center py-2 text-base sm:text-lg font-bold"
                       style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
                     >
                       입장 코드 생성하기
                     </button>
 
-                    <div className="chalk-box-straight bg-teal-950 px-3 py-2 flex items-center justify-center min-h-[62px] h-[62px] border-dashed border-teal-600 text-center rounded-md transition-all">
+                    <div className="chalk-box-straight bg-teal-950 px-3 py-1.5 flex items-center justify-center min-h-[56px] h-[56px] border-dashed border-teal-600 text-center rounded-md transition-all">
                       {generatedRoomCode ? (
                         <div className="flex items-center gap-3">
                           <span
-                            className="text-3xl sm:text-3.5xl text-yellow-300 font-extrabold leading-none"
+                            className="text-2.5xl sm:text-3xl text-yellow-300 font-extrabold leading-none"
                             style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.2em" }}
                           >
                             {generatedRoomCode}
@@ -915,7 +915,7 @@ export default function FormulaPyramidPage() {
                             className="p-1 text-yellow-400 hover:text-yellow-200 transition-colors cursor-pointer hover:scale-110"
                             title="코드 복사"
                           >
-                            <Copy size={20} />
+                            <Copy size={18} />
                           </button>
                         </div>
                       ) : (
