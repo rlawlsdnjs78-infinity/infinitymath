@@ -248,6 +248,8 @@ export default function FormulaPyramidPage() {
 
   const { exprStr, result: currentResult } = calculateFormula(selectedNodes);
 
+  const [currentRound, setCurrentRound] = useState<number>(1);
+
   const handleSubmitAnswer = () => {
     if (selectedNodes.length !== 3) {
       triggerNotice("3개의 칸을 모두 선택해야 합니다!", "warning", 1000);
@@ -256,6 +258,29 @@ export default function FormulaPyramidPage() {
     }
 
     const TARGET = 9;
+    const nodesStr = selectedNodes.join(" ");
+
+    // 플레이어가 제출한 수식이 이미 제출된 수식이라면 1점 감점 및 "이미 제출된 정답입니다!" 안내
+    const isAlreadySubmitted = submittedAnswersList.some((a) => a.nodes === nodesStr);
+    if (isAlreadySubmitted) {
+      const nextScore = Math.max(0, myScore - 1);
+      setMyScore(nextScore);
+      setPlayers((prev) =>
+        prev.map((p) => (p.name === myNickname ? { ...p, score: nextScore } : p))
+      );
+      triggerNotice("이미 제출된 정답입니다! (-1점)", "error", 1500);
+
+      if (inGameRoom && activeRoomCode && typeof window !== "undefined" && "BroadcastChannel" in window) {
+        try {
+          const bc = new BroadcastChannel(`pyramid-room-${activeRoomCode}`);
+          bc.postMessage({ type: "SCORE_UPDATE", playerName: myNickname, newScore: nextScore });
+          bc.close();
+        } catch (err) {}
+      }
+      setSelectedNodes([]);
+      return;
+    }
+
     if (currentResult === TARGET) {
       const nextScore = myScore + 1;
       setMyScore(nextScore);
@@ -266,7 +291,7 @@ export default function FormulaPyramidPage() {
 
       const nodesArr = selectedNodes.map((id) => ALL_NODES[id]);
       const formulaStr = `${nodesArr[0].num} ${nodesArr[1].op} ${nodesArr[1].num} ${nodesArr[2].op} ${nodesArr[2].num} = 9`;
-      const ansObj = { nodes: selectedNodes.join(" "), formula: formulaStr };
+      const ansObj = { nodes: nodesStr, formula: formulaStr };
 
       setSubmittedAnswersList((prev) => {
         if (prev.some((a) => a.nodes === ansObj.nodes)) return prev;
@@ -633,7 +658,7 @@ export default function FormulaPyramidPage() {
                   style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
                 >
                   <span className="text-yellow-300 font-extrabold text-base sm:text-lg" style={{ fontFamily: "var(--font-chalk)" }}>
-                    라운드 : <span className="text-white ml-1">{selectedRound} / {selectedRound}</span>
+                    라운드 : <span className="text-white ml-1">{currentRound} / {selectedRound}</span>
                   </span>
                 </div>
 
@@ -663,7 +688,7 @@ export default function FormulaPyramidPage() {
 
             {/* 메인 3컬럼 대전 그리드 */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-              {/* [좌측: 실시간 참가자 & 점수판] */}
+              {/* [좌측: 실시간 참가자 & 점수판 - 딜러 제외 플레이어만 표시] */}
               <div
                 className="xl:col-span-3 chalk-box content-box bg-teal-950/80 flex flex-col gap-4.5"
                 style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.25rem", paddingBottom: "1.25rem" }}
@@ -673,44 +698,53 @@ export default function FormulaPyramidPage() {
                     <Trophy size={22} className="text-yellow-400" />
                     <span>실시간 점수판</span>
                   </div>
-                  <span className="text-xs sm:text-sm text-gray-300 font-medium select-none">({players.length}명 접속 중)</span>
+                  <span className="text-xs sm:text-sm text-gray-300 font-medium select-none">
+                    ({players.filter((p) => !p.isHost).length}명 접속 중)
+                  </span>
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  {players
-                    .slice()
-                    .sort((a, b) => b.score - a.score)
-                    .map((p, idx) => (
-                      <div
-                        key={idx}
-                        className={`flex items-center justify-between rounded-lg border-2 transition-all ${
-                          p.name === myNickname
-                            ? "bg-yellow-400/20 border-yellow-400 text-yellow-200 shadow-md"
-                            : "bg-teal-900/70 border-teal-700/80 text-gray-200"
-                        }`}
-                        style={{
-                          paddingTop: "0.85rem",
-                          paddingBottom: "0.85rem",
-                          paddingLeft: "1.25rem",
-                          paddingRight: "1.25rem",
-                        }}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="font-extrabold text-lg text-yellow-400 w-6 flex-shrink-0 flex items-center justify-center">
-                            {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}`}
-                          </span>
-                          <span className="font-bold text-sm sm:text-base" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
-                            {p.name} {p.isHost && "(딜러)"}
+                  {players.filter((p) => !p.isHost).length > 0 ? (
+                    players
+                      .filter((p) => !p.isHost)
+                      .slice()
+                      .sort((a, b) => b.score - a.score)
+                      .map((p, idx) => (
+                        <div
+                          key={idx}
+                          className={`flex items-center justify-between rounded-lg border-2 transition-all ${
+                            p.name === myNickname
+                              ? "bg-yellow-400/20 border-yellow-400 text-yellow-200 shadow-md"
+                              : "bg-teal-900/70 border-teal-700/80 text-gray-200"
+                          }`}
+                          style={{
+                            paddingTop: "0.85rem",
+                            paddingBottom: "0.85rem",
+                            paddingLeft: "1.25rem",
+                            paddingRight: "1.25rem",
+                          }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="font-extrabold text-lg text-yellow-400 w-6 flex-shrink-0 flex items-center justify-center">
+                              {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}`}
+                            </span>
+                            <span className="font-bold text-sm sm:text-base" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
+                              {p.name}
+                            </span>
+                          </div>
+                          <span
+                            className="font-extrabold text-xl text-yellow-300 flex-shrink-0"
+                            style={{ fontFamily: "var(--font-chalk)" }}
+                          >
+                            {p.score}점
                           </span>
                         </div>
-                        <span
-                          className="font-extrabold text-xl text-yellow-300 flex-shrink-0"
-                          style={{ fontFamily: "var(--font-chalk)" }}
-                        >
-                          {p.score}점
-                        </span>
-                      </div>
-                    ))}
+                      ))
+                  ) : (
+                    <div className="py-6 text-center text-gray-400 text-sm font-medium" style={{ fontFamily: "var(--font-body)" }}>
+                      플레이어 참가 대기 중...
+                    </div>
+                  )}
                 </div>
               </div>
 
