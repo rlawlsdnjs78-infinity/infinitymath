@@ -790,7 +790,7 @@ export default function FormulaPyramidPage() {
                     className="text-yellow-300 font-bold"
                     style={{ fontFamily: "var(--font-chalk)", fontSize: "2.5rem", lineHeight: 1.1 }}
                   >
-                    게임 세팅 & 방 생성
+                    게임 생성
                   </h2>
                 </div>
 
@@ -801,11 +801,15 @@ export default function FormulaPyramidPage() {
 
                 <div className="flex flex-col gap-6 flex-1 justify-between py-1">
                   <div className="flex flex-col gap-5">
-                    {/* [요구사항 3] 각 버튼 및 라벨 글씨 크기 확대 */}
+                    {/* [요구사항 2] 라벨 폰트를 var(--font-body)로 맞추고 (N라운드) 수치 우측 정렬 */}
                     <div className="flex flex-col gap-2.5">
-                      <label className="text-lg sm:text-xl text-gray-200 font-bold" style={{ fontFamily: "var(--font-chalk)" }}>
-                        라운드 설정 ({selectedRound}라운드)
-                      </label>
+                      <div
+                        className="flex items-center justify-between w-full text-base sm:text-lg text-gray-200 font-medium"
+                        style={{ fontFamily: "var(--font-body)" }}
+                      >
+                        <span>라운드 설정</span>
+                        <span className="text-yellow-300 font-bold">({selectedRound}라운드)</span>
+                      </div>
                       <div className="grid grid-cols-5 gap-2">
                         {Array.from({ length: 15 }, (_, i) => i + 1).map((r) => (
                           <button
@@ -826,9 +830,13 @@ export default function FormulaPyramidPage() {
                     </div>
 
                     <div className="flex flex-col gap-2.5">
-                      <label className="text-lg sm:text-xl text-gray-200 font-bold" style={{ fontFamily: "var(--font-chalk)" }}>
-                        라운드 별 시간 ({selectedTime}분)
-                      </label>
+                      <div
+                        className="flex items-center justify-between w-full text-base sm:text-lg text-gray-200 font-medium"
+                        style={{ fontFamily: "var(--font-body)" }}
+                      >
+                        <span>라운드 별 시간</span>
+                        <span className="text-yellow-300 font-bold">({selectedTime}분)</span>
+                      </div>
                       <div className="grid grid-cols-3 gap-2.5">
                         {[1, 2, 3, 4, 5].map((t) => (
                           <button
@@ -849,9 +857,13 @@ export default function FormulaPyramidPage() {
                     </div>
 
                     <div className="flex flex-col gap-2.5">
-                      <label className="text-lg sm:text-xl text-gray-200 font-bold" style={{ fontFamily: "var(--font-chalk)" }}>
-                        오답 패널티 ({selectedPenalty})
-                      </label>
+                      <div
+                        className="flex items-center justify-between w-full text-base sm:text-lg text-gray-200 font-medium"
+                        style={{ fontFamily: "var(--font-body)" }}
+                      >
+                        <span>오답 패널티</span>
+                        <span className="text-yellow-300 font-bold">({selectedPenalty})</span>
+                      </div>
                       <div className="grid grid-cols-3 gap-2.5">
                         {["없음", "1초", "2초", "3초", "4초", "5초"].map((p) => (
                           <button
