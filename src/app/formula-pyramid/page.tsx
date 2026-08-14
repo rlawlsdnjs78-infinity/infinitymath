@@ -800,94 +800,92 @@ export default function FormulaPyramidPage() {
                   style={{ marginTop: "0.75rem", marginBottom: "0.75rem" }}
                 />
 
-                <div className="flex flex-col gap-3.5 flex-1 justify-between py-0.5">
-                  <div className="flex flex-col gap-3.5">
-                    {/* [요구사항] 게임 설명 본문 항목과 100% 동일한 글씨 크기(text-sm) & 폰트(var(--font-body)) 적용 */}
-                    <div className="flex flex-col gap-1.5">
-                      <div
-                        className="flex items-center justify-between w-full text-sm text-gray-200 font-medium"
-                        style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
-                      >
-                        <span>라운드 설정</span>
-                        <span className="text-yellow-300 font-bold">({selectedRound}라운드)</span>
-                      </div>
-                      <div className="grid grid-cols-5 gap-1.5">
-                        {Array.from({ length: 15 }, (_, i) => i + 1).map((r) => (
-                          <button
-                            key={r}
-                            type="button"
-                            onClick={() => setSelectedRound(r)}
-                            className={`py-1.5 text-sm font-medium rounded-md transition-all ${
-                              selectedRound === r
-                                ? "bg-yellow-400 text-teal-950 shadow scale-105"
-                                : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
-                            }`}
-                            style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
-                          >
-                            {r}R
-                          </button>
-                        ))}
-                      </div>
+                <div className="flex flex-col gap-3.5 py-0.5">
+                  {/* [요구사항] 게임 설명 본문 항목과 100% 동일한 글씨 크기(text-sm) & 폰트(var(--font-body)) 적용 */}
+                  <div className="flex flex-col gap-1.5">
+                    <div
+                      className="flex items-center justify-between w-full text-sm text-gray-200 font-medium"
+                      style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
+                    >
+                      <span>라운드 설정</span>
+                      <span className="text-yellow-300 font-bold">({selectedRound}라운드)</span>
                     </div>
-
-                    {/* [요구사항 1] 라운드 별 시간 3분, 5분, 7분 3개로 구성 */}
-                    <div className="flex flex-col gap-1.5">
-                      <div
-                        className="flex items-center justify-between w-full text-sm text-gray-200 font-medium"
-                        style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
-                      >
-                        <span>라운드 별 시간</span>
-                        <span className="text-yellow-300 font-bold">({selectedTime}분)</span>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[3, 5, 7].map((t) => (
-                          <button
-                            key={t}
-                            type="button"
-                            onClick={() => setSelectedTime(t)}
-                            className={`py-2 text-sm font-medium rounded-md transition-all ${
-                              selectedTime === t
-                                ? "bg-yellow-400 text-teal-950 shadow scale-105"
-                                : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
-                            }`}
-                            style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
-                          >
-                            {t}분
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5">
-                      <div
-                        className="flex items-center justify-between w-full text-sm text-gray-200 font-medium"
-                        style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
-                      >
-                        <span>오답 패널티</span>
-                        <span className="text-yellow-300 font-bold">({selectedPenalty})</span>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        {["없음", "1초", "2초", "3초", "4초", "5초"].map((p) => (
-                          <button
-                            key={p}
-                            type="button"
-                            onClick={() => setSelectedPenalty(p)}
-                            className={`py-1.5 text-sm font-medium rounded-md transition-all ${
-                              selectedPenalty === p
-                                ? "bg-yellow-400 text-teal-950 shadow scale-105"
-                                : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
-                            }`}
-                            style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
-                          >
-                            {p}
-                          </button>
-                        ))}
-                      </div>
+                    <div className="grid grid-cols-5 gap-1.5">
+                      {Array.from({ length: 15 }, (_, i) => i + 1).map((r) => (
+                        <button
+                          key={r}
+                          type="button"
+                          onClick={() => setSelectedRound(r)}
+                          className={`py-1.5 text-sm font-medium rounded-md transition-all ${
+                            selectedRound === r
+                              ? "bg-yellow-400 text-teal-950 shadow scale-105"
+                              : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
+                          }`}
+                          style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
+                        >
+                          {r}R
+                        </button>
+                      ))}
                     </div>
                   </div>
 
+                  {/* [요구사항 1] 라운드 별 시간 3분, 5분, 7분 3개로 구성 */}
+                  <div className="flex flex-col gap-1.5">
+                    <div
+                      className="flex items-center justify-between w-full text-sm text-gray-200 font-medium"
+                      style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
+                    >
+                      <span>라운드 별 시간</span>
+                      <span className="text-yellow-300 font-bold">({selectedTime}분)</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[3, 5, 7].map((t) => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setSelectedTime(t)}
+                          className={`py-2 text-sm font-medium rounded-md transition-all ${
+                            selectedTime === t
+                              ? "bg-yellow-400 text-teal-950 shadow scale-105"
+                              : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
+                          }`}
+                          style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
+                        >
+                          {t}분
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <div
+                      className="flex items-center justify-between w-full text-sm text-gray-200 font-medium"
+                      style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
+                    >
+                      <span>오답 패널티</span>
+                      <span className="text-yellow-300 font-bold">({selectedPenalty})</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {["없음", "1초", "2초", "3초", "4초", "5초"].map((p) => (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => setSelectedPenalty(p)}
+                          className={`py-1.5 text-sm font-medium rounded-md transition-all ${
+                            selectedPenalty === p
+                              ? "bg-yellow-400 text-teal-950 shadow scale-105"
+                              : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
+                          }`}
+                          style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
+                        >
+                          {p}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* [요구사항] '오답 패널티' 버튼 행과 '입장 코드 생성하기' 박스 사이 간격을 상단 항목 간격(gap-3.5)과 100% 동일하게 통일 */}
                   <div>
-                    {/* [요구사항 2] 태블릿 한 화면에 스크롤 없이 컴팩트 출력 */}
                     <button
                       type="button"
                       onClick={handleCreateGame}
