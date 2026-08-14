@@ -983,34 +983,72 @@ export default function FormulaPyramidPage() {
               /* 🎮 [플레이어 모드 전용 가운데 UI] - 딜러 모드 변경 시 영향 받지 않음 */
               /* =================================================================== */
               <div className="flex flex-col gap-4 w-full h-full">
-                {/* 상단 딜러/게임 상태 바 (방 접속 시 노출) */}
+                {/* 상단 딜러/게임 상태 바 (방 접속 시 노출) - 라운드, 남은시간, 오답페널티 개별 박스 분리 & 퇴장 버튼 1.25rem 패딩 */}
                 {inGameRoom && (
-                  <div
-                    className="chalk-box-straight bg-teal-900/90 flex flex-wrap items-center justify-between gap-3 border border-yellow-400/80 shadow-md rounded-xl"
-                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.75rem", paddingBottom: "0.75rem" }}
-                  >
+                  <div className="flex flex-wrap items-center justify-between gap-3 w-full">
                     <div className="flex items-center gap-3 flex-wrap">
-                      <span className="text-yellow-300 font-extrabold text-sm sm:text-base" style={{ fontFamily: "var(--font-chalk)" }}>
-                        라운드: <span className="text-white">{currentRound} / {selectedRound}</span>
-                      </span>
-                      <span className="text-teal-600">|</span>
-                      <span className={`font-extrabold text-sm sm:text-base flex items-center gap-1.5 ${roomTimerSeconds <= 30 && isGameStarted ? "text-rose-300 animate-pulse" : "text-yellow-300"}`} style={{ fontFamily: "var(--font-chalk)" }}>
-                        <Clock size={16} className={roomTimerSeconds <= 30 && isGameStarted ? "text-rose-400 animate-spin" : "text-yellow-400"} />
-                        남은 시간: <span className="text-white ml-0.5">{!isGameStarted ? `${formatTime(roomTimerSeconds)} (대기 중)` : formatTime(roomTimerSeconds)}</span>
-                      </span>
-                      <span className="text-teal-600">|</span>
-                      <span className="text-yellow-300 font-extrabold text-sm sm:text-base" style={{ fontFamily: "var(--font-chalk)" }}>
-                        오답 페널티: <span className="text-white">{selectedPenalty}</span>
-                      </span>
+                      {/* 1. 라운드 박스 */}
+                      <div
+                        className="bg-teal-900/90 border-2 border-dashed border-teal-500/80 rounded-xl flex items-center shadow-md"
+                        style={{
+                          paddingLeft: "1.25rem",
+                          paddingRight: "1.25rem",
+                          paddingTop: "0.6rem",
+                          paddingBottom: "0.6rem",
+                        }}
+                      >
+                        <span className="text-yellow-300 font-extrabold text-sm sm:text-base whitespace-nowrap" style={{ fontFamily: "var(--font-chalk)" }}>
+                          라운드: <span className="text-white ml-1">{currentRound} / {selectedRound}</span>
+                        </span>
+                      </div>
+
+                      {/* 2. 남은 시간 박스 */}
+                      <div
+                        className={`bg-teal-900/90 border-2 border-dashed ${roomTimerSeconds <= 30 && isGameStarted ? "border-rose-500/90 bg-rose-950/80" : "border-teal-500/80"} rounded-xl flex items-center gap-2 shadow-md`}
+                        style={{
+                          paddingLeft: "1.25rem",
+                          paddingRight: "1.25rem",
+                          paddingTop: "0.6rem",
+                          paddingBottom: "0.6rem",
+                        }}
+                      >
+                        <Clock size={18} className={roomTimerSeconds <= 30 && isGameStarted ? "text-rose-400 animate-spin" : "text-yellow-400"} />
+                        <span className={`font-extrabold text-sm sm:text-base whitespace-nowrap ${roomTimerSeconds <= 30 && isGameStarted ? "text-rose-300 animate-pulse" : "text-yellow-300"}`} style={{ fontFamily: "var(--font-chalk)" }}>
+                          남은 시간: <span className="text-white ml-1">{!isGameStarted ? `${formatTime(roomTimerSeconds)} (대기 중)` : formatTime(roomTimerSeconds)}</span>
+                        </span>
+                      </div>
+
+                      {/* 3. 오답 페널티 박스 */}
+                      <div
+                        className="bg-teal-900/90 border-2 border-dashed border-teal-500/80 rounded-xl flex items-center shadow-md"
+                        style={{
+                          paddingLeft: "1.25rem",
+                          paddingRight: "1.25rem",
+                          paddingTop: "0.6rem",
+                          paddingBottom: "0.6rem",
+                        }}
+                      >
+                        <span className="text-yellow-300 font-extrabold text-sm sm:text-base whitespace-nowrap" style={{ fontFamily: "var(--font-chalk)" }}>
+                          오답 페널티: <span className="text-white ml-1">{selectedPenalty}</span>
+                        </span>
+                      </div>
                     </div>
 
+                    {/* 퇴장 버튼 (좌우 1.25rem / 20px 패딩 100% 엄격 적용) */}
                     <button
                       type="button"
                       onClick={handleLeaveRoom}
-                      className="flex items-center gap-1.5 bg-rose-900/80 hover:bg-rose-800 text-rose-200 rounded-md text-xs sm:text-sm font-bold border border-rose-600/60 cursor-pointer px-3 py-2"
+                      className="flex items-center justify-center gap-2 bg-rose-900/90 hover:bg-rose-800 text-rose-100 rounded-xl text-sm sm:text-base font-extrabold border-2 border-rose-600/90 cursor-pointer shadow-lg transition-all"
+                      style={{
+                        paddingLeft: "1.25rem",
+                        paddingRight: "1.25rem",
+                        paddingTop: "0.65rem",
+                        paddingBottom: "0.65rem",
+                        fontFamily: "var(--font-chalk)",
+                      }}
                     >
-                      <LogOut size={16} />
-                      <span>퇴장</span>
+                      <LogOut size={18} className="flex-shrink-0" />
+                      <span className="whitespace-nowrap">퇴장</span>
                     </button>
                   </div>
                 )}
@@ -1345,24 +1383,54 @@ export default function FormulaPyramidPage() {
                 ) : (
                   /* 2. [요구사항 2] 입장 코드 생성 완료 시: 딜러 대시보드 노출 (피라미드 아래 점선 제거) */
                   <>
-                    {/* 딜러 상태 컨트롤 바 */}
-                    <div
-                      className="chalk-box-straight bg-teal-900/90 flex flex-wrap items-center justify-between gap-3 border border-yellow-400/80 shadow-md rounded-xl"
-                      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.75rem", paddingBottom: "0.75rem" }}
-                    >
+                    {/* 딜러 상태 컨트롤 바 - 라운드, 남은시간, 오답페널티 개별 박스 분리 */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 w-full">
                       <div className="flex items-center gap-3 flex-wrap">
-                        <span className="text-yellow-300 font-extrabold text-sm sm:text-base" style={{ fontFamily: "var(--font-chalk)" }}>
-                          라운드: <span className="text-white">{currentRound} / {selectedRound}</span>
-                        </span>
-                        <span className="text-teal-600">|</span>
-                        <span className={`font-extrabold text-sm sm:text-base flex items-center gap-1.5 ${roomTimerSeconds <= 30 && isGameStarted ? "text-rose-300 animate-pulse" : "text-yellow-300"}`} style={{ fontFamily: "var(--font-chalk)" }}>
-                          <Clock size={16} className={roomTimerSeconds <= 30 && isGameStarted ? "text-rose-400 animate-spin" : "text-yellow-400"} />
-                          남은 시간: <span className="text-white ml-0.5">{!isGameStarted ? `${formatTime(roomTimerSeconds)} (대기 중)` : formatTime(roomTimerSeconds)}</span>
-                        </span>
-                        <span className="text-teal-600">|</span>
-                        <span className="text-yellow-300 font-extrabold text-sm sm:text-base" style={{ fontFamily: "var(--font-chalk)" }}>
-                          오답 페널티: <span className="text-white">{selectedPenalty}</span>
-                        </span>
+                        {/* 1. 라운드 박스 */}
+                        <div
+                          className="bg-teal-900/90 border-2 border-dashed border-teal-500/80 rounded-xl flex items-center shadow-md"
+                          style={{
+                            paddingLeft: "1.25rem",
+                            paddingRight: "1.25rem",
+                            paddingTop: "0.6rem",
+                            paddingBottom: "0.6rem",
+                          }}
+                        >
+                          <span className="text-yellow-300 font-extrabold text-sm sm:text-base whitespace-nowrap" style={{ fontFamily: "var(--font-chalk)" }}>
+                            라운드: <span className="text-white ml-1">{currentRound} / {selectedRound}</span>
+                          </span>
+                        </div>
+
+                        {/* 2. 남은 시간 박스 */}
+                        <div
+                          className={`bg-teal-900/90 border-2 border-dashed ${roomTimerSeconds <= 30 && isGameStarted ? "border-rose-500/90 bg-rose-950/80" : "border-teal-500/80"} rounded-xl flex items-center gap-2 shadow-md`}
+                          style={{
+                            paddingLeft: "1.25rem",
+                            paddingRight: "1.25rem",
+                            paddingTop: "0.6rem",
+                            paddingBottom: "0.6rem",
+                          }}
+                        >
+                          <Clock size={18} className={roomTimerSeconds <= 30 && isGameStarted ? "text-rose-400 animate-spin" : "text-yellow-400"} />
+                          <span className={`font-extrabold text-sm sm:text-base whitespace-nowrap ${roomTimerSeconds <= 30 && isGameStarted ? "text-rose-300 animate-pulse" : "text-yellow-300"}`} style={{ fontFamily: "var(--font-chalk)" }}>
+                            남은 시간: <span className="text-white ml-1">{!isGameStarted ? `${formatTime(roomTimerSeconds)} (대기 중)` : formatTime(roomTimerSeconds)}</span>
+                          </span>
+                        </div>
+
+                        {/* 3. 오답 페널티 박스 */}
+                        <div
+                          className="bg-teal-900/90 border-2 border-dashed border-teal-500/80 rounded-xl flex items-center shadow-md"
+                          style={{
+                            paddingLeft: "1.25rem",
+                            paddingRight: "1.25rem",
+                            paddingTop: "0.6rem",
+                            paddingBottom: "0.6rem",
+                          }}
+                        >
+                          <span className="text-yellow-300 font-extrabold text-sm sm:text-base whitespace-nowrap" style={{ fontFamily: "var(--font-chalk)" }}>
+                            오답 페널티: <span className="text-white ml-1">{selectedPenalty}</span>
+                          </span>
+                        </div>
                       </div>
 
                       <div className="flex items-center gap-3">
@@ -1370,22 +1438,34 @@ export default function FormulaPyramidPage() {
                           <button
                             type="button"
                             onClick={handleStartGame}
-                            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-md text-sm sm:text-base border border-emerald-400 shadow-md cursor-pointer animate-pulse"
-                            style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.6rem", paddingBottom: "0.6rem" }}
+                            className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-sm sm:text-base border-2 border-emerald-400 shadow-lg cursor-pointer animate-pulse transition-all"
+                            style={{
+                              paddingLeft: "1.25rem",
+                              paddingRight: "1.25rem",
+                              paddingTop: "0.65rem",
+                              paddingBottom: "0.65rem",
+                              fontFamily: "var(--font-chalk)",
+                            }}
                           >
                             <Play size={18} className="fill-white flex-shrink-0" />
-                            <span>게임 시작하기</span>
+                            <span className="whitespace-nowrap">게임 시작하기</span>
                           </button>
                         )}
 
                         <button
                           type="button"
                           onClick={handleLeaveRoom}
-                          className="flex items-center gap-2 bg-rose-900/90 hover:bg-rose-800 text-rose-200 rounded-md text-sm sm:text-base font-bold border border-rose-600/70 cursor-pointer shadow-md"
-                          style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.6rem", paddingBottom: "0.6rem" }}
+                          className="flex items-center justify-center gap-2 bg-rose-900/90 hover:bg-rose-800 text-rose-100 rounded-xl text-sm sm:text-base font-extrabold border-2 border-rose-600/90 cursor-pointer shadow-lg transition-all"
+                          style={{
+                            paddingLeft: "1.25rem",
+                            paddingRight: "1.25rem",
+                            paddingTop: "0.65rem",
+                            paddingBottom: "0.65rem",
+                            fontFamily: "var(--font-chalk)",
+                          }}
                         >
-                          <LogOut size={18} />
-                          <span>퇴장</span>
+                          <LogOut size={18} className="flex-shrink-0" />
+                          <span className="whitespace-nowrap">퇴장</span>
                         </button>
                       </div>
                     </div>
