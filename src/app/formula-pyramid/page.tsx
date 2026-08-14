@@ -312,6 +312,7 @@ export default function FormulaPyramidPage() {
         if (rem === 0 && !showRoundEndPopup && !isRoundLocked) {
           setIsRoundLocked(true);
           setShowRoundEndPopup(true);
+          setActivityLogs((prev) => [`[안내] ${currentRound}라운드가 종료되었습니다.`, ...prev]);
         }
       } else {
         setRoomTimerSeconds((prev) => {
@@ -319,6 +320,7 @@ export default function FormulaPyramidPage() {
           if (next === 0 && !showRoundEndPopup && !isRoundLocked) {
             setIsRoundLocked(true);
             setShowRoundEndPopup(true);
+            setActivityLogs((logPrev) => [`[안내] ${currentRound}라운드가 종료되었습니다.`, ...logPrev]);
           }
           return next;
         });
@@ -656,7 +658,7 @@ export default function FormulaPyramidPage() {
             }
 
             setActivityLogs((prev) => {
-              const msg = `[실시간] ${data.player?.name || "플레이어"} 님이 방에 참가하셨습니다.`;
+              const msg = `[입장] ${data.player?.name || "플레이어"} 님이 입장하였습니다.`;
               return prev.includes(msg) ? prev : [msg, ...prev];
             });
 
@@ -757,7 +759,7 @@ export default function FormulaPyramidPage() {
             setPenaltyLockSeconds(0);
             setCountdownValue(3);
             setActivityLogs((prev) => [
-              `[실시간] ${data.currentRound || 1}라운드가 시작되었습니다! (TARGET: ${data.target || 10})`,
+              `[안내] ${data.currentRound || 1}라운드가 시작되었습니다! (TARGET: ${data.target || 10})`,
               ...prev,
             ]);
           } else if (data.type === "SCORE_UPDATE") {
@@ -780,6 +782,10 @@ export default function FormulaPyramidPage() {
                   setShowRoundEndPopup(true);
                   setRoomTimerSeconds(0);
                   setRoomEndTime(Date.now());
+                  setActivityLogs((logPrev) => [
+                    `[안내] 모든 정답이 제출되어 ${curr.currentRound}라운드가 종료되었습니다.`,
+                    ...logPrev,
+                  ]);
                 }
                 return nextList;
               });
@@ -919,7 +925,7 @@ export default function FormulaPyramidPage() {
 
     const me = { name: nickname.trim(), score: 0 };
     setPlayers([me]);
-    setActivityLogs([`[안내] 방 [${cleanCode}] 에 성공적으로 입장했습니다.`]);
+    setActivityLogs([`[입장] ${nickname.trim()} 님이 입장하였습니다.`]);
 
     // 서버에 입장 알림 (다른 기기 동기화)
     postRoomAction("JOIN", { playerName: nickname.trim() }, cleanCode);
@@ -939,7 +945,7 @@ export default function FormulaPyramidPage() {
     setGeneratedRoomCode(code); setActiveRoomCode(code); setMyNickname("딜러(선생님)"); setMyScore(0); setIsDealerHost(true); setInGameRoom(true); setUsedBoardIds([]);
     const host = { name: "딜러(선생님)", score: 0, isHost: true };
     setPlayers([host]);
-    setActivityLogs([`[안내] 딜러 방 [${code}] 가 생성되었습니다. 플레이어가 입장하면 [게임 시작하기]를 눌러주세요.`]);
+    setActivityLogs([`[안내] 딜러 방 [${code}] 가 생성되었습니다.`]);
 
     // 서버에 방 생성 알림 (다른 기기 동기화)
     postRoomAction("CREATE", {
@@ -987,6 +993,11 @@ export default function FormulaPyramidPage() {
 
     const gameStartTs = Date.now();
     lastStartedGameTsRef.current = gameStartTs;
+
+    setActivityLogs((prev) => [
+      `[안내] ${roundNum}라운드가 시작되었습니다! (TARGET: ${chosenBoard.target})`,
+      ...prev,
+    ]);
 
     // 모든 기기로 게임 시작 전송
     broadcastRoomEvent({
@@ -1830,58 +1841,71 @@ export default function FormulaPyramidPage() {
                 </div>
               </>
             ) : inGameRoom && isDealerHost ? (
-              /* ── 딜러 방 생성 후: 실시간 현황판 ── */
+              /* ── 딜러 방 생성 후: 실시간 게임 공지 ── */
               <div className="flex flex-col flex-1 h-full">
                 <div className="flex items-center gap-3 w-full min-h-[44px]">
-                  <Activity className="text-yellow-400 flex-shrink-0 animate-pulse" size={28} />
-                  <h2 className="text-yellow-300 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "2.3rem", lineHeight: 1.1 }}>
-                    실시간 현황판
+                  <Megaphone className="text-yellow-400 flex-shrink-0" size={28} />
+                  <h2 className="text-yellow-300 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "2.5rem", lineHeight: 1.1 }}>
+                    실시간 게임 공지
                   </h2>
                 </div>
-                <div className="w-full border-t border-dashed border-teal-700" style={{ marginTop: "0.5rem", marginBottom: "0.75rem" }} />
+                <div className="w-full border-t border-dashed border-teal-700" style={{ marginTop: "1.1rem", marginBottom: "1.1rem" }} />
 
-                <div
-                  className="flex-1 w-full rounded-xl bg-teal-900/95 border-2 border-dashed border-teal-600/80 shadow-inner flex flex-col overflow-hidden"
-                  style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.75rem", paddingBottom: "0.75rem", minHeight: "260px" }}
-                >
-                  <div className="flex items-center justify-between text-yellow-300 font-bold text-sm mb-2 pb-1.5 border-b border-dashed border-teal-700/80" style={{ fontFamily: "var(--font-chalk)" }}>
-                    <div className="flex items-center gap-2">
-                      <Activity size={16} className="text-yellow-400 animate-pulse flex-shrink-0" />
-                      <span>실시간 활동 기록</span>
-                    </div>
-                    <span className="text-xs text-gray-300 font-normal">총 {activityLogs.length}건</span>
-                  </div>
-                  <div className="flex-1 flex flex-col gap-1.5 overflow-y-auto pr-1">
-                    {activityLogs.length > 0 ? (
-                      activityLogs.map((log, idx) => {
-                        const isCorrect = log.startsWith("[정답]");
-                        const isWrong = log.startsWith("[오답]");
-                        const isJoin = log.startsWith("[입장]");
-                        const isLeave = log.startsWith("[퇴장]");
-                        return (
-                          <div
-                            key={idx}
-                            className={`text-xs sm:text-sm py-1 px-2 rounded font-medium transition-all ${
+                {/* 말머리 기준 들여쓰기된 실시간 공지 리스트 (작은 내부 박스 제거) */}
+                <div className="flex-1 flex flex-col gap-3 overflow-y-auto pr-1">
+                  {activityLogs.length > 0 ? (
+                    activityLogs.map((log, idx) => {
+                      const match = log.match(/^(\[[^\]]+\])\s*(.*)$/);
+                      const tag = match ? match[1] : "[안내]";
+                      const text = match ? match[2] : log;
+
+                      const isCorrect = tag === "[정답]";
+                      const isWrong = tag === "[오답]";
+                      const isJoin = tag === "[입장]";
+                      const isLeave = tag === "[퇴장]";
+
+                      return (
+                        <div
+                          key={idx}
+                          className="flex items-start gap-2.5 text-base sm:text-lg leading-relaxed py-0.5"
+                          style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
+                        >
+                          <span
+                            className={`flex-shrink-0 font-extrabold text-base sm:text-lg ${
                               isCorrect
-                                ? "bg-emerald-950/80 text-emerald-200 border border-emerald-500/60 font-bold shadow-sm"
+                                ? "text-yellow-300"
                                 : isWrong
-                                ? "bg-rose-950/80 text-rose-200 border border-rose-500/60 font-bold shadow-sm"
+                                ? "text-rose-400"
                                 : isJoin
-                                ? "bg-teal-950/70 text-cyan-300 border border-cyan-600/50"
+                                ? "text-emerald-400"
                                 : isLeave
-                                ? "bg-gray-950/70 text-gray-400 border border-gray-700/50"
-                                : "bg-teal-950/60 text-yellow-200 border border-yellow-600/40"
+                                ? "text-gray-400"
+                                : "text-cyan-300"
                             }`}
-                            style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.01em" }}
+                            style={{ fontFamily: "var(--font-chalk)" }}
                           >
-                            {log}
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <div className="py-12 text-center text-gray-400 text-xs">활동 기록이 여기에 실시간으로 표시됩니다.</div>
-                    )}
-                  </div>
+                            {tag}
+                          </span>
+                          <span
+                            className={`flex-1 ${
+                              isCorrect
+                                ? "text-yellow-100 font-bold"
+                                : isWrong
+                                ? "text-rose-200 font-semibold"
+                                : "text-gray-200"
+                            }`}
+                            style={{ wordBreak: "break-all" }}
+                          >
+                            {text}
+                          </span>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="py-12 text-center text-gray-400 text-sm font-medium" style={{ fontFamily: "var(--font-body)" }}>
+                      공지 내역이 여기에 실시간으로 표시됩니다.
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
