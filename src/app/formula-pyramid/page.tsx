@@ -453,7 +453,20 @@ export default function FormulaPyramidPage() {
     setSelectedNodes([]);
   };
 
-  const broadcastScoreUpdate = (playerName: string, newScore: number, submittedAnswer?: { nodes: string; formula: string }) => {
+  const postRoomAction = async (action: string, payload: Record<string, unknown>, targetRoomCode?: string) => {
+    const code = targetRoomCode || activeRoomCode;
+    if (!code) return;
+    try {
+      await fetch("/api/pyramid", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, roomCode: code, payload }),
+      });
+    } catch {}
+  };
+
+  const broadcastScoreUpdate = (playerName: string, newScore: number, submittedAnswer?: { nodes: string; formula: string }, roundFinish?: boolean) => {
+    // 1. 로컬 탭 간 BroadcastChannel
     if (inGameRoom && activeRoomCode && typeof window !== "undefined" && "BroadcastChannel" in window) {
       try {
         const bc = new BroadcastChannel(`pyramid-room-${activeRoomCode}`);
@@ -461,6 +474,8 @@ export default function FormulaPyramidPage() {
         bc.close();
       } catch {}
     }
+    // 2. 다른 기기(PC, 태블릿 등)를 위한 서버 API 전파
+    postRoomAction("SCORE_UPDATE", { playerName, newScore, submittedAnswer, roundFinish });
   };
 
   /* ── 최신 방 상태값을 useRef로 관리 ── */
@@ -476,6 +491,7 @@ export default function FormulaPyramidPage() {
     roomEndTime,
     currentTargetNumber,
     currentAllNodes,
+    isRoundLocked,
   });
   useEffect(() => {
     roomStateRef.current = {
@@ -490,6 +506,7 @@ export default function FormulaPyramidPage() {
       roomEndTime,
       currentTargetNumber,
       currentAllNodes,
+      isRoundLocked,
     };
   });
 
@@ -607,6 +624,85 @@ export default function FormulaPyramidPage() {
     return () => clearTimeout(timer);
   }, [countdownValue]);
 
+  /* ── 다른 기기(PC, 태블릿) 간 실시간 서버 폴링 동기화 ── */
+  useEffect(() => {
+    if (!inGameRoom || !activeRoomCode) return;
+
+    let isSubscribed = true;
+    const pollInterval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/pyramid?roomCode=${encodeURIComponent(activeRoomCode)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!isSubscribed) return;
+
+        if (data.exists && data.room) {
+          const r = data.room;
+          const curr = roomStateRef.current;
+
+          // 플레이어 목록 동기화
+          if (r.players && Array.isArray(r.players)) {
+            setPlayers(r.players);
+            const me = r.players.find((p: { name: string; score: number }) => p.name === curr.myNickname);
+            if (me && me.score !== curr.myScore) {
+              setMyScore(me.score);
+            }
+          }
+
+          // 게임 시작 동기화 (다른 기기에서 시작했을 때)
+          if (r.isGameStarted && !curr.isGameStarted) {
+            setSelectedBoardId(r.selectedBoardId || 1);
+            if (r.currentRound) setCurrentRound(r.currentRound);
+            if (r.roomEndTime) {
+              setRoomEndTime(r.roomEndTime);
+              setRoomTimerSeconds(Math.max(0, Math.ceil((r.roomEndTime - Date.now()) / 1000)));
+            }
+            setShowRoundEndPopup(false);
+            setIsRoundLocked(false);
+            setCountdownValue(3); // 3초 카운트다운
+          } else if (r.isGameStarted && curr.isGameStarted) {
+            if (r.selectedBoardId && r.selectedBoardId !== curr.selectedBoardId) {
+              setSelectedBoardId(r.selectedBoardId);
+            }
+            if (r.currentRound && r.currentRound !== curr.selectedRound) {
+              setCurrentRound(r.currentRound);
+            }
+            if (r.roomEndTime) {
+              setRoomEndTime(r.roomEndTime);
+            }
+          }
+
+          // 정답 제출 목록 동기화
+          if (r.submittedAnswersList && Array.isArray(r.submittedAnswersList)) {
+            setSubmittedAnswersList(r.submittedAnswersList);
+
+            // 모든 정답이 완료되었는지 확인
+            const allSolutions = getAllValidSolutions(curr.currentTargetNumber, curr.currentAllNodes);
+            const allSubmittedKeys = r.submittedAnswersList.map((a: { nodes: string }) => a.nodes);
+            const allSolKeys = allSolutions.map((s) => s.nodes.join(" "));
+            const allDone = allSolKeys.length > 0 && allSolKeys.every((k) => allSubmittedKeys.includes(k));
+            if (allDone && !curr.isRoundLocked) {
+              setIsRoundLocked(true);
+              setShowRoundEndPopup(true);
+              setRoomTimerSeconds(0);
+              setRoomEndTime(Date.now());
+            }
+          }
+
+          // 활동 로그
+          if (r.activityLogs && Array.isArray(r.activityLogs)) {
+            setActivityLogs(r.activityLogs);
+          }
+        }
+      } catch {}
+    }, 800);
+
+    return () => {
+      isSubscribed = false;
+      clearInterval(pollInterval);
+    };
+  }, [inGameRoom, activeRoomCode]);
+
   /* ── unload 처리 ── */
   useEffect(() => {
     if (!inGameRoom || !activeRoomCode) return;
@@ -616,18 +712,22 @@ export default function FormulaPyramidPage() {
         bc.postMessage({ type: "LEAVE", playerName: myNickname, isHost: isDealerHost });
         bc.close();
       } catch {}
+      postRoomAction("LEAVE", { playerName: myNickname });
     };
     window.addEventListener("beforeunload", handleUnload);
     return () => window.removeEventListener("beforeunload", handleUnload);
   }, [inGameRoom, activeRoomCode, myNickname, isDealerHost]);
 
   const handleLeaveRoom = () => {
-    if (inGameRoom && activeRoomCode && typeof window !== "undefined" && "BroadcastChannel" in window) {
-      try {
-        const bc = new BroadcastChannel(`pyramid-room-${activeRoomCode}`);
-        bc.postMessage({ type: "LEAVE", playerName: myNickname, isHost: isDealerHost });
-        bc.close();
-      } catch {}
+    if (inGameRoom && activeRoomCode) {
+      if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+        try {
+          const bc = new BroadcastChannel(`pyramid-room-${activeRoomCode}`);
+          bc.postMessage({ type: "LEAVE", playerName: myNickname, isHost: isDealerHost });
+          bc.close();
+        } catch {}
+      }
+      postRoomAction("LEAVE", { playerName: myNickname });
     }
     const remainingPlayers = players.filter((p) => p.name !== myNickname);
     if (remainingPlayers.length === 0 && activeRoomCode) {
@@ -638,32 +738,63 @@ export default function FormulaPyramidPage() {
     setShowRoundEndPopup(false); setIsRoundLocked(false); setCountdownValue(null); setShowFinalRanking(false); setCurrentRound(1); setUsedBoardIds([]);
   };
 
-  const handleJoinGameRoom = (e?: React.FormEvent) => {
+  const handleJoinGameRoom = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!nickname.trim()) { alert("닉네임을 입력해 주세요."); return; }
     if (!entryCode.trim()) { alert("입장 코드를 입력해 주세요."); return; }
     const cleanCode = entryCode.trim().toUpperCase();
+
+    // 1. 서버에 방 존재 여부 확인 및 정보 로드
+    let roomInfo: Record<string, unknown> | null = null;
     try {
-      const savedConfigStr = localStorage.getItem(`pyramid-room-config-${cleanCode}`);
-      if (savedConfigStr) {
-        const savedConfig = JSON.parse(savedConfigStr);
-        if (savedConfig.selectedRound) setSelectedRound(savedConfig.selectedRound);
-        if (savedConfig.selectedTime) setSelectedTime(savedConfig.selectedTime);
-        if (savedConfig.selectedPenalty) setSelectedPenalty(savedConfig.selectedPenalty);
-        if (savedConfig.selectedBoardId) setSelectedBoardId(savedConfig.selectedBoardId);
-        if (savedConfig.isGameStarted !== undefined) setIsGameStarted(savedConfig.isGameStarted);
-        if (savedConfig.roomEndTime) {
-          setRoomEndTime(savedConfig.roomEndTime);
-          setRoomTimerSeconds(Math.max(0, Math.ceil((savedConfig.roomEndTime - Date.now()) / 1000)));
-        } else {
-          setRoomTimerSeconds(savedConfig.selectedTime ? savedConfig.selectedTime * 60 : 180);
+      const res = await fetch(`/api/pyramid?roomCode=${encodeURIComponent(cleanCode)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.exists && data.room) {
+          roomInfo = data.room;
         }
       }
     } catch {}
-    setActiveRoomCode(cleanCode); setMyNickname(nickname.trim()); setMyScore(0); setIsDealerHost(false); setInGameRoom(true);
+
+    // 로컬 스토리지 보조 확인
+    if (!roomInfo) {
+      try {
+        const savedConfigStr = localStorage.getItem(`pyramid-room-config-${cleanCode}`);
+        if (savedConfigStr) {
+          roomInfo = JSON.parse(savedConfigStr);
+        }
+      } catch {}
+    }
+
+    if (roomInfo) {
+      if (typeof roomInfo.selectedRound === "number") setSelectedRound(roomInfo.selectedRound);
+      if (typeof roomInfo.selectedTime === "number") setSelectedTime(roomInfo.selectedTime);
+      if (typeof roomInfo.selectedPenalty === "string") setSelectedPenalty(roomInfo.selectedPenalty);
+      if (typeof roomInfo.selectedBoardId === "number") setSelectedBoardId(roomInfo.selectedBoardId);
+      if (typeof roomInfo.isGameStarted === "boolean") setIsGameStarted(roomInfo.isGameStarted);
+      if (typeof roomInfo.currentRound === "number") setCurrentRound(roomInfo.currentRound);
+      if (typeof roomInfo.roomEndTime === "number" && roomInfo.roomEndTime) {
+        setRoomEndTime(roomInfo.roomEndTime);
+        setRoomTimerSeconds(Math.max(0, Math.ceil((roomInfo.roomEndTime - Date.now()) / 1000)));
+      } else {
+        setRoomTimerSeconds(typeof roomInfo.selectedTime === "number" ? roomInfo.selectedTime * 60 : 180);
+      }
+    }
+
+    setActiveRoomCode(cleanCode);
+    setMyNickname(nickname.trim());
+    setMyScore(0);
+    setIsDealerHost(false);
+    setInGameRoom(true);
+
     const me = { name: nickname.trim(), score: 0 };
     setPlayers([me]);
     setActivityLogs([`[안내] 방 [${cleanCode}] 에 성공적으로 입장했습니다.`]);
+
+    // 서버에 입장 알림 (다른 기기 동기화)
+    postRoomAction("JOIN", { playerName: nickname.trim() }, cleanCode);
+
+    // 로컬 탭 동기화
     if (typeof window !== "undefined" && "BroadcastChannel" in window) {
       try { const bc = new BroadcastChannel(`pyramid-room-${cleanCode}`); bc.postMessage({ type: "JOIN", player: me }); bc.close(); } catch {}
     }
@@ -679,6 +810,17 @@ export default function FormulaPyramidPage() {
     const host = { name: "딜러(선생님)", score: 0, isHost: true };
     setPlayers([host]);
     setActivityLogs([`[안내] 딜러 방 [${code}] 가 생성되었습니다. 플레이어가 입장하면 [게임 시작하기]를 눌러주세요.`]);
+
+    // 서버에 방 생성 알림 (다른 기기 동기화)
+    postRoomAction("CREATE", {
+      hostName: "딜러(선생님)",
+      selectedRound,
+      selectedTime,
+      selectedPenalty,
+      selectedBoardId: 1,
+    }, code);
+
+    // 로컬 탭 동기화
     if (typeof window !== "undefined" && "BroadcastChannel" in window) {
       try { const bc = new BroadcastChannel(`pyramid-room-${code}`); bc.postMessage({ type: "JOIN", player: host, roomConfig: currentRoomConfig }); bc.close(); } catch {}
     }
@@ -707,12 +849,22 @@ export default function FormulaPyramidPage() {
     setSubmittedAnswersList([]);
     setShowFinalRanking(false);
 
-    const currentRoomConfig = { selectedRound, selectedTime, selectedPenalty, selectedBoardId: chosenBoardId, isGameStarted: true, roomEndTime: calculatedEndTime };
+    const currentRoomConfig = { selectedRound, selectedTime, selectedPenalty, selectedBoardId: chosenBoardId, isGameStarted: true, roomEndTime: calculatedEndTime, usedBoardIds: nextUsed };
     try { localStorage.setItem(`pyramid-room-config-${activeRoomCode}`, JSON.stringify(currentRoomConfig)); } catch {}
 
     // 딜러 본인도 카운트다운 시작
     setCountdownValue(3);
 
+    // 서버에 게임 시작 알림 (태블릿 등 다른 기기 동기화)
+    postRoomAction("START_GAME", {
+      selectedBoardId: chosenBoardId,
+      currentRound: roundNum,
+      roomEndTime: calculatedEndTime,
+      target: chosenBoard.target,
+      usedBoardIds: nextUsed,
+    });
+
+    // 로컬 탭 동기화
     if (typeof window !== "undefined" && "BroadcastChannel" in window) {
       try {
         const bc = new BroadcastChannel(`pyramid-room-${activeRoomCode}`);
