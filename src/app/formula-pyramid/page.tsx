@@ -233,6 +233,12 @@ function HexagonCell({
   );
 }
 
+/* ─── 노드 순서 무관 정답 비교를 위한 정규화 헬퍼 ─── */
+const normalizeNodesKey = (nodes: string | string[]): string => {
+  const arr = Array.isArray(nodes) ? nodes : nodes.trim().split(/\s+/);
+  return arr.slice().sort().join(" ");
+};
+
 /* ─── 메인 수식 피라미드 페이지 ─────────────────────────────────────────── */
 export default function FormulaPyramidPage() {
   const [mode, setMode] = useState<"player" | "dealer">("player");
@@ -389,7 +395,10 @@ export default function FormulaPyramidPage() {
     }
 
     const nodesStr = selectedNodes.join(" ");
-    const isAlreadySubmitted = submittedAnswersList.some((a) => a.nodes === nodesStr);
+    const currentNormalizedKey = normalizeNodesKey(selectedNodes);
+    const isAlreadySubmitted = submittedAnswersList.some(
+      (a) => normalizeNodesKey(a.nodes) === currentNormalizedKey
+    );
 
     if (isAlreadySubmitted) {
       const nextScore = Math.max(0, myScore - 1);
@@ -421,18 +430,25 @@ export default function FormulaPyramidPage() {
       setActivityLogs((prev) => [logMsg, ...prev]);
 
       setSubmittedAnswersList((prev) => {
-        if (prev.some((a) => a.nodes === ansObj.nodes)) return prev;
+        if (prev.some((a) => normalizeNodesKey(a.nodes) === currentNormalizedKey)) return prev;
         const next = [...prev, ansObj];
-        // 모든 정답 조합이 다 제출되었으면 즉시 남은 시간 0초 및 라운드 종료
+        // 모든 정답 조합이 다 제출되었는지 노드 순서 무관 정규화 검사
         const allSolutions = getAllValidSolutions(currentTargetNumber, currentAllNodes);
-        const allSubmittedKeys = next.map((a) => a.nodes);
-        const allSolKeys = allSolutions.map((s) => s.nodes.join(" "));
-        const allDone = allSolKeys.length > 0 && allSolKeys.every((k) => allSubmittedKeys.includes(k));
+        const allSubmittedNormalized = next.map((a) => normalizeNodesKey(a.nodes));
+        const allSolNormalized = allSolutions.map((s) => normalizeNodesKey(s.nodes));
+        const allDone =
+          allSolNormalized.length > 0 &&
+          allSolNormalized.every((k) => allSubmittedNormalized.includes(k));
+
         if (allDone) {
           setIsRoundLocked(true);
           setShowRoundEndPopup(true);
           setRoomTimerSeconds(0);
           setRoomEndTime(Date.now());
+          setActivityLogs((logPrev) => [
+            "[안내] 이번 라운드의 모든 정답이 제출되었습니다.",
+            ...logPrev,
+          ]);
           if (activeRoomCode && typeof window !== "undefined") {
             try {
               const confStr = localStorage.getItem(`pyramid-room-config-${activeRoomCode}`);
@@ -771,20 +787,22 @@ export default function FormulaPyramidPage() {
             }
             if (data.submittedAnswer) {
               setSubmittedAnswersList((prev) => {
-                const nextList = prev.some((a) => a.nodes === data.submittedAnswer.nodes)
-                  ? prev
-                  : [...prev, data.submittedAnswer];
+                const isDup = prev.some((a) => normalizeNodesKey(a.nodes) === normalizeNodesKey(data.submittedAnswer.nodes));
+                const nextList = isDup ? prev : [...prev, data.submittedAnswer];
                 const allSolutions = getAllValidSolutions(curr.currentTargetNumber, curr.currentAllNodes);
-                const allSubmittedKeys = nextList.map((a) => a.nodes);
-                const allSolKeys = allSolutions.map((s) => s.nodes.join(" "));
-                const allDone = allSolKeys.length > 0 && allSolKeys.every((k) => allSubmittedKeys.includes(k));
+                const allSubmittedNormalized = nextList.map((a) => normalizeNodesKey(a.nodes));
+                const allSolNormalized = allSolutions.map((s) => normalizeNodesKey(s.nodes));
+                const allDone =
+                  allSolNormalized.length > 0 &&
+                  allSolNormalized.every((k) => allSubmittedNormalized.includes(k));
+
                 if (allDone) {
                   setIsRoundLocked(true);
                   setShowRoundEndPopup(true);
                   setRoomTimerSeconds(0);
                   setRoomEndTime(Date.now());
                   setActivityLogs((logPrev) => [
-                    `[안내] 모든 정답이 제출되어 ${curr.currentRound}라운드가 종료되었습니다.`,
+                    "[안내] 이번 라운드의 모든 정답이 제출되었습니다.",
                     ...logPrev,
                   ]);
                 }
@@ -857,7 +875,28 @@ export default function FormulaPyramidPage() {
             );
           }
           if (data.submittedAnswer) {
-            setSubmittedAnswersList((prev) => (prev.some((a) => a.nodes === data.submittedAnswer.nodes) ? prev : [...prev, data.submittedAnswer]));
+            setSubmittedAnswersList((prev) => {
+              const isDup = prev.some((a) => normalizeNodesKey(a.nodes) === normalizeNodesKey(data.submittedAnswer.nodes));
+              const nextList = isDup ? prev : [...prev, data.submittedAnswer];
+              const allSolutions = getAllValidSolutions(curr.currentTargetNumber, curr.currentAllNodes);
+              const allSubmittedNormalized = nextList.map((a) => normalizeNodesKey(a.nodes));
+              const allSolNormalized = allSolutions.map((s) => normalizeNodesKey(s.nodes));
+              const allDone =
+                allSolNormalized.length > 0 &&
+                allSolNormalized.every((k) => allSubmittedNormalized.includes(k));
+
+              if (allDone) {
+                setIsRoundLocked(true);
+                setShowRoundEndPopup(true);
+                setRoomTimerSeconds(0);
+                setRoomEndTime(Date.now());
+                setActivityLogs((logPrev) => [
+                  "[안내] 이번 라운드의 모든 정답이 제출되었습니다.",
+                  ...logPrev,
+                ]);
+              }
+              return nextList;
+            });
           }
           if (data.logMsg) {
             setActivityLogs((prev) => [data.logMsg, ...prev]);
@@ -877,27 +916,94 @@ export default function FormulaPyramidPage() {
     };
   }, [inGameRoom, activeRoomCode]);
 
-  /* ── 고정밀 3초 카운트다운 로직 (타임스탬프 기반: 중복/루프 절대 방지) ── */
+  /* ── 태블릿 & 모바일 환경을 위한 탄탄한 백그라운드 HTTP 서버 동기화 폴링 (1.2초) ── */
+  useEffect(() => {
+    if (!inGameRoom || !activeRoomCode || isDealerHost) return;
+
+    let isAlive = true;
+    const pollInterval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/pyramid?roomCode=${encodeURIComponent(activeRoomCode)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!isAlive || !data.exists || !data.room) return;
+
+        const r = data.room;
+        const curr = roomStateRef.current;
+
+        // 플레이어 목록 및 내 점수 동기화
+        if (r.players && Array.isArray(r.players)) {
+          setPlayers((prev) => {
+            const map = new Map<string, { name: string; score: number; isHost?: boolean }>();
+            prev.forEach((p) => map.set(p.name, p));
+            r.players.forEach((p: { name: string; score: number; isHost?: boolean }) => map.set(p.name, p));
+            return Array.from(map.values());
+          });
+          const me = r.players.find((p: { name: string; score: number }) => p.name === curr.myNickname);
+          if (me && me.score !== curr.myScore) {
+            setMyScore(me.score);
+          }
+        }
+
+        // 게임 시작 동기화 (태블릿이 MQTT를 놓쳤을 경우 완벽 보정)
+        if (r.isGameStarted && !curr.isGameStarted) {
+          setIsGameStarted(true);
+          setSelectedBoardId(r.selectedBoardId || 1);
+          if (r.currentRound) setCurrentRound(r.currentRound);
+          if (r.roomEndTime) {
+            setRoomEndTime(r.roomEndTime);
+            setRoomTimerSeconds(Math.max(0, Math.ceil((r.roomEndTime - Date.now()) / 1000)));
+          }
+          setSubmittedAnswersList([]);
+          setIsRoundLocked(false);
+          setShowRoundEndPopup(false);
+          setSelectedNodes([]);
+          setPenaltyLockSeconds(0);
+          setCountdownValue(3);
+        } else if (r.isGameStarted && curr.isGameStarted) {
+          if (r.currentRound && r.currentRound > curr.currentRound) {
+            // 새 라운드 전환
+            setCurrentRound(r.currentRound);
+            setSelectedBoardId(r.selectedBoardId || 1);
+            if (r.roomEndTime) {
+              setRoomEndTime(r.roomEndTime);
+              setRoomTimerSeconds(Math.max(0, Math.ceil((r.roomEndTime - Date.now()) / 1000)));
+            }
+            setSubmittedAnswersList([]);
+            setIsRoundLocked(false);
+            setShowRoundEndPopup(false);
+            setSelectedNodes([]);
+            setPenaltyLockSeconds(0);
+            setCountdownValue(3);
+          }
+        }
+
+        // 정답 제출 동기화
+        if (r.submittedAnswersList && Array.isArray(r.submittedAnswersList)) {
+          setSubmittedAnswersList(r.submittedAnswersList);
+        }
+      } catch {}
+    }, 1200);
+
+    return () => {
+      isAlive = false;
+      clearInterval(pollInterval);
+    };
+  }, [inGameRoom, activeRoomCode, isDealerHost]);
+
+  /* ── 고정밀 3초 카운트다운 로직 ── */
   useEffect(() => {
     if (countdownValue === null) return;
-    const startTs = Date.now();
-    const totalCount = 3;
-
-    const interval = setInterval(() => {
-      const elapsed = (Date.now() - startTs) / 1000;
-      const remaining = Math.max(0, Math.ceil(totalCount - elapsed));
-
-      if (remaining <= 0) {
-        setCountdownValue(null);
-        setIsGameStarted(true);
-        clearInterval(interval);
-      } else {
-        setCountdownValue(remaining);
-      }
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [countdownValue !== null]);
+    if (countdownValue <= 0) {
+      setCountdownValue(null);
+      setIsGameStarted(true);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setCountdownValue((prev) => (prev !== null ? prev - 1 : null));
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [countdownValue]);
 
   /* ── unload 처리 ── */
   useEffect(() => {
@@ -1173,7 +1279,9 @@ export default function FormulaPyramidPage() {
                 ) : (
                   validSolutions.map((sol, idx) => {
                     const solNodeStr = sol.nodes.join(" ");
-                    const isSubmitted = submittedAnswersList.some((a) => a.nodes === solNodeStr);
+                    const isSubmitted = submittedAnswersList.some(
+                      (a) => normalizeNodesKey(a.nodes) === normalizeNodesKey(sol.nodes)
+                    );
                     return (
                       <div
                         key={idx}
@@ -1790,8 +1898,9 @@ export default function FormulaPyramidPage() {
                           validSolutions.length > 0 ? (
                             <div className="grid grid-cols-3 gap-1.5">
                               {validSolutions.map((sol, idx) => {
-                                const key = sol.nodes.join(" ");
-                                const isSubmitted = submittedAnswersList.some((a) => a.nodes === key);
+                                const isSubmitted = submittedAnswersList.some(
+                                  (a) => normalizeNodesKey(a.nodes) === normalizeNodesKey(sol.nodes)
+                                );
                                 return (
                                   <div
                                     key={idx}
