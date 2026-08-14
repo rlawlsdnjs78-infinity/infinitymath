@@ -14,8 +14,8 @@
    ========================================= */
 :root {
   /* 화이트보드 색상 팔레트 */
-  --chalk-bg: #ffffff;          /* 흰색 배경 */
-  --chalk-bg-light: #f8f9fa;    /* 매우 밝은 회색 */
+  --chalk-bg: #f9fafb;          /* 매우 연한 회색(gray-50) 배경 */
+  --chalk-bg-light: rgba(255, 255, 255, 0.7); /* 글래스모피즘 배경 */
   --chalk-white: #333333;       /* 하얀 분필 대신 어두운 텍스트 */
   --chalk-yellow: #CBA7D2;      /* 노란 분필 대신 연보라색 포인트 컬러 */
   --chalk-blue: #7dd3fc;        /* 파란 분필 */
@@ -134,14 +134,16 @@ h1, h2, h3, h4, h5, h6 {
    내용이 테두리에 붙지 않도록 padding을 기본 포함합니다.
    ───────────────────────────────────────────── */
 
-/* 기본 분필 박스 — 약간 삐뚤어진 손글씨 느낌 (좌우 여백 1.25rem 절대 통일) */
+/* 기본 글래스 박스 (좌우 여백 1.25rem 절대 통일) */
 .chalk-box {
-  border: 2px dashed var(--chalk-border-bright);
-  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 1rem;
   position: relative;
-  padding: 1.5rem 1.25rem;
-  transform: rotate(-0.3deg);
-  background-color: var(--chalk-bg-light); /* 화이트보드 톤 박스 */
+  padding: 2rem 1.25rem; /* 상하 넓은 패딩, 좌우 1.25rem */
+  background-color: var(--chalk-bg-light);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
 /* 박스 내부 스타일 (좌우 여백 1.25rem) */
@@ -149,17 +151,20 @@ h1, h2, h3, h4, h5, h6 {
   padding: 1.5rem 1.25rem;
 }
 
-/* 기울임 없는 직선 분필 박스 (좌우 여백 1.25rem) */
+/* 기울임 없는 직선 글래스 박스 (좌우 여백 1.25rem) */
 .chalk-box-straight {
-  border: 2px dashed var(--chalk-border-bright);
-  border-radius: 2px;
-  padding: 1.25rem 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 1rem;
+  padding: 2rem 1.25rem;
   background-color: var(--chalk-bg-light);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
 /* 텍스트 설명 박스 (좌우 여백 1.25rem) */
 .content-box {
-  padding: 1.5rem 1.25rem;
+  padding: 2rem 1.25rem;
 }
 
 /* 칠판 가로선 (밑줄) */
@@ -192,7 +197,7 @@ h1, h2, h3, h4, h5, h6 {
   background-position: 0 8px;
 }
 
-/* 버튼 — 분필 스타일 */
+/* 버튼 — 모던 스타일 */
 .btn-chalk {
   display: inline-flex;
   align-items: center;
@@ -203,12 +208,12 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--chalk-yellow);
   border: 2px solid var(--chalk-yellow);
   padding: 0.6rem 1.6rem;
-  border-radius: 4px;
+  border-radius: 9999px; /* rounded-full */
   cursor: pointer;
   transition: all 0.25s ease;
-  transform: rotate(-0.5deg);
   letter-spacing: 0.05em;
   font-weight: bold;
+  box-shadow: 0 4px 6px -1px rgba(203, 167, 210, 0.3);
 }
 
 .btn-chalk:hover {
@@ -217,11 +222,11 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow:
     0 0 12px rgba(203, 167, 210, 0.25),
     inset 0 0 8px rgba(203, 167, 210, 0.05);
-  transform: rotate(0deg) scale(1.03);
+  transform: scale(1.03);
 }
 
 .btn-chalk:active {
-  transform: rotate(0deg) scale(0.97);
+  transform: scale(0.97);
 }
 
 /* 화이트보드 테두리 프레임 */

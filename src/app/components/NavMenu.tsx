@@ -55,11 +55,13 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
               style={{ animation: "slideInUp 0.2s ease forwards" }}
             >
               <div
-                className="chalk-box-straight shadow-2xl p-3 rounded flex flex-col gap-1.5"
+                className="chalk-box-straight shadow-md p-3 flex flex-col gap-1.5"
                 style={{
-                  background: "rgba(255, 255, 255, 0.98)",
+                  background: "rgba(255, 255, 255, 0.9)",
                   backdropFilter: "blur(12px)",
-                  border: "2px dashed var(--chalk-yellow)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  border: "1px solid rgba(0,0,0,0.05)",
+                  borderRadius: "1rem",
                 }}
               >
                 <div
@@ -113,11 +115,13 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
               style={{ animation: "slideInUp 0.2s ease forwards" }}
             >
               <div
-                className="chalk-box-straight shadow-2xl p-3 rounded flex flex-col gap-1.5"
+                className="chalk-box-straight shadow-md p-3 flex flex-col gap-1.5"
                 style={{
-                  background: "rgba(255, 255, 255, 0.98)",
+                  background: "rgba(255, 255, 255, 0.9)",
                   backdropFilter: "blur(12px)",
-                  border: "2px dashed var(--chalk-yellow)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  border: "1px solid rgba(0,0,0,0.05)",
+                  borderRadius: "1rem",
                 }}
               >
                 <Link
@@ -147,7 +151,7 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
       {/* 로그인 버튼 */}
       <Link
         href="#"
-        className="rounded-md transition-all duration-200 hover:bg-black/5"
+        className="rounded-full transition-all duration-200 hover:bg-black/5"
         style={{
           display: "inline-flex",
           alignItems: "center",
@@ -158,9 +162,9 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
           fontSize: "1.15rem",
           lineHeight: 1,
           color: "var(--chalk-white)",
-          border: "1.5px dashed var(--chalk-border-bright)",
+          border: "1px solid rgba(0,0,0,0.1)",
           textDecoration: "none",
-          background: "rgba(0, 0, 0, 0.03)",
+          background: "rgba(0, 0, 0, 0.02)",
           letterSpacing: "0.04em",
           whiteSpace: "nowrap",
         }}
@@ -172,7 +176,7 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
       {/* 회원가입 버튼 */}
       <Link
         href="#"
-        className="rounded-md transition-all duration-200 hover:scale-105 hover:opacity-90"
+        className="rounded-full transition-all duration-200 hover:scale-105 hover:opacity-90"
         style={{
           display: "inline-flex",
           alignItems: "center",
@@ -185,9 +189,9 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
           color: "#ffffff",
           background: "var(--chalk-yellow)",
           fontWeight: 700,
-          border: "1.5px solid var(--chalk-yellow)",
+          border: "1px solid var(--chalk-yellow)",
           textDecoration: "none",
-          boxShadow: "0 0 12px rgba(203, 167, 210, 0.4)",
+          boxShadow: "0 4px 6px -1px rgba(203, 167, 210, 0.3)",
           letterSpacing: "0.04em",
           whiteSpace: "nowrap",
         }}

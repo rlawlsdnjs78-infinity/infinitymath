@@ -28,9 +28,11 @@ export default function Header() {
       style={{
         paddingLeft: "1.25rem",
         paddingRight: "1.25rem",
-        background: "rgba(255, 255, 255, 0.92)",
+        background: "rgba(255, 255, 255, 0.8)",
         backdropFilter: "blur(12px)",
-        borderBottom: "2px dashed rgba(0, 0, 0, 0.1)",
+        WebkitBackdropFilter: "blur(12px)",
+        borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
+        boxShadow: "0 4px 20px -2px rgba(0, 0, 0, 0.03)",
         minHeight: "72px",
       }}
     >

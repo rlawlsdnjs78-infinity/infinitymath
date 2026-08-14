@@ -78,12 +78,7 @@ function FeatureCard({
       className="chalk-box chalk-box-inner slide-in-up flex flex-col gap-3"
       style={{
         animationDelay: delay,
-        background: "rgba(255,255,255,0.8)",
-        backdropFilter: "blur(2px)",
-        paddingLeft: "1.25rem",
-        paddingRight: "1.25rem",
-        paddingTop: "1.5rem",
-        paddingBottom: "1.5rem",
+        background: "var(--chalk-bg-light)",
       }}
     >
       <div className="flex items-center gap-2" style={{ color }}>
@@ -114,15 +109,19 @@ function HeroSection() {
 
       <div
         className="relative z-10 chalkboard-frame w-full max-w-4xl mx-auto"
-        style={{ background: "rgba(255, 255, 255, 0.95)" }}
+        style={{ 
+          background: "rgba(255, 255, 255, 0.7)", 
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+        }}
       >
-        {/* 칠판 프레임 내부 여백 (좌우 여백 1.25rem 적용) */}
+        {/* 칠판 프레임 내부 여백 (좌우 여백 1.25rem 적용, 상하 4rem) */}
         <div
           style={{
             paddingLeft: "1.25rem",
             paddingRight: "1.25rem",
-            paddingTop: "2.5rem",
-            paddingBottom: "2.5rem",
+            paddingTop: "4rem",
+            paddingBottom: "4rem",
           }}
         >
           {/* 상단 장식선 */}
@@ -164,17 +163,17 @@ function HeroSection() {
             만들기
           </h1>
 
-          {/* 설명 텍스트 박스 — 좌우 내부 여백 1.25rem */}
           <div
-            className="slide-in-up mb-8 notebook-lines rounded-sm content-box"
+            className="slide-in-up mb-8 notebook-lines content-box flex flex-col gap-4 text-center rounded-2xl"
             style={{
               animationDelay: "0.2s",
-              border: "1px dashed var(--chalk-border)",
-              background: "rgba(0,0,0,0.02)",
+              background: "rgba(255, 255, 255, 0.6)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
               paddingLeft: "1.25rem",
               paddingRight: "1.25rem",
-              paddingTop: "1.25rem",
-              paddingBottom: "1.25rem",
+              paddingTop: "2.5rem",
+              paddingBottom: "2.5rem",
             }}
           >
             <p style={{ fontFamily: "var(--font-body)", color: "var(--chalk-dim)", fontSize: "1rem", lineHeight: 2 }}>
