@@ -265,8 +265,9 @@ export default function FormulaPyramidPage() {
   };
 
   const handleCreateGame = () => {
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    const code = `PYRAMID-${randomNum}`;
+    // [요구사항] P로 시작하고 숫자 5자리로 구성된 6자리 코드 (예: P74829)
+    const randomNum = Math.floor(10000 + Math.random() * 90000);
+    const code = `P${randomNum}`;
     setGeneratedRoomCode(code);
   };
 
@@ -895,32 +896,28 @@ export default function FormulaPyramidPage() {
                       입장 코드 생성하기
                     </button>
 
-                    <div className="chalk-box-straight bg-teal-950 px-4 py-3 mt-3 flex flex-col items-center justify-center min-h-[76px] h-[76px] border-dashed border-teal-600 text-center rounded-md transition-all">
+                    {/* [요구사항] '생성된 입장 코드' 문구 제거, P + 5자리 숫자 코드 출력 및 글씨 크기(text-3.5xl sm:text-4xl) & 자간 확대 */}
+                    <div className="chalk-box-straight bg-teal-950 px-4 py-3 mt-3 flex items-center justify-center min-h-[72px] h-[72px] border-dashed border-teal-600 text-center rounded-md transition-all">
                       {generatedRoomCode ? (
-                        <>
-                          <span className="text-xs text-gray-300 mb-0.5" style={{ fontFamily: "var(--font-body)" }}>
-                            생성된 입장 코드
+                        <div className="flex items-center gap-3">
+                          <span
+                            className="text-3.5xl sm:text-4xl text-yellow-300 font-extrabold leading-none"
+                            style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.2em" }}
+                          >
+                            {generatedRoomCode}
                           </span>
-                          <div className="flex items-center gap-2.5">
-                            <span
-                              className="text-2.5xl text-yellow-300 font-bold tracking-widest leading-none"
-                              style={{ fontFamily: "var(--font-chalk)" }}
-                            >
-                              {generatedRoomCode}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                navigator.clipboard.writeText(generatedRoomCode);
-                                alert(`방 코드 [${generatedRoomCode}] 가 복사되었습니다!`);
-                              }}
-                              className="p-1 text-yellow-400 hover:text-yellow-200 transition-colors cursor-pointer"
-                              title="코드 복사"
-                            >
-                              <Copy size={18} />
-                            </button>
-                          </div>
-                        </>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(generatedRoomCode);
+                              alert(`입장 코드 [${generatedRoomCode}] 가 복사되었습니다!`);
+                            }}
+                            className="p-1.5 text-yellow-400 hover:text-yellow-200 transition-colors cursor-pointer hover:scale-110"
+                            title="코드 복사"
+                          >
+                            <Copy size={22} />
+                          </button>
+                        </div>
                       ) : (
                         <span className="text-sm text-gray-400 font-medium" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
                           버튼을 클릭하면 입장 코드가 생성됩니다.
