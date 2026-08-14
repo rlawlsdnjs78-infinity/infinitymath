@@ -34,6 +34,7 @@ import {
   Trophy,
   LogOut,
   Clock,
+  Lock,
 } from "lucide-react";
 
 /* ─── 피라미드 칸 데이터 (A ~ J) ─────────────────────────────────────────── */
@@ -249,10 +250,34 @@ export default function FormulaPyramidPage() {
   const { exprStr, result: currentResult } = calculateFormula(selectedNodes);
 
   const [currentRound, setCurrentRound] = useState<number>(1);
+  const [penaltyLockSeconds, setPenaltyLockSeconds] = useState<number>(0);
+
+  useEffect(() => {
+    if (penaltyLockSeconds <= 0) return;
+    const timer = setInterval(() => {
+      setPenaltyLockSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [penaltyLockSeconds]);
+
+  const getPenaltySec = () => {
+    if (!selectedPenalty || selectedPenalty === "없음") return 0;
+    const parsed = parseInt(selectedPenalty.replace(/[^0-9]/g, ""), 10);
+    return isNaN(parsed) ? 0 : parsed;
+  };
 
   const handleSubmitAnswer = () => {
+    if (penaltyLockSeconds > 0) return;
+
+    const penaltySec = getPenaltySec();
+
     if (selectedNodes.length !== 3) {
-      triggerNotice("3개의 칸을 모두 선택해야 합니다!", "warning", 1000);
+      if (penaltySec > 0) {
+        setPenaltyLockSeconds(penaltySec);
+        triggerNotice(`3개의 칸을 모두 선택해야 합니다! (${penaltySec}초 동안 정답을 입력할 수 없습니다.)`, "warning", penaltySec * 1000);
+      } else {
+        triggerNotice("3개의 칸을 모두 선택해야 합니다!", "warning", 1000);
+      }
       setSelectedNodes([]);
       return;
     }
@@ -268,7 +293,13 @@ export default function FormulaPyramidPage() {
       setPlayers((prev) =>
         prev.map((p) => (p.name === myNickname ? { ...p, score: nextScore } : p))
       );
-      triggerNotice("이미 제출된 정답입니다! (-1점)", "error", 1500);
+
+      if (penaltySec > 0) {
+        setPenaltyLockSeconds(penaltySec);
+        triggerNotice(`이미 제출된 정답입니다! (-1점) (${penaltySec}초 동안 정답을 입력할 수 없습니다.)`, "error", penaltySec * 1000);
+      } else {
+        triggerNotice("이미 제출된 정답입니다! (-1점)", "error", 1500);
+      }
 
       if (inGameRoom && activeRoomCode && typeof window !== "undefined" && "BroadcastChannel" in window) {
         try {
@@ -316,7 +347,13 @@ export default function FormulaPyramidPage() {
       setPlayers((prev) =>
         prev.map((p) => (p.name === myNickname ? { ...p, score: nextScore } : p))
       );
-      triggerNotice("오답입니다! (-1점)", "error", 1200);
+
+      if (penaltySec > 0) {
+        setPenaltyLockSeconds(penaltySec);
+        triggerNotice(`오답입니다! (-1점) (${penaltySec}초 동안 정답을 입력할 수 없습니다.)`, "error", penaltySec * 1000);
+      } else {
+        triggerNotice("오답입니다! (-1점)", "error", 1200);
+      }
 
       if (inGameRoom && activeRoomCode && typeof window !== "undefined" && "BroadcastChannel" in window) {
         try {
@@ -742,6 +779,17 @@ export default function FormulaPyramidPage() {
                   </span>
                 </div>
 
+                {/* 박스 3: 오답 페널티 */}
+                <div
+                  className="flex items-center gap-2 bg-teal-900/90 rounded-md border border-teal-700/80 shadow-sm"
+                  style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
+                >
+                  <AlertTriangle className="text-yellow-400" size={18} />
+                  <span className="text-yellow-300 font-extrabold text-base sm:text-lg" style={{ fontFamily: "var(--font-chalk)" }}>
+                    오답 페널티 : <span className="text-white ml-1">{selectedPenalty}</span>
+                  </span>
+                </div>
+
                 {/* '방 나가기' 버튼 (좌우 여백 1.25rem) */}
                 <button
                   type="button"
@@ -981,11 +1029,25 @@ export default function FormulaPyramidPage() {
                 <div className="w-full mt-1">
                   <button
                     type="button"
+                    disabled={penaltyLockSeconds > 0}
                     onClick={handleSubmitAnswer}
-                    className="btn-chalk w-full justify-center py-3.5 text-2.5xl sm:text-3xl font-extrabold cursor-pointer shadow-lg"
-                    style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.35em" }}
+                    className={`btn-chalk w-full justify-center py-3.5 text-2.5xl sm:text-3xl font-extrabold shadow-lg transition-all ${
+                      penaltyLockSeconds > 0
+                        ? "bg-rose-950/90 border-2 border-rose-500/80 text-rose-300 opacity-90 cursor-not-allowed"
+                        : "cursor-pointer"
+                    }`}
+                    style={{ fontFamily: "var(--font-chalk)", letterSpacing: penaltyLockSeconds > 0 ? "0.02em" : "0.35em" }}
                   >
-                    제출하기
+                    {penaltyLockSeconds > 0 ? (
+                      <div className="flex items-center justify-center gap-2.5 py-0.5">
+                        <Lock size={26} className="text-yellow-400 animate-pulse flex-shrink-0" />
+                        <span className="text-rose-200 text-lg sm:text-xl font-bold" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
+                          {penaltyLockSeconds}초 동안 정답을 입력할 수 없습니다.
+                        </span>
+                      </div>
+                    ) : (
+                      <span>제출하기</span>
+                    )}
                   </button>
                 </div>
               </div>
@@ -1359,11 +1421,25 @@ export default function FormulaPyramidPage() {
                   <div className="w-full mt-1">
                     <button
                       type="button"
+                      disabled={penaltyLockSeconds > 0}
                       onClick={handleSubmitAnswer}
-                      className="btn-chalk w-full justify-center py-4 text-2.5xl sm:text-3xl font-extrabold cursor-pointer shadow-lg"
-                      style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.35em" }}
+                      className={`btn-chalk w-full justify-center py-4 text-2.5xl sm:text-3xl font-extrabold shadow-lg transition-all ${
+                        penaltyLockSeconds > 0
+                          ? "bg-rose-950/90 border-2 border-rose-500/80 text-rose-300 opacity-90 cursor-not-allowed"
+                          : "cursor-pointer"
+                      }`}
+                      style={{ fontFamily: "var(--font-chalk)", letterSpacing: penaltyLockSeconds > 0 ? "0.02em" : "0.35em" }}
                     >
-                      제출하기
+                      {penaltyLockSeconds > 0 ? (
+                        <div className="flex items-center justify-center gap-2.5 py-0.5">
+                          <Lock size={26} className="text-yellow-400 animate-pulse flex-shrink-0" />
+                          <span className="text-rose-200 text-lg sm:text-xl font-bold" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
+                            {penaltyLockSeconds}초 동안 정답을 입력할 수 없습니다.
+                          </span>
+                        </div>
+                      ) : (
+                        <span>제출하기</span>
+                      )}
                     </button>
                   </div>
                 </div>
