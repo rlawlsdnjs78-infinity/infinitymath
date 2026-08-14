@@ -334,7 +334,7 @@ export default function FormulaPyramidPage() {
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
-  // BroadcastChannel 실시간 멀티플레이어 동기화 (같은 방 코드로 참가한 탭/창 실시간 연동)
+  // BroadcastChannel 실시간 멀티플레이어 동기화 (같은 방 코드로 참가한 탭/창 실시간 연동 및 방 설정 동기화)
   useEffect(() => {
     if (!inGameRoom || !activeRoomCode) return;
 
@@ -353,15 +353,30 @@ export default function FormulaPyramidPage() {
             });
             setActivityLogs((prev) => [`[실시간] ${data.player.name} 님이 방에 참가하셨습니다.`, ...prev]);
 
+            // 기존 참가자(방장/딜러)가 새로 들어온 참가자에게 현재 방 설정(라운드, 제한시간, 오답패널티)과 프로필 전송
             bc?.postMessage({
               type: "SYNC_PRESENCE",
               player: { name: myNickname, score: myScore, isHost: isDealerHost },
+              roomConfig: {
+                selectedRound,
+                selectedTime,
+                selectedPenalty,
+              },
             });
           } else if (data.type === "SYNC_PRESENCE") {
             setPlayers((prev) => {
               if (prev.some((p) => p.name === data.player.name)) return prev;
               return [...prev, data.player];
             });
+
+            if (data.roomConfig) {
+              if (data.roomConfig.selectedRound) setSelectedRound(data.roomConfig.selectedRound);
+              if (data.roomConfig.selectedTime) {
+                setSelectedTime(data.roomConfig.selectedTime);
+                setRoomTimerSeconds(data.roomConfig.selectedTime * 60);
+              }
+              if (data.roomConfig.selectedPenalty) setSelectedPenalty(data.roomConfig.selectedPenalty);
+            }
           } else if (data.type === "SCORE_UPDATE") {
             setPlayers((prev) =>
               prev.map((p) => (p.name === data.playerName ? { ...p, score: data.newScore } : p))
@@ -389,7 +404,7 @@ export default function FormulaPyramidPage() {
     return () => {
       if (bc) bc.close();
     };
-  }, [inGameRoom, activeRoomCode, myNickname, myScore, isDealerHost]);
+  }, [inGameRoom, activeRoomCode, myNickname, myScore, isDealerHost, selectedRound, selectedTime, selectedPenalty]);
 
   const handleJoinGameRoom = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -402,6 +417,23 @@ export default function FormulaPyramidPage() {
       return;
     }
     const cleanCode = entryCode.trim().toUpperCase();
+
+    // 입장하려는 방의 설정(라운드, 제한시간, 오답패널티)을 localStorage 및 로컬 상태로 동기화
+    if (typeof window !== "undefined") {
+      try {
+        const savedConfigStr = localStorage.getItem(`pyramid-room-config-${cleanCode}`);
+        if (savedConfigStr) {
+          const savedConfig = JSON.parse(savedConfigStr);
+          if (savedConfig.selectedRound) setSelectedRound(savedConfig.selectedRound);
+          if (savedConfig.selectedTime) {
+            setSelectedTime(savedConfig.selectedTime);
+            setRoomTimerSeconds(savedConfig.selectedTime * 60);
+          }
+          if (savedConfig.selectedPenalty) setSelectedPenalty(savedConfig.selectedPenalty);
+        }
+      } catch (err) {}
+    }
+
     setActiveRoomCode(cleanCode);
     setMyNickname(nickname.trim());
     setMyScore(0);
@@ -424,6 +456,19 @@ export default function FormulaPyramidPage() {
   const handleCreateGame = () => {
     const randomNum = Math.floor(10000 + Math.random() * 90000);
     const code = `P${randomNum}`;
+
+    const currentRoomConfig = {
+      selectedRound,
+      selectedTime,
+      selectedPenalty,
+    };
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(`pyramid-room-config-${code}`, JSON.stringify(currentRoomConfig));
+      } catch (err) {}
+    }
+
     setGeneratedRoomCode(code);
     setActiveRoomCode(code);
     setMyNickname("딜러(선생님)");
@@ -438,7 +483,7 @@ export default function FormulaPyramidPage() {
     if (typeof window !== "undefined" && "BroadcastChannel" in window) {
       try {
         const bc = new BroadcastChannel(`pyramid-room-${code}`);
-        bc.postMessage({ type: "JOIN", player: host });
+        bc.postMessage({ type: "JOIN", player: host, roomConfig: currentRoomConfig });
         bc.close();
       } catch (err) {}
     }
