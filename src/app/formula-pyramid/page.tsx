@@ -1366,17 +1366,17 @@ export default function FormulaPyramidPage() {
               /* 👑 [딜러 모드 전용 가운데 UI] - 플레이어 모드 변경 시 영향 받지 않음  */
               /* =================================================================== */
               <div className="flex flex-col gap-4 w-full h-full">
-                {/* 1. [요구사항 1] 입장 코드 생성 전에는 오직 안내 박스 단 하나만 출력 */}
+                {/* 1. [요구사항 1] 입장 코드 생성 전: 대시보드 커진 크기와 동일한 디폴트 높이(min-h-[520px])를 가진 안내 박스 정중앙 배치 */}
                 {!inGameRoom ? (
                   <div
-                    className="w-full flex items-center justify-center bg-teal-950/90 rounded-2xl border-2 border-dashed border-teal-500/90 shadow-md text-center"
-                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.85rem", paddingBottom: "0.85rem" }}
+                    className="w-full flex-1 min-h-[480px] sm:min-h-[520px] flex items-center justify-center bg-teal-950/90 rounded-2xl border-2 border-dashed border-teal-500/90 shadow-md text-center my-auto"
+                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.5rem", paddingBottom: "1.5rem" }}
                   >
                     <div
-                      className="text-base sm:text-lg text-white font-medium flex items-center justify-center gap-3"
+                      className="text-lg sm:text-xl text-white font-medium flex items-center justify-center gap-3"
                       style={{ fontFamily: "var(--font-chalk)", wordBreak: "keep-all" }}
                     >
-                      <Megaphone size={20} className="text-yellow-400 flex-shrink-0" />
+                      <Megaphone size={24} className="text-yellow-400 flex-shrink-0 animate-bounce" />
                       <span>우측 [입장 코드 생성하기]를 클릭하면 딜러 대시보드가 실시간으로 연결됩니다.</span>
                     </div>
                   </div>
