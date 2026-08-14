@@ -745,12 +745,10 @@ export default function FormulaPyramidPage() {
                   <p className="leading-loose text-base sm:text-lg">
                     딜러 모드에서는 라운드 수, 제한 시간, 오답 패널티를 설정하여 방을 생성할 수 있습니다.
                   </p>
-                  {/* [여백 최우선 원칙] 확성기 아이콘(Megaphone)이 테두리에 결코 닿거나 답답하지 않도록 내부 패딩(px-6 py-4.5) 및 아이콘 뱃지 부여 */}
-                  <div className="bg-teal-900/70 px-6 py-4.5 sm:px-7 sm:py-5 rounded-lg border-2 border-dashed border-yellow-400/60 text-base sm:text-lg text-yellow-300 flex items-center gap-4.5 shadow-inner">
-                    <div className="p-2.5 bg-teal-950/90 rounded-full border border-yellow-400/40 flex-shrink-0 flex items-center justify-center">
-                      <Megaphone className="text-yellow-400 flex-shrink-0" size={24} />
-                    </div>
-                    <span className="flex-1 font-medium leading-relaxed" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
+                  {/* [요구사항] 확성기 아이콘 상단 위치를 설명 첫째 줄에 맞추고(items-start mt-1) 왼쪽 깊은 여백(pl-8 sm:pl-9) 부여 */}
+                  <div className="w-full bg-teal-900/70 pl-8 pr-5 py-4 sm:pl-9 sm:py-4.5 rounded-md border border-dashed border-yellow-400/60 text-base sm:text-lg text-yellow-300 flex items-start gap-3.5 shadow-sm">
+                    <Megaphone className="text-yellow-400 flex-shrink-0 mt-1" size={22} />
+                    <span className="flex-1 leading-relaxed" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
                       생성된 방 코드를 플레이어들에게 공유하세요.
                     </span>
                   </div>
