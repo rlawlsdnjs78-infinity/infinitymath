@@ -102,7 +102,7 @@ function HeroSection() {
     <main
       id="hero"
       className="relative flex-1 flex flex-col items-center justify-center py-16 md:py-24 overflow-hidden"
-      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
+      style={{ }}
     >
       <ChalkboardGrid />
       <ChalkDust />
@@ -115,14 +115,9 @@ function HeroSection() {
           WebkitBackdropFilter: "blur(12px)",
         }}
       >
-        {/* 칠판 프레임 내부 여백 (좌우 여백 1.25rem 적용, 상하 4rem) */}
+        {/* 칠판 프레임 내부 여백 (반응형 패딩) */}
         <div
-          style={{
-            paddingLeft: "1.25rem",
-            paddingRight: "1.25rem",
-            paddingTop: "4rem",
-            paddingBottom: "4rem",
-          }}
+          className="px-6 md:px-12 py-16"
         >
           {/* 상단 장식선 */}
           <div aria-hidden="true" className="absolute top-3 left-5 right-5 h-px"
@@ -170,8 +165,6 @@ function HeroSection() {
               background: "rgba(255, 255, 255, 0.6)",
               backdropFilter: "blur(8px)",
               WebkitBackdropFilter: "blur(8px)",
-              paddingLeft: "1.25rem",
-              paddingRight: "1.25rem",
               paddingTop: "2.5rem",
               paddingBottom: "2.5rem",
             }}
@@ -194,7 +187,7 @@ function HeroSection() {
               id="cta-start-btn"
               type="button"
               className="btn-chalk flex items-center gap-2"
-              style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
+              style={{ }}
             >
               <Pencil size={18} strokeWidth={1.5} />
               수업 시작하기
@@ -218,7 +211,7 @@ function HeroSection() {
         id="features"
         className="relative z-10 w-full max-w-4xl mx-auto mt-12"
         aria-label="주요 기능"
-        style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
+        style={{ }}
       >
         <h2
           className="text-center mb-8"
@@ -254,8 +247,6 @@ function Footer() {
       style={{
         borderTop: "2px dashed rgba(0,0,0,0.1)",
         background: "rgba(255,255,255,0.9)",
-        paddingLeft: "1.25rem",
-        paddingRight: "1.25rem",
       }}
     >
       <p style={{ fontFamily: "var(--font-body)", color: "var(--chalk-dim)", fontSize: "0.85rem" }}>

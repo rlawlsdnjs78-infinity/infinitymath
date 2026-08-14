@@ -131,37 +131,37 @@ h1, h2, h3, h4, h5, h6 {
    내용이 테두리에 붙지 않도록 padding을 기본 포함합니다.
    ───────────────────────────────────────────── */
 
-/* 기본 글래스 박스 (좌우 여백 1.25rem 절대 통일) */
+/* 기본 글래스 박스 */
 .chalk-box {
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 1rem;
   position: relative;
-  padding: 2rem 1.25rem; /* 상하 넓은 패딩, 좌우 1.25rem */
+  padding: 2rem;
   background-color: var(--chalk-bg-light);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
-/* 박스 내부 스타일 (좌우 여백 1.25rem) */
+/* 박스 내부 스타일 */
 .chalk-box-inner {
-  padding: 1.5rem 1.25rem;
+  padding: 1.5rem;
 }
 
-/* 기울임 없는 직선 글래스 박스 (좌우 여백 1.25rem) */
+/* 기울임 없는 직선 글래스 박스 */
 .chalk-box-straight {
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 1rem;
-  padding: 2rem 1.25rem;
+  padding: 2rem;
   background-color: var(--chalk-bg-light);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
-/* 텍스트 설명 박스 (좌우 여백 1.25rem) */
+/* 텍스트 설명 박스 */
 .content-box {
-  padding: 2rem 1.25rem;
+  padding: 2rem;
 }
 
 /* 칠판 가로선 (밑줄) */

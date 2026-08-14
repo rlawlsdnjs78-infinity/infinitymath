@@ -24,10 +24,8 @@ export default function Header() {
   return (
     <header
       id="header"
-      className="w-full relative z-30 flex items-center justify-between py-3.5"
+      className="w-full relative z-30 flex items-center justify-between py-3.5 px-6"
       style={{
-        paddingLeft: "1.25rem",
-        paddingRight: "1.25rem",
         background: "rgba(255, 255, 255, 0.8)",
         backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
@@ -44,12 +42,13 @@ export default function Header() {
               aria-hidden="true"
               style={{
                 fontFamily: "var(--font-chalk)",
-                fontSize: "2.4rem",
+                fontSize: "1.65rem",
                 lineHeight: 1,
                 color: "var(--chalk-yellow)",
                 textShadow:
                   "0 0 12px rgba(203,167,210,0.5), 0 0 24px rgba(203,167,210,0.2)",
                 userSelect: "none",
+                fontWeight: "bold",
               }}
             >
               ∞
@@ -62,6 +61,7 @@ export default function Header() {
                 color: "var(--chalk-white)",
                 letterSpacing: "0.04em",
                 whiteSpace: "nowrap",
+                fontWeight: "bold",
               }}
             >
               무한대수학반

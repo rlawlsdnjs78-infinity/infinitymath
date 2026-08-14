@@ -26,10 +26,9 @@ const ScoreBoard = memo(function ScoreBoard({ players, myNickname, maxH = "120px
           sortedPlayers.map((p, idx) => (
             <div
               key={p.name}
-              className={`flex items-center justify-between rounded-2xl border transition-all ${
+              className={`flex items-center justify-between px-4 py-2 rounded-2xl border transition-all ${
                 p.name === myNickname ? "bg-[#CBA7D2]/20 backdrop-blur-sm border-[#CBA7D2] text-gray-600 shadow-sm" : "bg-white/60 backdrop-blur-sm border-gray-200/80 text-gray-700 shadow-sm"
               }`}
-              style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
             >
               <div className="flex items-center gap-2">
                 <span className="font-extrabold text-sm text-[#CBA7D2] w-4 flex-shrink-0 text-center">
