@@ -3,10 +3,11 @@
  * 수식 피라미드 게임 페이지
  *
  * [주요 기능]
- * 1. 딜러가 '게임 시작하기' 클릭 시 10가지 프리셋 게임판 선택 모달 제공
- * 2. 10가지 게임판별 A~J 사칙연산 노드 및 고유 타깃 넘버 (1~10번) 실시간 동기화
- * 3. 각 게임판에 맞춘 정답 수식 조합 동적 계산 및 채점
- * 4. 모든 박스/버튼 UI 좌우 여백 1.25rem (20px) 규칙 100% 엄격 준수
+ * 1. 게임 시작 전(!isGameStarted)에는 타깃 넘버가 9인 '연습 문제판'으로 고정 (자유 연습 가능)
+ * 2. 딜러가 '게임 시작하기' 클릭 시 10가지 프리셋 게임판 중 1개가 랜덤으로 추첨되어 적용
+ * 3. 게임 시작과 동시에 모든 플레이어 화면에 실시간으로 랜덤 선정된 게임판 및 TARGET 동기화
+ * 4. 각 게임판에 맞춘 정답 수식 조합 동적 계산 및 채점
+ * 5. 좌우 여백 1.25rem(20px) 디자인 규칙 100% 엄격 준수
  */
 
 "use client";
@@ -35,10 +36,7 @@ import {
   Lock,
   BookOpen,
   Play,
-  X,
-  Target,
-  Layers,
-  Check,
+  Dices,
 } from "lucide-react";
 
 /* ─── 피라미드 칸 데이터 타입 (A ~ J) ─────────────────────────────────────────── */
@@ -96,7 +94,21 @@ const createBoardPreset = (
   };
 };
 
-/* ─── 10가지 프리셋 게임판 리스트 정의 ─────────────────────────────────────────── */
+/* ─── 0. 게임 시작 전 기본 연습용 게임판 (타깃 넘버: 9 고정) ────────────────────────── */
+export const PRACTICE_BOARD: GameBoardPreset = createBoardPreset(0, "연습 문제판", 9, [
+  { id: "A", op: "+", num: 1 },
+  { id: "B", op: "÷", num: 4 },
+  { id: "C", op: "×", num: 3 },
+  { id: "D", op: "-", num: 10 },
+  { id: "E", op: "÷", num: 5 },
+  { id: "F", op: "×", num: 6 },
+  { id: "G", op: "-", num: 11 },
+  { id: "H", op: "+", num: 7 },
+  { id: "I", op: "÷", num: 9 },
+  { id: "J", op: "+", num: 9 },
+]);
+
+/* ─── 1~10. 게임 시작 시 랜덤으로 적용되는 10가지 실전 게임판 리스트 ─────────────────── */
 export const GAME_BOARDS: GameBoardPreset[] = [
   // 1. A~J 순서대로 곱하기7, 나누기5, 더하기9, 빼기5, 곱하기2, 더하기2, 나누기8, 나누기8, 빼기8, 곱하기3이고 타깃 넘버는 10
   createBoardPreset(1, "게임판 1", 10, [
@@ -343,13 +355,28 @@ function HexagonCell({
 export default function FormulaPyramidPage() {
   const [mode, setMode] = useState<"player" | "dealer">("player");
 
-  /* ── 게임판 선택 상태 (기본 1번 게임판) ── */
+  /* ── 실시간 다중 플레이어 대전 방 상태 ── */
+  const [inGameRoom, setInGameRoom] = useState(false);
+  const [activeRoomCode, setActiveRoomCode] = useState("");
+  const [myNickname, setMyNickname] = useState("");
+  const [myScore, setMyScore] = useState(0);
+  const [isDealerHost, setIsDealerHost] = useState(false);
+  const [isGameStarted, setIsGameStarted] = useState(false);
   const [selectedBoardId, setSelectedBoardId] = useState<number>(1);
-  const [showBoardSelectModal, setShowBoardSelectModal] = useState<boolean>(false);
-  const [modalSelectedBoardId, setModalSelectedBoardId] = useState<number>(1);
+  const [players, setPlayers] = useState<{ name: string; score: number; isHost?: boolean }[]>([]);
+  const [activityLogs, setActivityLogs] = useState<string[]>([]);
+  const [submittedAnswersList, setSubmittedAnswersList] = useState<{ nodes: string; formula: string }[]>([]);
+  const [roomTimerSeconds, setRoomTimerSeconds] = useState(180);
+  const [roomEndTime, setRoomEndTime] = useState<number | null>(null);
 
-  // 현재 활성화된 게임판 객체 및 계산용 데이터
-  const currentBoard = GAME_BOARDS.find((b) => b.id === selectedBoardId) || GAME_BOARDS[0];
+  /* ── 게임판 결정 로직 ──
+     1. 게임 시작 전(!isGameStarted)에는 항상 '연습 문제판'(TARGET: 9 고정)으로 연습 가능
+     2. 딜러가 게임 시작 시 10개의 게임판 중 하나가 랜덤으로 추첨되어 실시간 적용
+  ── */
+  const currentBoard = isGameStarted
+    ? GAME_BOARDS.find((b) => b.id === selectedBoardId) || GAME_BOARDS[0]
+    : PRACTICE_BOARD;
+
   const currentPyramidData = currentBoard.pyramidData;
   const currentAllNodes = currentBoard.nodes;
   const currentTargetNumber = currentBoard.target;
@@ -547,19 +574,6 @@ export default function FormulaPyramidPage() {
     setSelectedNodes([]);
   };
 
-  /* ── 실시간 다중 플레이어 대전 방 상태 ── */
-  const [inGameRoom, setInGameRoom] = useState(false);
-  const [activeRoomCode, setActiveRoomCode] = useState("");
-  const [myNickname, setMyNickname] = useState("");
-  const [myScore, setMyScore] = useState(0);
-  const [isDealerHost, setIsDealerHost] = useState(false);
-  const [isGameStarted, setIsGameStarted] = useState(false);
-  const [players, setPlayers] = useState<{ name: string; score: number; isHost?: boolean }[]>([]);
-  const [activityLogs, setActivityLogs] = useState<string[]>([]);
-  const [submittedAnswersList, setSubmittedAnswersList] = useState<{ nodes: string; formula: string }[]>([]);
-  const [roomTimerSeconds, setRoomTimerSeconds] = useState(180);
-  const [roomEndTime, setRoomEndTime] = useState<number | null>(null);
-
   useEffect(() => {
     if (!inGameRoom) return;
     const interval = setInterval(() => {
@@ -689,7 +703,7 @@ export default function FormulaPyramidPage() {
               setRoomTimerSeconds(rem);
             }
             setActivityLogs((prev) => [
-              `[실시간] 딜러가 게임을 시작했습니다! (게임판 ${data.selectedBoardId || 1}번 / TARGET: ${data.target || 10})`,
+              `[실시간] 딜러가 게임을 시작했습니다! (랜덤 추첨: 게임판 ${data.selectedBoardId || 1}번 / TARGET: ${data.target || 10})`,
               ...prev,
             ]);
           } else if (data.type === "SCORE_UPDATE") {
@@ -784,6 +798,7 @@ export default function FormulaPyramidPage() {
     }
 
     setInGameRoom(false);
+    setIsGameStarted(false);
     setActiveRoomCode("");
     setPlayers([]);
     setActivityLogs([]);
@@ -850,7 +865,7 @@ export default function FormulaPyramidPage() {
       selectedRound,
       selectedTime,
       selectedPenalty,
-      selectedBoardId,
+      selectedBoardId: 1,
       isGameStarted: false,
       roomEndTime: null,
     };
@@ -884,20 +899,16 @@ export default function FormulaPyramidPage() {
     }
   };
 
-  // 딜러가 '게임 시작하기' 버튼을 누르면 먼저 게임판 선택 모달을 띄움
-  const handleOpenStartGameModal = () => {
-    setModalSelectedBoardId(selectedBoardId);
-    setShowBoardSelectModal(true);
-  };
-
-  // 모달에서 특정 게임판을 선택하고 최종 게임 시작
-  const handleConfirmStartGame = (boardIdToStart: number) => {
+  // 딜러가 '게임 시작하기' 버튼을 누르면 10개의 게임판 중 하나를 무작위(랜덤)로 추첨하여 시작
+  const handleStartGame = () => {
     if (!activeRoomCode) return;
 
-    setSelectedBoardId(boardIdToStart);
-    setShowBoardSelectModal(false);
+    // 10개의 게임판 중 1개를 랜덤으로 추첨
+    const randomIndex = Math.floor(Math.random() * GAME_BOARDS.length);
+    const chosenBoard = GAME_BOARDS[randomIndex];
+    const chosenBoardId = chosenBoard.id;
 
-    const boardObj = GAME_BOARDS.find((b) => b.id === boardIdToStart) || GAME_BOARDS[0];
+    setSelectedBoardId(chosenBoardId);
     const calculatedEndTime = Date.now() + selectedTime * 60 * 1000;
     setRoomEndTime(calculatedEndTime);
     setIsGameStarted(true);
@@ -906,7 +917,7 @@ export default function FormulaPyramidPage() {
       selectedRound,
       selectedTime,
       selectedPenalty,
-      selectedBoardId: boardIdToStart,
+      selectedBoardId: chosenBoardId,
       isGameStarted: true,
       roomEndTime: calculatedEndTime,
     };
@@ -918,7 +929,7 @@ export default function FormulaPyramidPage() {
     }
 
     setActivityLogs((prev) => [
-      `[실시간] 딜러가 [${boardObj.title}] (TARGET: ${boardObj.target}) 로 게임을 시작했습니다!`,
+      `[실시간] 딜러가 게임을 시작했습니다! (랜덤 추첨: ${chosenBoard.title} / TARGET: ${chosenBoard.target})`,
       ...prev,
     ]);
 
@@ -928,8 +939,8 @@ export default function FormulaPyramidPage() {
         bc.postMessage({
           type: "START_GAME",
           roomEndTime: calculatedEndTime,
-          selectedBoardId: boardIdToStart,
-          target: boardObj.target,
+          selectedBoardId: chosenBoardId,
+          target: chosenBoard.target,
         });
         bc.close();
       } catch (err) {}
@@ -1287,7 +1298,7 @@ export default function FormulaPyramidPage() {
 
                 {/* 대칭 수식 피라미드 보드 및 우측 연습/모니터 영역 */}
                 {!inGameRoom ? (
-                  /* [플레이어 대기/연습용 상단]: 피라미드 + 연습 문구 & 정답 확인 버튼 */
+                  /* [플레이어 대기/연습용 상단]: 타깃 넘버 9 연습 피라미드 + 연습 문구 & 정답 확인 버튼 */
                   <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between gap-6 mb-1">
                     {/* 피라미드 보드 */}
                     <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0">
@@ -1455,7 +1466,7 @@ export default function FormulaPyramidPage() {
                           ))
                         ) : (
                           <div className="py-6 text-center text-gray-400 text-sm font-medium" style={{ fontFamily: "var(--font-body)" }}>
-                            아직 제출된 정답이 없습니다.
+                            {isGameStarted ? "아직 제출된 정답이 없습니다." : "게임 시작을 기다리는 중입니다..."}
                           </div>
                         )}
                       </div>
@@ -1712,7 +1723,12 @@ export default function FormulaPyramidPage() {
                         }}
                       >
                         <span className="text-yellow-300 font-extrabold text-sm sm:text-base whitespace-nowrap" style={{ fontFamily: "var(--font-chalk)" }}>
-                          현재 게임판: <span className="text-white ml-1">{currentBoard.title} (TARGET: {currentBoard.target})</span>
+                          게임판:{" "}
+                          <span className="text-white ml-1">
+                            {isGameStarted
+                              ? `${currentBoard.title} (TARGET: ${currentBoard.target})`
+                              : "10종 중 랜덤 추첨 예정 (대기: 연습판)"}
+                          </span>
                         </span>
                       </div>
                     </div>
@@ -1721,7 +1737,7 @@ export default function FormulaPyramidPage() {
                       {!isGameStarted && inGameRoom && (
                         <button
                           type="button"
-                          onClick={handleOpenStartGameModal}
+                          onClick={handleStartGame}
                           className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-sm sm:text-base border-2 border-emerald-400 shadow-lg cursor-pointer animate-pulse transition-all"
                           style={{
                             paddingLeft: "1.25rem",
@@ -1732,7 +1748,7 @@ export default function FormulaPyramidPage() {
                           }}
                         >
                           <Play size={18} className="fill-white flex-shrink-0" />
-                          <span className="whitespace-nowrap">게임 시작하기</span>
+                          <span className="whitespace-nowrap">게임 시작하기 (랜덤 추첨)</span>
                         </button>
                       )}
 
@@ -1817,7 +1833,11 @@ export default function FormulaPyramidPage() {
                           ))
                         ) : (
                           <div className="py-6 text-center text-gray-400 text-sm font-medium" style={{ fontFamily: "var(--font-body)" }}>
-                            {inGameRoom ? "아직 제출된 정답이 없습니다." : "입장 코드를 생성하면 실시간 정답 제출 현황이 표시됩니다."}
+                            {inGameRoom
+                              ? isGameStarted
+                                ? "아직 제출된 정답이 없습니다."
+                                : "게임이 시작되면 실시간 정답 제출 현황이 표시됩니다."
+                              : "입장 코드를 생성하면 실시간 정답 제출 현황이 표시됩니다."}
                           </div>
                         )}
                       </div>
@@ -2144,172 +2164,6 @@ export default function FormulaPyramidPage() {
           </div>
         </div>
       </div>
-
-      {/* ───────────────────────────────────────────────────────────────────
-         👑 [딜러 전용] 게임 시작 시 나타나는 10가지 게임판 선택 모달
-         ─────────────────────────────────────────────────────────────────── */}
-      {showBoardSelectModal && (
-        <div className="fixed inset-0 z-50 bg-teal-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
-          <div
-            className="chalk-box bg-teal-950/98 border-2 border-yellow-400/90 rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden"
-            style={{
-              paddingTop: "1.25rem",
-              paddingBottom: "1.25rem",
-            }}
-          >
-            {/* 모달 헤더 */}
-            <div
-              className="flex items-center justify-between w-full border-b border-dashed border-teal-700/80 pb-3"
-              style={{
-                paddingLeft: "1.25rem",
-                paddingRight: "1.25rem",
-              }}
-            >
-              <div className="flex items-center gap-3">
-                <Layers className="text-yellow-400 flex-shrink-0" size={26} />
-                <div>
-                  <h3 className="text-xl sm:text-2xl text-yellow-300 font-bold" style={{ fontFamily: "var(--font-chalk)" }}>
-                    게임판 선택 (10종 프리셋)
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-300 font-medium" style={{ fontFamily: "var(--font-body)" }}>
-                    진행할 게임판을 선택하면 해당 사칙연산 구성과 타깃 넘버로 게임이 시작됩니다.
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowBoardSelectModal(false)}
-                className="p-1.5 text-gray-400 hover:text-yellow-300 transition-colors cursor-pointer rounded-lg hover:bg-teal-900/60"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            {/* 모달 본문 (10개 게임판 리스트) */}
-            <div
-              className="flex-1 overflow-y-auto py-3 grid grid-cols-1 md:grid-cols-2 gap-3"
-              style={{
-                paddingLeft: "1.25rem",
-                paddingRight: "1.25rem",
-              }}
-            >
-              {GAME_BOARDS.map((board) => {
-                const isSelected = modalSelectedBoardId === board.id;
-                const boardSolutions = getAllValidSolutions(board.target, board.nodes);
-
-                return (
-                  <div
-                    key={board.id}
-                    onClick={() => setModalSelectedBoardId(board.id)}
-                    className={`relative rounded-xl border-2 transition-all cursor-pointer flex flex-col gap-2.5 p-3.5 ${
-                      isSelected
-                        ? "bg-teal-900/95 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.35)] scale-[1.01]"
-                        : "bg-teal-950/80 border-teal-700/80 hover:border-teal-500/80 hover:bg-teal-900/40"
-                    }`}
-                    style={{
-                      paddingLeft: "1.25rem",
-                      paddingRight: "1.25rem",
-                    }}
-                  >
-                    {/* 상단 라벨 & 타깃 넘버 */}
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${
-                            isSelected ? "bg-yellow-400 text-teal-950" : "bg-teal-800 text-teal-200"
-                          }`}
-                        >
-                          {isSelected ? <Check size={14} className="stroke-[3]" /> : board.id}
-                        </span>
-                        <span className="text-lg font-bold text-yellow-300" style={{ fontFamily: "var(--font-chalk)" }}>
-                          {board.title}
-                        </span>
-                      </div>
-
-                      <div
-                        className="flex items-center gap-1.5 bg-yellow-400 text-teal-950 font-black text-sm rounded-md shadow-sm"
-                        style={{
-                          paddingLeft: "1.25rem",
-                          paddingRight: "1.25rem",
-                          paddingTop: "0.2rem",
-                          paddingBottom: "0.2rem",
-                          fontFamily: "var(--font-chalk)",
-                        }}
-                      >
-                        <Target size={15} />
-                        <span>TARGET: {board.target}</span>
-                      </div>
-                    </div>
-
-                    {/* A~J 노드 구성 요약 칩 그리드 */}
-                    <div className="grid grid-cols-5 gap-1.5 bg-teal-950/90 p-2 rounded-lg border border-teal-800/80">
-                      {board.nodeList.map((node) => (
-                        <div
-                          key={node.id}
-                          className="flex flex-col items-center justify-center bg-teal-900/90 rounded p-1 border border-teal-700/60"
-                        >
-                          <span className="text-[10px] text-yellow-400 font-bold leading-none">{node.id}</span>
-                          <span className="text-xs text-white font-extrabold leading-tight mt-0.5" style={{ fontFamily: "var(--font-chalk)" }}>
-                            {node.display}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* 하단 정답 가능 조합 수 */}
-                    <div className="flex items-center justify-between text-xs text-gray-300 font-medium">
-                      <span className="flex items-center gap-1 text-teal-200">
-                        <Sparkles size={13} className="text-yellow-400" />
-                        정답 조합: <strong>{boardSolutions.length}개</strong>
-                      </span>
-                      <span className="text-[11px] text-gray-400">클릭하여 선택</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* 모달 하단 버튼 바 */}
-            <div
-              className="flex items-center justify-end gap-3 border-t border-dashed border-teal-700/80 pt-3"
-              style={{
-                paddingLeft: "1.25rem",
-                paddingRight: "1.25rem",
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setShowBoardSelectModal(false)}
-                className="rounded-xl border-2 border-teal-700 hover:bg-teal-900 text-gray-300 text-sm font-bold transition-all cursor-pointer"
-                style={{
-                  paddingLeft: "1.25rem",
-                  paddingRight: "1.25rem",
-                  paddingTop: "0.65rem",
-                  paddingBottom: "0.65rem",
-                  fontFamily: "var(--font-body)",
-                }}
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                onClick={() => handleConfirmStartGame(modalSelectedBoardId)}
-                className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-base border-2 border-emerald-400 shadow-lg cursor-pointer transition-all hover:scale-[1.02]"
-                style={{
-                  paddingLeft: "1.25rem",
-                  paddingRight: "1.25rem",
-                  paddingTop: "0.65rem",
-                  paddingBottom: "0.65rem",
-                  fontFamily: "var(--font-chalk)",
-                }}
-              >
-                <Play size={18} className="fill-white flex-shrink-0" />
-                <span>선택한 게임판({modalSelectedBoardId}번)으로 게임 시작</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
