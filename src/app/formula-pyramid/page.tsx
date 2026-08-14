@@ -900,19 +900,19 @@ export default function FormulaPyramidPage() {
                     style={{
                       paddingLeft: "1.25rem",
                       paddingRight: "1.25rem",
-                      paddingTop: "1rem",
-                      paddingBottom: "1rem",
+                      paddingTop: "1.1rem",
+                      paddingBottom: "1.1rem",
                       marginTop: "1.25rem",
                     }}
                   >
-                    <span className="font-extrabold text-sm sm:text-base flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
+                    <span className="font-black text-lg sm:text-xl text-yellow-300 flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
                       🟢 [{activeRoomCode}] 접속 완료 ({myNickname})
                     </span>
                     <button
                       type="button"
                       onClick={handleLeaveRoom}
-                      className="bg-rose-900/90 hover:bg-rose-800 text-rose-200 font-extrabold text-xs sm:text-sm rounded-md border border-rose-600/80 cursor-pointer shadow flex-shrink-0"
-                      style={{ paddingLeft: "1rem", paddingRight: "1rem", paddingTop: "0.4rem", paddingBottom: "0.4rem" }}
+                      className="bg-rose-900/90 hover:bg-rose-800 text-rose-200 font-extrabold text-sm sm:text-base rounded-md border border-rose-600/80 cursor-pointer shadow flex-shrink-0"
+                      style={{ paddingLeft: "1.1rem", paddingRight: "1.1rem", paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
                     >
                       퇴장
                     </button>
@@ -954,19 +954,19 @@ export default function FormulaPyramidPage() {
                     style={{
                       paddingLeft: "1.25rem",
                       paddingRight: "1.25rem",
-                      paddingTop: "1rem",
-                      paddingBottom: "1rem",
+                      paddingTop: "1.1rem",
+                      paddingBottom: "1.1rem",
                       marginTop: "1.25rem",
                     }}
                   >
-                    <span className="font-extrabold text-sm sm:text-base flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
+                    <span className="font-black text-lg sm:text-xl text-yellow-300 flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
                       👑 딜러 방 [{activeRoomCode}] 운영 중
                     </span>
                     <button
                       type="button"
                       onClick={handleLeaveRoom}
-                      className="bg-rose-900/90 hover:bg-rose-800 text-rose-200 font-extrabold text-xs sm:text-sm rounded-md border border-rose-600/80 cursor-pointer shadow flex-shrink-0"
-                      style={{ paddingLeft: "1rem", paddingRight: "1rem", paddingTop: "0.4rem", paddingBottom: "0.4rem" }}
+                      className="bg-rose-900/90 hover:bg-rose-800 text-rose-200 font-extrabold text-sm sm:text-base rounded-md border border-rose-600/80 cursor-pointer shadow flex-shrink-0"
+                      style={{ paddingLeft: "1.1rem", paddingRight: "1.1rem", paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
                     >
                       퇴장
                     </button>
