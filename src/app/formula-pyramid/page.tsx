@@ -433,12 +433,13 @@ export default function FormulaPyramidPage() {
                   </div>
                 </div>
 
+                {/* [요구사항 2] '게임 방 입장하기' -> '입장하기' 수정 & 글씨 크기 확대 */}
                 <button
                   type="submit"
-                  className="btn-chalk w-full justify-center text-2xl mt-6"
-                  style={{ padding: "16px 24px" }}
+                  className="btn-chalk w-full justify-center text-2.5xl sm:text-3xl font-extrabold mt-6"
+                  style={{ padding: "16px 24px", fontFamily: "var(--font-chalk)" }}
                 >
-                  게임 방 입장하기
+                  입장하기
                 </button>
               </form>
             ) : (
@@ -450,9 +451,10 @@ export default function FormulaPyramidPage() {
                   <p className="leading-loose text-base sm:text-lg">
                     딜러 모드에서는 라운드 수, 제한 시간, 오답 패널티를 설정하여 방을 생성할 수 있습니다.
                   </p>
-                  {/* [요구사항 1] '학생(플레이어)들에게' -> '플레이어들에게' 수정 */}
-                  <div className="bg-teal-900/60 p-4.5 rounded-md border border-dashed border-yellow-400/50 text-base text-yellow-300 leading-relaxed">
-                    💡 생성된 방 코드를 플레이어들에게 공유하세요.
+                  {/* [요구사항 1] 전구 아이콘(💡) 기준 내어쓰기 적용 */}
+                  <div className="bg-teal-900/60 p-4.5 rounded-md border border-dashed border-yellow-400/50 text-base sm:text-lg text-yellow-300 leading-relaxed flex items-start gap-2.5">
+                    <span className="flex-shrink-0 select-none">💡</span>
+                    <span className="flex-1 leading-relaxed">생성된 방 코드를 플레이어들에게 공유하세요.</span>
                   </div>
                 </div>
                 {/* [요구사항 2] 하단의 '현재 모드: 딜러 진행 관리' 부분 삭제 */}
@@ -596,9 +598,10 @@ export default function FormulaPyramidPage() {
 
                   {/* [요구사항 3] TARGET 표시 박스와 A~J 버튼 영역 높이 수평 완벽 정렬 */}
                   <div className="flex flex-col sm:flex-row items-stretch gap-4">
+                    {/* [요구사항 2] TARGET 글씨 크기 키우기 */}
                     <div className="chalk-box-straight bg-teal-950 px-7 py-4 flex flex-col items-center justify-center min-w-[135px] border-yellow-400/80">
                       <span
-                        className="text-base text-yellow-400 font-bold tracking-wider mb-1"
+                        className="text-xl sm:text-2xl text-yellow-400 font-extrabold tracking-widest mb-1"
                         style={{ fontFamily: "var(--font-chalk)" }}
                       >
                         TARGET
@@ -641,12 +644,13 @@ export default function FormulaPyramidPage() {
                     </div>
                   </div>
 
-                  {/* [요구사항 4] 올곧은 제출하기 버튼 배치 */}
+                  {/* [요구사항 2] '제출하기' 자간을 조금 띄워서 가시성 확보 (letterSpacing: 0.35em) */}
                   <div className="w-full mt-1">
                     <button
                       type="button"
                       onClick={handleSubmitAnswer}
-                      className="btn-chalk w-full justify-center py-4 text-2xl font-bold tracking-wider"
+                      className="btn-chalk w-full justify-center py-4 text-2.5xl sm:text-3xl font-extrabold cursor-pointer shadow-lg"
+                      style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.35em" }}
                     >
                       제출하기
                     </button>
