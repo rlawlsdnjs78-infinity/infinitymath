@@ -26,8 +26,8 @@ export default function Header() {
       id="header"
       className="w-full relative z-30 flex items-center justify-between py-3.5"
       style={{
-        paddingLeft: "clamp(1rem, 4vw, 5rem)",
-        paddingRight: "clamp(1rem, 4vw, 5rem)",
+        paddingLeft: "1.25rem",
+        paddingRight: "1.25rem",
         background: "rgba(26, 58, 58, 0.92)",
         backdropFilter: "blur(12px)",
         borderBottom: "2px dashed rgba(240, 237, 232, 0.2)",

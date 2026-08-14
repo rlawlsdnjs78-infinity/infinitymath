@@ -73,13 +73,17 @@ function FeatureCard({
   delay: string;
 }) {
   return (
-    /* chalk-box-inner: 박스 테두리와 내용 사이 충분한 padding 적용 */
+    /* chalk-box-inner: 좌우 내부 여백 1.25rem 적용 */
     <div
       className="chalk-box chalk-box-inner slide-in-up flex flex-col gap-3"
       style={{
         animationDelay: delay,
         background: "rgba(255,255,255,0.04)",
         backdropFilter: "blur(2px)",
+        paddingLeft: "1.25rem",
+        paddingRight: "1.25rem",
+        paddingTop: "1.5rem",
+        paddingBottom: "1.5rem",
       }}
     >
       <div className="flex items-center gap-2" style={{ color }}>
@@ -103,6 +107,7 @@ function HeroSection() {
     <main
       id="hero"
       className="relative flex-1 flex flex-col items-center justify-center py-16 md:py-24 overflow-hidden"
+      style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
     >
       <ChalkboardGrid />
       <ChalkDust />
@@ -112,12 +117,19 @@ function HeroSection() {
         className="relative z-10 chalkboard-frame w-full max-w-4xl mx-auto"
         style={{ background: "rgba(20, 50, 50, 0.92)" }}
       >
-        {/* 칠판 프레임 내부 여백 — padding으로 내용이 테두리에 붙지 않도록 */}
-        <div className="p-8 md:p-14">
+        {/* 칠판 프레임 내부 여백 (좌우 여백 1.25rem 적용) */}
+        <div
+          style={{
+            paddingLeft: "1.25rem",
+            paddingRight: "1.25rem",
+            paddingTop: "2.5rem",
+            paddingBottom: "2.5rem",
+          }}
+        >
           {/* 상단 장식선 */}
-          <div aria-hidden="true" className="absolute top-3 left-6 right-6 h-px"
+          <div aria-hidden="true" className="absolute top-3 left-5 right-5 h-px"
             style={{ background: "rgba(240,237,232,0.15)" }} />
-          <div aria-hidden="true" className="absolute top-5 left-6 right-6 h-px"
+          <div aria-hidden="true" className="absolute top-5 left-5 right-5 h-px"
             style={{ background: "rgba(240,237,232,0.08)" }} />
 
           {/* 별 장식 */}
@@ -153,13 +165,17 @@ function HeroSection() {
             만들기
           </h1>
 
-          {/* 설명 텍스트 박스 — notebook-lines + 내부 여백 */}
+          {/* 설명 텍스트 박스 — 좌우 내부 여백 1.25rem */}
           <div
             className="slide-in-up mb-8 notebook-lines rounded-sm content-box"
             style={{
               animationDelay: "0.2s",
               border: "1px dashed var(--chalk-border)",
               background: "rgba(255,255,255,0.03)",
+              paddingLeft: "1.25rem",
+              paddingRight: "1.25rem",
+              paddingTop: "1.25rem",
+              paddingBottom: "1.25rem",
             }}
           >
             <p style={{ fontFamily: "var(--font-body)", color: "var(--chalk-dim)", fontSize: "1rem", lineHeight: 2 }}>
@@ -176,7 +192,12 @@ function HeroSection() {
             className="slide-in-up flex flex-col sm:flex-row items-start sm:items-center gap-4"
             style={{ animationDelay: "0.35s" }}
           >
-            <button id="cta-start-btn" type="button" className="btn-chalk flex items-center gap-2">
+            <button
+              id="cta-start-btn"
+              type="button"
+              className="btn-chalk flex items-center gap-2"
+              style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
+            >
               <Pencil size={18} strokeWidth={1.5} />
               수업 시작하기
               <ChevronRight size={18} strokeWidth={1.5} />
@@ -199,6 +220,7 @@ function HeroSection() {
         id="features"
         className="relative z-10 w-full max-w-4xl mx-auto mt-12"
         aria-label="주요 기능"
+        style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
       >
         <h2
           className="text-center mb-8"
@@ -231,7 +253,12 @@ function Footer() {
     <footer
       id="footer"
       className="relative z-10 w-full py-5 text-center"
-      style={{ borderTop: "2px dashed rgba(240,237,232,0.15)", background: "rgba(20,45,45,0.9)" }}
+      style={{
+        borderTop: "2px dashed rgba(240,237,232,0.15)",
+        background: "rgba(20,45,45,0.9)",
+        paddingLeft: "1.25rem",
+        paddingRight: "1.25rem",
+      }}
     >
       <p style={{ fontFamily: "var(--font-body)", color: "var(--chalk-dim)", fontSize: "0.85rem" }}>
         © {year} ∞ 무한대 수학반. All rights reserved.
