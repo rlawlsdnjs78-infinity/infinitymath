@@ -808,14 +808,14 @@ export default function FormulaPyramidPage() {
             />
 
             {/* [플레이어 모드 / 딜러 모드] 탭 선택 버튼 */}
-            <div className="w-full mb-5">
-              <div className="bg-teal-900/80 p-1 rounded-full border border-teal-700/80 flex items-center shadow-inner">
+            <div className="w-full flex justify-center" style={{ marginTop: "0.5rem", marginBottom: "2.5rem" }}>
+              <div className="flex items-center rounded-full select-none bg-teal-950/95 border-2 border-yellow-400/70 shadow-lg w-full p-1.5 gap-2">
                 <button
                   type="button"
                   onClick={() => setMode("player")}
-                  className={`flex-1 py-2 rounded-full text-sm sm:text-base font-bold transition-all cursor-pointer ${
+                  className={`flex-1 py-2.5 rounded-full text-base sm:text-lg font-bold transition-all duration-200 cursor-pointer text-center ${
                     mode === "player"
-                      ? "bg-yellow-400 text-teal-950 shadow-md"
+                      ? "bg-yellow-400 text-teal-950 shadow-md scale-102"
                       : "text-gray-300 hover:text-white"
                   }`}
                   style={{ fontFamily: "var(--font-chalk)" }}
@@ -825,9 +825,9 @@ export default function FormulaPyramidPage() {
                 <button
                   type="button"
                   onClick={() => setMode("dealer")}
-                  className={`flex-1 py-2 rounded-full text-sm sm:text-base font-bold transition-all cursor-pointer ${
+                  className={`flex-1 py-2.5 rounded-full text-base sm:text-lg font-bold transition-all duration-200 cursor-pointer text-center ${
                     mode === "dealer"
-                      ? "bg-yellow-400 text-teal-950 shadow-md"
+                      ? "bg-yellow-400 text-teal-950 shadow-md scale-102"
                       : "text-gray-300 hover:text-white"
                   }`}
                   style={{ fontFamily: "var(--font-chalk)" }}
