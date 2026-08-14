@@ -344,8 +344,12 @@ export default function FormulaPyramidPage() {
           addActivityLog(`[안내] ${currentRound}라운드가 종료되었습니다.`);
         }
 
-        // 딜러(호스트)는 매 1초마다 현재 남은 시간을 모든 플레이어 기기에 전송 (Master Clock Sync)
-        if (isDealerHost && mqttClientRef.current && activeRoomCode) {
+        // 딜러(호스트)는 라운드 시작 후 초반 5초 동안 및 종료 시점(0초)에만 동기화 전송 (시간 역행/버벅임 원천 차단)
+        const totalRoundSec = selectedTime * 60;
+        const elapsedSec = totalRoundSec - next;
+        const shouldSync = elapsedSec <= 5 || next === 0;
+
+        if (isDealerHost && shouldSync && mqttClientRef.current && activeRoomCode) {
           try {
             const topic = `infinitymath/v2/pyramid/${activeRoomCode}`;
             mqttClientRef.current.publish(
@@ -365,7 +369,7 @@ export default function FormulaPyramidPage() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [inGameRoom, isGameStarted, countdownValue, isRoundLocked, currentRound, isDealerHost, activeRoomCode]);
+  }, [inGameRoom, isGameStarted, countdownValue, isRoundLocked, currentRound, isDealerHost, activeRoomCode, selectedTime]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -785,9 +789,15 @@ export default function FormulaPyramidPage() {
               }
             }
           } else if (data.type === "TIME_SYNC") {
-            // 딜러(Master Clock)가 보낸 실시간 남은 시간 동기화 수신
+            // 딜러(Master Clock)가 보낸 실시간 남은 시간 동기화 수신 (초반 5초 및 종료 시점 보정)
             if (!curr.isDealerHost && typeof data.remainingSeconds === "number") {
-              setRoomTimerSeconds(data.remainingSeconds);
+              setRoomTimerSeconds((prev) => {
+                if (data.remainingSeconds === 0) return 0;
+                if (Math.abs(prev - data.remainingSeconds) >= 2) {
+                  return data.remainingSeconds;
+                }
+                return prev;
+              });
               if (data.isRoundLocked && !isRoundLocked) {
                 setIsRoundLocked(true);
                 setShowRoundEndPopup(true);
@@ -874,7 +884,13 @@ export default function FormulaPyramidPage() {
 
         if (data.type === "TIME_SYNC") {
           if (!curr.isDealerHost && typeof data.remainingSeconds === "number") {
-            setRoomTimerSeconds(data.remainingSeconds);
+            setRoomTimerSeconds((prev) => {
+              if (data.remainingSeconds === 0) return 0;
+              if (Math.abs(prev - data.remainingSeconds) >= 2) {
+                return data.remainingSeconds;
+              }
+              return prev;
+            });
             if (data.isRoundLocked && !isRoundLocked) {
               setIsRoundLocked(true);
               setShowRoundEndPopup(true);
