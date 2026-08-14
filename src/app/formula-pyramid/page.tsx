@@ -500,22 +500,25 @@ export default function FormulaPyramidPage() {
            ─────────────────────────────────────────────────────────────────── */}
         {inGameRoom ? (
           <div className="w-full flex flex-col gap-5">
-            {/* 상단 컨트롤 바 */}
-            <div className="chalk-box-straight bg-teal-950 p-5 sm:px-8 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4 border-2 border-yellow-400/80 shadow-lg">
-              {/* [요구사항 2 & 3] 입장코드 좌우 여백(px-5 py-1.5) 추가 & 닉네임 란 삭제 */}
+            {/* 상단 컨트롤 바 (모든 좌우 여백 1.25rem 절대 통일 규칙) */}
+            <div
+              className="chalk-box-straight bg-teal-950 flex flex-col sm:flex-row items-center justify-between gap-4 border-2 border-yellow-400/80 shadow-lg"
+              style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.25rem", paddingBottom: "1.25rem" }}
+            >
+              {/* 입장 코드 칸 */}
               <div className="flex items-center gap-5 flex-wrap">
                 <span className="text-xl sm:text-2.5xl text-yellow-300 font-extrabold flex items-center gap-2.5" style={{ fontFamily: "var(--font-chalk)" }}>
                   입장 코드:{" "}
                   <span
                     className="tracking-widest text-white bg-teal-900 rounded-md border border-teal-700/80 shadow-inner"
-                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.35rem", paddingBottom: "0.35rem" }}
+                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.4rem", paddingBottom: "0.4rem" }}
                   >
                     {activeRoomCode}
                   </span>
                 </span>
               </div>
 
-              {/* [요구사항 4 & 5] 라운드 & 남은 시간 두 개의 별도 박스로 분리 및 방 나가기 여백 강화 */}
+              {/* 라운드 & 남은 시간 & 방 나가기 */}
               <div className="flex items-center gap-4 flex-wrap">
                 {/* 박스 1: 라운드 */}
                 <div
@@ -538,12 +541,12 @@ export default function FormulaPyramidPage() {
                   </span>
                 </div>
 
-                {/* [요구사항 4] '방 나가기' 버튼 여백 부여 (px-6 py-2.5) */}
+                {/* '방 나가기' 버튼 (좌우 여백 1.25rem) */}
                 <button
                   type="button"
                   onClick={() => setInGameRoom(false)}
                   className="flex items-center bg-rose-900/80 hover:bg-rose-800 text-rose-200 rounded-md text-sm font-bold border border-rose-600/60 transition-all cursor-pointer shadow-md"
-                  style={{ paddingLeft: "1.5rem", paddingRight: "1.5rem", paddingTop: "0.6rem", paddingBottom: "0.6rem", gap: "0.75rem" }}
+                  style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.6rem", paddingBottom: "0.6rem", gap: "0.75rem" }}
                 >
                   <LogOut size={18} />
                   <span>방 나가기</span>
@@ -554,7 +557,10 @@ export default function FormulaPyramidPage() {
             {/* 메인 3컬럼 대전 그리드 */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
               {/* [좌측: 실시간 참가자 & 점수판] */}
-              <div className="xl:col-span-3 chalk-box content-box bg-teal-950/80 p-5 sm:p-6 flex flex-col gap-4.5">
+              <div
+                className="xl:col-span-3 chalk-box content-box bg-teal-950/80 flex flex-col gap-4.5"
+                style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.25rem", paddingBottom: "1.25rem" }}
+              >
                 <div className="flex items-center justify-between border-b-2 border-dashed border-teal-700 pb-3">
                   <div className="flex items-center gap-2.5 text-yellow-300 font-extrabold text-xl sm:text-2xl" style={{ fontFamily: "var(--font-chalk)" }}>
                     <Trophy size={22} className="text-yellow-400" />
@@ -578,11 +584,10 @@ export default function FormulaPyramidPage() {
                         style={{
                           paddingTop: "0.85rem",
                           paddingBottom: "0.85rem",
-                          paddingLeft: "1.1rem",
-                          paddingRight: "1.1rem",
+                          paddingLeft: "1.25rem",
+                          paddingRight: "1.25rem",
                         }}
                       >
-                        {/* [요구사항 1] 메달 좌측 여백 절반 감축 (paddingLeft: 1.1rem) */}
                         <div className="flex items-center gap-3">
                           <span className="font-extrabold text-lg text-yellow-400 w-6 flex-shrink-0 flex items-center justify-center">
                             {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}`}
@@ -591,7 +596,6 @@ export default function FormulaPyramidPage() {
                             {p.name} {p.isHost && "(딜러)"}
                           </span>
                         </div>
-                        {/* [요구사항 3] 우측 '0점' 넉넉한 절연 여백 지정 */}
                         <span
                           className="font-extrabold text-xl text-yellow-300 flex-shrink-0"
                           style={{ fontFamily: "var(--font-chalk)" }}
@@ -604,7 +608,10 @@ export default function FormulaPyramidPage() {
               </div>
 
               {/* [중앙: 수식 피라미드 보드] */}
-              <div className="xl:col-span-6 chalk-box content-box bg-teal-950/85 p-5 sm:p-7 flex flex-col gap-5">
+              <div
+                className="xl:col-span-6 chalk-box content-box bg-teal-950/85 flex flex-col gap-5"
+                style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.25rem", paddingBottom: "1.25rem" }}
+              >
                 <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between gap-6 mb-2">
                   <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0">
                     {PYRAMID_DATA.map((row, rowIndex) => (
@@ -624,7 +631,7 @@ export default function FormulaPyramidPage() {
                     ))}
                   </div>
 
-                  {/* [요구사항 6] 이미 제출된 정답 수량 표기를 'n개'로 변경 */}
+                  {/* 이미 제출된 정답 수량 표기 */}
                   <div className="relative flex-1 w-full flex flex-col items-stretch gap-3">
                     <div className="flex items-center justify-between border-b border-dashed border-teal-700 pb-2">
                       <div className="flex items-center gap-2 text-yellow-300 font-extrabold text-xl" style={{ fontFamily: "var(--font-chalk)" }}>
@@ -633,7 +640,7 @@ export default function FormulaPyramidPage() {
                       </div>
                       <span
                         className="text-xs sm:text-sm text-yellow-300 font-extrabold bg-teal-900 rounded-md border border-teal-700/80 shadow-sm"
-                        style={{ paddingLeft: "0.85rem", paddingRight: "0.85rem", paddingTop: "0.25rem", paddingBottom: "0.25rem" }}
+                        style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.25rem", paddingBottom: "0.25rem" }}
                       >
                         {submittedAnswersList.length}개
                       </span>
@@ -642,7 +649,10 @@ export default function FormulaPyramidPage() {
                     <div
                       className="w-full bg-teal-900/98 rounded-xl border-2 border-dashed border-yellow-400/90 shadow-lg flex flex-col backdrop-blur-md overflow-hidden min-h-[160px] max-h-[220px] overflow-y-auto"
                       style={{
-                        padding: "0.65rem 0.75rem",
+                        paddingTop: "0.65rem",
+                        paddingBottom: "0.65rem",
+                        paddingLeft: "1.25rem",
+                        paddingRight: "1.25rem",
                         gap: "0.4rem",
                       }}
                     >
@@ -652,7 +662,10 @@ export default function FormulaPyramidPage() {
                             key={idx}
                             className="w-full flex items-center justify-between rounded-lg bg-teal-950/95 text-white transition-all border border-teal-700/80 shadow-sm"
                             style={{
-                              padding: "0.5rem 0.85rem",
+                              paddingTop: "0.5rem",
+                              paddingBottom: "0.5rem",
+                              paddingLeft: "1.25rem",
+                              paddingRight: "1.25rem",
                               fontFamily: "var(--font-chalk)",
                             }}
                           >
@@ -673,15 +686,16 @@ export default function FormulaPyramidPage() {
                   </div>
                 </div>
 
-                {/* [선택한 수식: 박스] */}
+                {/* 선택한 수식: 박스 (좌우 여백 1.25rem) */}
                 <div
                   className={`w-full rounded-md border border-dashed transition-all duration-200 flex items-center justify-between min-h-[64px] h-[64px] ${
                     tempNotice
                       ? tempNotice.type === "success"
-                        ? "bg-emerald-950/90 border-emerald-500 text-emerald-200 px-6 py-3"
-                        : "bg-rose-950/90 border-rose-500 text-rose-200 px-6 py-3"
-                      : "bg-teal-950 border-teal-600 text-yellow-300 px-6 py-3"
+                        ? "bg-emerald-950/90 border-emerald-500 text-emerald-200"
+                        : "bg-rose-950/90 border-rose-500 text-rose-200"
+                      : "bg-teal-950 border-teal-600 text-yellow-300"
                   }`}
+                  style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.75rem", paddingBottom: "0.75rem" }}
                 >
                   {tempNotice ? (
                     <div
@@ -699,7 +713,7 @@ export default function FormulaPyramidPage() {
                       <span style={{ fontFamily: "var(--font-chalk)" }}>{tempNotice.msg}</span>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-4" style={{ paddingLeft: "1rem" }}>
+                    <div className="flex items-center gap-4">
                       <span
                         className="text-2xl sm:text-3xl text-teal-300 font-extrabold"
                         style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.02em" }}
@@ -708,7 +722,7 @@ export default function FormulaPyramidPage() {
                       </span>
                       <span
                         className="text-3xl sm:text-4xl font-black text-yellow-300 tracking-widest min-h-[40px] flex items-center"
-                        style={{ fontFamily: "var(--font-chalk)", paddingLeft: "0.75rem" }}
+                        style={{ fontFamily: "var(--font-chalk)", paddingLeft: "0.5rem" }}
                       >
                         {exprStr || "\u00A0"}
                       </span>
@@ -718,7 +732,10 @@ export default function FormulaPyramidPage() {
 
                 {/* TARGET 표시 및 A~J 선택 버튼 */}
                 <div className="flex flex-col sm:flex-row items-stretch gap-5">
-                  <div className="chalk-box-straight bg-teal-950 px-8 py-5 flex flex-col items-center justify-center min-w-[145px] border-2 border-yellow-400/80 shadow-md">
+                  <div
+                    className="chalk-box-straight bg-teal-950 flex flex-col items-center justify-center min-w-[145px] border-2 border-yellow-400/80 shadow-md"
+                    style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.25rem", paddingBottom: "1.25rem" }}
+                  >
                     <span className="text-xl sm:text-2xl text-yellow-400 font-extrabold tracking-widest mb-1" style={{ fontFamily: "var(--font-chalk)" }}>
                       TARGET
                     </span>
@@ -763,8 +780,11 @@ export default function FormulaPyramidPage() {
                 </div>
               </div>
 
-              {/* [우측: 실시간 활동 피드] */}
-              <div className="xl:col-span-3 chalk-box content-box bg-teal-950/80 p-5 sm:p-6 flex flex-col gap-4.5">
+              {/* [우측: 실시간 활동 피드] (좌우 여백 1.25rem) */}
+              <div
+                className="xl:col-span-3 chalk-box content-box bg-teal-950/80 flex flex-col gap-4.5"
+                style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "1.25rem", paddingBottom: "1.25rem" }}
+              >
                 <div className="flex items-center gap-2.5 text-yellow-300 font-extrabold text-xl sm:text-2xl border-b-2 border-dashed border-teal-700 pb-3" style={{ fontFamily: "var(--font-chalk)" }}>
                   <Users size={22} className="text-yellow-400" />
                   <span>실시간 활동 현황</span>
@@ -777,8 +797,8 @@ export default function FormulaPyramidPage() {
                       key={i}
                       className="text-xs sm:text-sm text-gray-200 bg-teal-900/70 rounded-md border border-teal-700/80 shadow-sm leading-relaxed"
                       style={{
-                        paddingLeft: "1.6rem",
-                        paddingRight: "1.4rem",
+                        paddingLeft: "1.25rem",
+                        paddingRight: "1.25rem",
                         paddingTop: "0.75rem",
                         paddingBottom: "0.75rem",
                         fontFamily: "var(--font-body)",
