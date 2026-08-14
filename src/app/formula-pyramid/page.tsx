@@ -785,11 +785,9 @@ export default function FormulaPyramidPage() {
           style={{ marginTop: "0.25rem", marginBottom: "1rem" }}
         />
 
-        {/* ───────────────────────────────────────────────────────────────────
-           [하단 3분할 박스 영역] - items-stretch 및 min-h-[610px]를 통해 방 생성 전후 박스 외각 크기를 100% 동일하게 고정
-           ─────────────────────────────────────────────────────────────────── */}
+        {/* [하단 3분할 박스 영역] - items-stretch: 3개 박스 높이 동일하게 고정 */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
-          {/* ── [좌측 박스] xl:col-span-3 ─────────────────────────────────── */}
+          {/* [좌측 박스] xl:col-span-3 */}
           <div className="xl:col-span-3 chalk-box content-box flex flex-col bg-teal-950/80 backdrop-blur-md h-full p-4 sm:p-5">
             {/* 카드 헤더 */}
             <div className="flex items-center gap-3 w-full min-h-[44px]">
@@ -922,33 +920,37 @@ export default function FormulaPyramidPage() {
               </form>
             ) : (
               /* 딜러 모드 대기 정보 */
-              <div className="flex flex-col gap-4 text-sm text-gray-200 leading-relaxed py-1" style={{ fontFamily: "var(--font-body)" }}>
-                <p className="leading-loose text-base sm:text-lg">
-                  딜러 모드에서는 라운드 수, 제한 시간, 오답 패널티를 설정하여 방을 생성할 수 있습니다.
-                </p>
-                <div
-                  className="w-full rounded-xl shadow-lg border-2 border-dashed border-yellow-400/90 bg-teal-900/95"
-                  style={{
-                    paddingLeft: "1.25rem",
-                    paddingRight: "1.25rem",
-                    paddingTop: "1.25rem",
-                    paddingBottom: "1.25rem",
-                    marginTop: "0.5rem",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.75rem",
-                    boxSizing: "border-box",
-                  }}
-                >
+              <div className="flex flex-col justify-between flex-1 gap-4 text-sm text-gray-200 leading-relaxed py-1" style={{ fontFamily: "var(--font-body)" }}>
+                {/* 상단 콘텐츠 그룹 */}
+                <div className="flex flex-col gap-4">
+                  <p className="leading-loose text-base sm:text-lg">
+                    딜러 모드에서는 라운드 수, 제한 시간, 오답 패널티를 설정하여 방을 생성할 수 있습니다.
+                  </p>
                   <div
-                    className="flex items-start gap-3 text-yellow-300 text-base sm:text-lg font-medium"
-                    style={{ lineHeight: "1.5", wordBreak: "break-all", letterSpacing: "-0.015em" }}
+                    className="w-full rounded-xl shadow-lg border-2 border-dashed border-yellow-400/90 bg-teal-900/95"
+                    style={{
+                      paddingLeft: "1.25rem",
+                      paddingRight: "1.25rem",
+                      paddingTop: "1.25rem",
+                      paddingBottom: "1.25rem",
+                      marginTop: "0.5rem",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.75rem",
+                      boxSizing: "border-box",
+                    }}
                   >
-                    <Megaphone size={20} className="flex-shrink-0 text-yellow-400 mt-0.5" />
-                    <span style={{ wordBreak: "break-all" }}>생성된 방 코드를 플레이어들에게 공유하세요.</span>
+                    <div
+                      className="flex items-start gap-3 text-yellow-300 text-base sm:text-lg font-medium"
+                      style={{ lineHeight: "1.5", wordBreak: "break-all", letterSpacing: "-0.015em" }}
+                    >
+                      <Megaphone size={20} className="flex-shrink-0 text-yellow-400 mt-0.5" />
+                      <span style={{ wordBreak: "break-all" }}>생성된 방 코드를 플레이어들에게 공유하세요.</span>
+                    </div>
                   </div>
                 </div>
 
+                {/* 하단 뱃지: 방 생성 전후 동일한 공간 예약 */}
                 {inGameRoom && isDealerHost ? (
                   <div
                     className="flex items-center justify-between rounded-xl bg-amber-950/95 border-2 border-amber-500/90 text-amber-200 shadow-md"
@@ -957,7 +959,6 @@ export default function FormulaPyramidPage() {
                       paddingRight: "1.25rem",
                       paddingTop: "1.1rem",
                       paddingBottom: "1.1rem",
-                      marginTop: "1.25rem",
                     }}
                   >
                     <span className="font-black text-lg sm:text-xl text-yellow-300 flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
@@ -973,7 +974,7 @@ export default function FormulaPyramidPage() {
                     </button>
                   </div>
                 ) : (
-                  /* 방 생성 전: Photo 2와 동일한 외곽 흰색 박스 크기를 유지하기 위한 하단 투명 빈 공간 예약 */
+                  /* 방 생성 전: 동일한 높이를 유지하기 위한 투명 placeholder */
                   <div
                     className="invisible flex items-center justify-between rounded-xl"
                     style={{
@@ -981,7 +982,6 @@ export default function FormulaPyramidPage() {
                       paddingRight: "1.25rem",
                       paddingTop: "1.1rem",
                       paddingBottom: "1.1rem",
-                      marginTop: "1.25rem",
                     }}
                   >
                     <span className="font-black text-lg sm:text-xl flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
@@ -1000,7 +1000,7 @@ export default function FormulaPyramidPage() {
             )}
           </div>
 
-          {/* ── [중앙 박스] xl:col-span-6 ─────────────────────────────────── */}
+          {/* [중앙 박스] xl:col-span-6 */}
           <div className="xl:col-span-6 chalk-box content-box flex flex-col bg-teal-950/85 backdrop-blur-md h-full p-4 sm:p-5 gap-4">
             {mode === "player" ? (
               /* =================================================================== */
@@ -1624,7 +1624,7 @@ export default function FormulaPyramidPage() {
             )}
           </div>
 
-          {/* ── [우측 박스] xl:col-span-3 ─────────────────────────────────── */}
+          {/* [우측 박스] xl:col-span-3 */}
           <div className="xl:col-span-3 chalk-box content-box flex flex-col bg-teal-950/80 backdrop-blur-md h-full p-4 sm:p-5">
             {mode === "player" ? (
               <>
