@@ -555,6 +555,11 @@ export default function FormulaPyramidPage() {
     };
   });
 
+  const playersRef = useRef(players);
+  useEffect(() => {
+    playersRef.current = players;
+  }, [players]);
+
   const lastStartedGameTsRef = useRef<number>(0);
 
   /* ── MQTT over WebSocket 실시간 크로스 디바이스(PC, 태블릿) 양방향 동기화 ── */
@@ -570,25 +575,31 @@ export default function FormulaPyramidPage() {
         protocolId: "MQTT",
         protocolVersion: 4,
         clean: true,
-        reconnectPeriod: 2000,
+        reconnectPeriod: 1000,
         connectTimeout: 5000,
         clientId: `pyr_${Math.random().toString(16).slice(2, 10)}`,
       });
 
       mqttClientRef.current = client;
 
+      const sendPresence = (type: "JOIN" | "PRESENCE_PING" | "PRESENCE_PONG") => {
+        const curr = roomStateRef.current;
+        if (!client || !client.connected) return;
+        client.publish(
+          topic,
+          JSON.stringify({
+            type,
+            sender: curr.myNickname,
+            player: { name: curr.myNickname, score: curr.myScore, isHost: curr.isDealerHost },
+            allPlayers: playersRef.current,
+          })
+        );
+      };
+
       client.on("connect", () => {
         client?.subscribe(topic, { qos: 0 }, (err) => {
           if (!err) {
-            const curr = roomStateRef.current;
-            client?.publish(
-              topic,
-              JSON.stringify({
-                type: "JOIN",
-                sender: curr.myNickname,
-                player: { name: curr.myNickname, score: curr.myScore, isHost: curr.isDealerHost },
-              })
-            );
+            sendPresence("JOIN");
           }
         });
       });
@@ -603,15 +614,41 @@ export default function FormulaPyramidPage() {
           // 본인이 보낸 메시지는 무시 (에코 방지)
           if (data.sender && data.sender === curr.myNickname) return;
 
-          if (data.type === "JOIN") {
-            if (data.player.name === curr.myNickname) return;
-            setPlayers((prev) => (prev.some((p) => p.name === data.player.name) ? prev : [...prev, data.player]));
+          if (data.type === "JOIN" || data.type === "PRESENCE_PING") {
+            // 1. 상대방 플레이어를 내 목록에 즉시 추가
+            if (data.player && data.player.name) {
+              setPlayers((prev) => {
+                const exists = prev.some((p) => p.name === data.player.name);
+                if (exists) {
+                  return prev.map((p) => (p.name === data.player.name ? { ...p, score: data.player.score, isHost: data.player.isHost } : p));
+                }
+                return [...prev, data.player];
+              });
+            }
+
+            // 2. 상대방이 보낸 allPlayers 목록도 병합
+            if (data.allPlayers && Array.isArray(data.allPlayers)) {
+              setPlayers((prev) => {
+                const map = new Map<string, { name: string; score: number; isHost?: boolean }>();
+                prev.forEach((p) => map.set(p.name, p));
+                data.allPlayers.forEach((p: { name: string; score: number; isHost?: boolean }) => {
+                  if (!map.has(p.name)) {
+                    map.set(p.name, p);
+                  }
+                });
+                return Array.from(map.values());
+              });
+            }
+
             setActivityLogs((prev) => {
-              const msg = `[실시간] ${data.player.name} 님이 방에 참가하셨습니다.`;
+              const msg = `[실시간] ${data.player?.name || "플레이어"} 님이 방에 참가하셨습니다.`;
               return prev.includes(msg) ? prev : [msg, ...prev];
             });
 
-            // 딜러인 경우 새 참가자에게 현재 방 설정 즉시 전파
+            // 3. 상대방에게 "나도 여기 있어" 하고 내 정보 + 전체 플레이어 목록 즉시 응답 (PONG)
+            sendPresence("PRESENCE_PONG");
+
+            // 4. 딜러인 경우 방 설정도 즉시 전파
             if (curr.isDealerHost) {
               client?.publish(
                 topic,
@@ -619,6 +656,7 @@ export default function FormulaPyramidPage() {
                   type: "SYNC_PRESENCE",
                   sender: curr.myNickname,
                   player: { name: curr.myNickname, score: curr.myScore, isHost: true },
+                  allPlayers: playersRef.current,
                   roomConfig: {
                     selectedRound: curr.selectedRound,
                     selectedTime: curr.selectedTime,
@@ -632,9 +670,43 @@ export default function FormulaPyramidPage() {
                 })
               );
             }
+          } else if (data.type === "PRESENCE_PONG") {
+            // 상대방 응답 수신 시 플레이어 목록에 즉시 추가/갱신
+            if (data.player && data.player.name) {
+              setPlayers((prev) => {
+                const exists = prev.some((p) => p.name === data.player.name);
+                if (exists) {
+                  return prev.map((p) => (p.name === data.player.name ? { ...p, score: data.player.score, isHost: data.player.isHost } : p));
+                }
+                return [...prev, data.player];
+              });
+            }
+            if (data.allPlayers && Array.isArray(data.allPlayers)) {
+              setPlayers((prev) => {
+                const map = new Map<string, { name: string; score: number; isHost?: boolean }>();
+                prev.forEach((p) => map.set(p.name, p));
+                data.allPlayers.forEach((p: { name: string; score: number; isHost?: boolean }) => {
+                  if (!map.has(p.name)) {
+                    map.set(p.name, p);
+                  }
+                });
+                return Array.from(map.values());
+              });
+            }
           } else if (data.type === "SYNC_PRESENCE") {
-            if (data.player.name === curr.myNickname) return;
-            setPlayers((prev) => (prev.some((p) => p.name === data.player.name) ? prev : [...prev, data.player]));
+            if (data.player && data.player.name) {
+              setPlayers((prev) => (prev.some((p) => p.name === data.player.name) ? prev : [...prev, data.player]));
+            }
+            if (data.allPlayers && Array.isArray(data.allPlayers)) {
+              setPlayers((prev) => {
+                const map = new Map<string, { name: string; score: number; isHost?: boolean }>();
+                prev.forEach((p) => map.set(p.name, p));
+                data.allPlayers.forEach((p: { name: string; score: number; isHost?: boolean }) => {
+                  if (!map.has(p.name)) map.set(p.name, p);
+                });
+                return Array.from(map.values());
+              });
+            }
             if (data.roomConfig) {
               if (data.roomConfig.selectedRound) setSelectedRound(data.roomConfig.selectedRound);
               if (data.roomConfig.selectedTime) setSelectedTime(data.roomConfig.selectedTime);
