@@ -11,7 +11,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Pencil,
@@ -336,7 +336,30 @@ export default function FormulaPyramidPage() {
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
-  // BroadcastChannel 실시간 멀티플레이어 동기화 (같은 방 코드로 참가한 탭/창 실시간 연동 및 방 타이머/설정 동기화)
+  // 최신 방 상태값을 useRef로 관리하여 BroadcastChannel 수신 핸들러 내 무한 재구독 및 도배 방지
+  const roomStateRef = useRef({
+    myNickname,
+    myScore,
+    isDealerHost,
+    selectedRound,
+    selectedTime,
+    selectedPenalty,
+    roomEndTime,
+  });
+
+  useEffect(() => {
+    roomStateRef.current = {
+      myNickname,
+      myScore,
+      isDealerHost,
+      selectedRound,
+      selectedTime,
+      selectedPenalty,
+      roomEndTime,
+    };
+  });
+
+  // BroadcastChannel 실시간 멀티플레이어 동기화 (방 생성/입장 시 1회 커넥션 수립)
   useEffect(() => {
     if (!inGameRoom || !activeRoomCode) return;
 
@@ -348,25 +371,38 @@ export default function FormulaPyramidPage() {
           const data = event.data;
           if (!data) return;
 
+          const curr = roomStateRef.current;
+
           if (data.type === "JOIN") {
+            // 자기 자신이 보낸 JOIN 메시지는 무시
+            if (data.player.name === curr.myNickname) return;
+
             setPlayers((prev) => {
               if (prev.some((p) => p.name === data.player.name)) return prev;
               return [...prev, data.player];
             });
-            setActivityLogs((prev) => [`[실시간] ${data.player.name} 님이 방에 참가하셨습니다.`, ...prev]);
 
-            // 기존 참가자(방장/딜러)가 새로 들어온 참가자에게 현재 방 설정과 정확한 roomEndTime 전송
+            // 참가 안내 로그 중복 수신 방지
+            setActivityLogs((prev) => {
+              const logMsg = `[실시간] ${data.player.name} 님이 방에 참가하셨습니다.`;
+              if (prev.includes(logMsg)) return prev;
+              return [logMsg, ...prev];
+            });
+
+            // 기존 참가자(방장/딜러)가 새로 들어온 참가자에게 현재 방 설정 및 roomEndTime 전송
             bc?.postMessage({
               type: "SYNC_PRESENCE",
-              player: { name: myNickname, score: myScore, isHost: isDealerHost },
+              player: { name: curr.myNickname, score: curr.myScore, isHost: curr.isDealerHost },
               roomConfig: {
-                selectedRound,
-                selectedTime,
-                selectedPenalty,
-                roomEndTime: roomEndTime || Date.now() + selectedTime * 60 * 1000,
+                selectedRound: curr.selectedRound,
+                selectedTime: curr.selectedTime,
+                selectedPenalty: curr.selectedPenalty,
+                roomEndTime: curr.roomEndTime || Date.now() + curr.selectedTime * 60 * 1000,
               },
             });
           } else if (data.type === "SYNC_PRESENCE") {
+            if (data.player.name === curr.myNickname) return;
+
             setPlayers((prev) => {
               if (prev.some((p) => p.name === data.player.name)) return prev;
               return [...prev, data.player];
@@ -383,6 +419,8 @@ export default function FormulaPyramidPage() {
               }
             }
           } else if (data.type === "SCORE_UPDATE") {
+            if (data.playerName === curr.myNickname) return;
+
             setPlayers((prev) =>
               prev.map((p) => (p.name === data.playerName ? { ...p, score: data.newScore } : p))
             );
@@ -399,6 +437,7 @@ export default function FormulaPyramidPage() {
           }
         };
 
+        // 방 입장 시 1회에 한해 JOIN 방송
         bc.postMessage({
           type: "JOIN",
           player: { name: myNickname, score: myScore, isHost: isDealerHost },
@@ -409,7 +448,7 @@ export default function FormulaPyramidPage() {
     return () => {
       if (bc) bc.close();
     };
-  }, [inGameRoom, activeRoomCode, myNickname, myScore, isDealerHost, selectedRound, selectedTime, selectedPenalty, roomEndTime]);
+  }, [inGameRoom, activeRoomCode]);
 
   const handleJoinGameRoom = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
