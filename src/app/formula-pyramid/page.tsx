@@ -184,7 +184,7 @@ export default function FormulaPyramidPage() {
   const [showSolutions, setShowSolutions] = useState(false);
   const validSolutions = getAllValidSolutions(9);
   const [selectedRound, setSelectedRound] = useState<number>(1);
-  const [selectedTime, setSelectedTime] = useState<number>(1);
+  const [selectedTime, setSelectedTime] = useState<number>(3);
   const [selectedPenalty, setSelectedPenalty] = useState<string>("없음");
   const [generatedRoomCode, setGeneratedRoomCode] = useState<string>("");
 
@@ -797,13 +797,13 @@ export default function FormulaPyramidPage() {
 
                 <div
                   className="w-full border-t border-dashed border-teal-700"
-                  style={{ marginTop: "1.1rem", marginBottom: "1.1rem" }}
+                  style={{ marginTop: "0.75rem", marginBottom: "0.75rem" }}
                 />
 
-                <div className="flex flex-col gap-6 flex-1 justify-between py-1">
-                  <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-3.5 flex-1 justify-between py-0.5">
+                  <div className="flex flex-col gap-3.5">
                     {/* [요구사항] 게임 설명 본문 항목과 100% 동일한 글씨 크기(text-sm) & 폰트(var(--font-body)) 적용 */}
-                    <div className="flex flex-col gap-2.5">
+                    <div className="flex flex-col gap-1.5">
                       <div
                         className="flex items-center justify-between w-full text-sm text-gray-200 font-medium"
                         style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
@@ -811,13 +811,13 @@ export default function FormulaPyramidPage() {
                         <span>라운드 설정</span>
                         <span className="text-yellow-300 font-bold">({selectedRound}라운드)</span>
                       </div>
-                      <div className="grid grid-cols-5 gap-2">
+                      <div className="grid grid-cols-5 gap-1.5">
                         {Array.from({ length: 15 }, (_, i) => i + 1).map((r) => (
                           <button
                             key={r}
                             type="button"
                             onClick={() => setSelectedRound(r)}
-                            className={`py-2 text-sm font-medium rounded-md transition-all ${
+                            className={`py-1.5 text-sm font-medium rounded-md transition-all ${
                               selectedRound === r
                                 ? "bg-yellow-400 text-teal-950 shadow scale-105"
                                 : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
@@ -830,7 +830,8 @@ export default function FormulaPyramidPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-2.5">
+                    {/* [요구사항 1] 라운드 별 시간 3분, 5분, 7분 3개로 구성 */}
+                    <div className="flex flex-col gap-1.5">
                       <div
                         className="flex items-center justify-between w-full text-sm text-gray-200 font-medium"
                         style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
@@ -838,13 +839,13 @@ export default function FormulaPyramidPage() {
                         <span>라운드 별 시간</span>
                         <span className="text-yellow-300 font-bold">({selectedTime}분)</span>
                       </div>
-                      <div className="grid grid-cols-3 gap-2.5">
-                        {[1, 2, 3, 4, 5].map((t) => (
+                      <div className="grid grid-cols-3 gap-2">
+                        {[3, 5, 7].map((t) => (
                           <button
                             key={t}
                             type="button"
                             onClick={() => setSelectedTime(t)}
-                            className={`py-2.5 text-sm font-medium rounded-md transition-all ${
+                            className={`py-2 text-sm font-medium rounded-md transition-all ${
                               selectedTime === t
                                 ? "bg-yellow-400 text-teal-950 shadow scale-105"
                                 : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
@@ -857,7 +858,7 @@ export default function FormulaPyramidPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-2.5">
+                    <div className="flex flex-col gap-1.5">
                       <div
                         className="flex items-center justify-between w-full text-sm text-gray-200 font-medium"
                         style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
@@ -865,13 +866,13 @@ export default function FormulaPyramidPage() {
                         <span>오답 패널티</span>
                         <span className="text-yellow-300 font-bold">({selectedPenalty})</span>
                       </div>
-                      <div className="grid grid-cols-3 gap-2.5">
+                      <div className="grid grid-cols-3 gap-2">
                         {["없음", "1초", "2초", "3초", "4초", "5초"].map((p) => (
                           <button
                             key={p}
                             type="button"
                             onClick={() => setSelectedPenalty(p)}
-                            className={`py-2.5 text-sm font-medium rounded-md transition-all ${
+                            className={`py-1.5 text-sm font-medium rounded-md transition-all ${
                               selectedPenalty === p
                                 ? "bg-yellow-400 text-teal-950 shadow scale-105"
                                 : "bg-teal-900/90 text-gray-300 hover:bg-teal-800"
@@ -886,22 +887,21 @@ export default function FormulaPyramidPage() {
                   </div>
 
                   <div>
-                    {/* [요구사항 1 & 2] 버튼 이름 변경 ('입장 코드 생성하기') 및 고정 높이(h-[76px]) 하단 영역 확보로 클릭 시 레이아웃 흔들림 완전 방지 */}
+                    {/* [요구사항 2] 태블릿 한 화면에 스크롤 없이 컴팩트 출력 */}
                     <button
                       type="button"
                       onClick={handleCreateGame}
-                      className="btn-chalk w-full justify-center py-3.5 text-lg font-bold"
+                      className="btn-chalk w-full justify-center py-2.5 text-base sm:text-lg font-bold"
                       style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
                     >
                       입장 코드 생성하기
                     </button>
 
-                    {/* [요구사항] '생성된 입장 코드' 문구 제거, P + 5자리 숫자 코드 출력 및 글씨 크기(text-3.5xl sm:text-4xl) & 자간 확대 */}
-                    <div className="chalk-box-straight bg-teal-950 px-4 py-3 mt-3 flex items-center justify-center min-h-[72px] h-[72px] border-dashed border-teal-600 text-center rounded-md transition-all">
+                    <div className="chalk-box-straight bg-teal-950 px-3 py-2 mt-2 flex items-center justify-center min-h-[62px] h-[62px] border-dashed border-teal-600 text-center rounded-md transition-all">
                       {generatedRoomCode ? (
                         <div className="flex items-center gap-3">
                           <span
-                            className="text-3.5xl sm:text-4xl text-yellow-300 font-extrabold leading-none"
+                            className="text-3xl sm:text-3.5xl text-yellow-300 font-extrabold leading-none"
                             style={{ fontFamily: "var(--font-chalk)", letterSpacing: "0.2em" }}
                           >
                             {generatedRoomCode}
@@ -912,14 +912,14 @@ export default function FormulaPyramidPage() {
                               navigator.clipboard.writeText(generatedRoomCode);
                               alert(`입장 코드 [${generatedRoomCode}] 가 복사되었습니다!`);
                             }}
-                            className="p-1.5 text-yellow-400 hover:text-yellow-200 transition-colors cursor-pointer hover:scale-110"
+                            className="p-1 text-yellow-400 hover:text-yellow-200 transition-colors cursor-pointer hover:scale-110"
                             title="코드 복사"
                           >
-                            <Copy size={22} />
+                            <Copy size={20} />
                           </button>
                         </div>
                       ) : (
-                        <span className="text-sm text-gray-400 font-medium" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
+                        <span className="text-xs sm:text-sm text-gray-400 font-medium" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
                           버튼을 클릭하면 입장 코드가 생성됩니다.
                         </span>
                       )}
