@@ -34,7 +34,16 @@ export default function Header() {
         minHeight: "72px",
       }}
     >
-      <div className="w-full max-w-5xl mx-auto flex items-center justify-between px-6 md:px-12 relative">
+      <div 
+        className="w-full px-6 md:px-12 relative"
+        style={{
+          maxWidth: "1152px",
+          margin: "0 auto",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between"
+        }}
+      >
         {/* ── [좌측] 로고 ─────────────────────────────────────────── */}
         <div className="flex items-center gap-3 z-10">
           <Link href="/" style={{ textDecoration: "none" }}>
