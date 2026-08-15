@@ -1536,8 +1536,8 @@ export default function FormulaPyramidPage() {
                       <button
                         type="button"
                         onClick={() => setShowSolutions(!showSolutions)}
-                        className="w-full flex items-center justify-center gap-3 rounded-full bg-gray-50/80 backdrop-blur-md hover:bg-gray-100 border-2 border-dashed border-[#CBA7D2]/80 text-[#CBA7D2] text-base sm:text-lg font-bold transition-all cursor-pointer shadow-sm"
-                        style={{ paddingTop: "0.75rem", paddingBottom: "0.75rem", fontFamily: "var(--font-chalk)" }}
+                        className="w-full flex items-center justify-center gap-3 rounded-full bg-gray-50/80 backdrop-blur-md hover:bg-gray-100 border-2 border-dashed border-[#CBA7D2]/80 text-[#CBA7D2] font-bold transition-all cursor-pointer shadow-sm"
+                        style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", fontFamily: "var(--font-chalk)", fontSize: "1.05rem" }}
                       >
                         <Sparkles size={18} className="text-[#CBA7D2] animate-pulse" />
                         <span>정답 확인 ({validSolutions.length}개 조합)</span>
@@ -1556,10 +1556,10 @@ export default function FormulaPyramidPage() {
                               type="button"
                               onClick={() => { setSelectedNodes(sol.nodes); setTempNotice(null); }}
                               className="w-full flex items-center justify-between rounded-2xl bg-white/80 backdrop-blur-md hover:bg-[#CBA7D2] hover:text-gray-900 text-gray-800 transition-all border border-gray-200/80 cursor-pointer shadow-sm group flex-shrink-0"
-                              style={{ paddingTop: "0.35rem", paddingBottom: "0.35rem", fontFamily: "var(--font-chalk)" }}
+                              style={{ paddingTop: "0.35rem", paddingBottom: "0.35rem", paddingLeft: "0.65rem", paddingRight: "0.65rem", fontFamily: "var(--font-chalk)" }}
                             >
-                              <span className="text-lg sm:text-xl font-black text-[#CBA7D2] group-hover:text-gray-900 tracking-widest">{sol.nodes.join(" ")}</span>
-                              <span className="text-sm sm:text-base text-gray-600 group-hover:text-gray-900 font-extrabold tracking-wide">{sol.formulaStr}</span>
+                              <span className="font-black text-[#CBA7D2] group-hover:text-gray-900 tracking-widest" style={{ fontSize: "1.25rem" }}>{sol.nodes.join(" ")}</span>
+                              <span className="text-gray-600 group-hover:text-gray-900 font-extrabold tracking-wide" style={{ fontSize: "1.05rem" }}>{sol.formulaStr}</span>
                             </button>
                           ))}
                         </div>
@@ -1628,7 +1628,7 @@ export default function FormulaPyramidPage() {
                         ? tempNotice.type === "success" ? "bg-emerald-950/90 border-emerald-500 text-emerald-200" : "bg-rose-950/90 border-rose-500 text-rose-200"
                         : "bg-white border-gray-300 text-[#CBA7D2]"
                     }`}
-                    style={{ paddingTop: "0.6rem", paddingBottom: "0.6rem" }}
+                    style={{ paddingTop: "0.6rem", paddingBottom: "0.6rem", paddingLeft: "0.65rem", paddingRight: "0.65rem" }}
                   >
                     {tempNotice ? (
                       <div className={`flex items-center gap-3 w-full justify-center font-bold ${tempNotice.type === "success" ? "text-emerald-300" : "text-rose-300"}`}>
