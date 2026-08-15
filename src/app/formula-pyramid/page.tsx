@@ -28,7 +28,7 @@ import {
   XCircle,
   Copy,
   Sparkles,
-  Pyramid,
+  Brain,
   ChevronDown,
   ChevronUp,
   ArrowLeft,
@@ -1302,16 +1302,16 @@ export default function FormulaPyramidPage() {
 
         {/* ─── 상단 타이틀 ─────────────────────────────── */}
         <div className="flex items-center justify-between w-full" style={{ marginTop: "0.25rem", marginBottom: "0.75rem" }}>
-          <h1 className="text-3xl sm:text-4xl text-[#CBA7D2] flex items-center gap-4" style={{ fontFamily: "var(--font-chalk)" }}>
-            <Pyramid className="text-[#CBA7D2] flex-shrink-0" size={36} />
-            수식 피라미드 (Formula Pyramid)
+          <h1 className="text-[#CBA7D2] flex items-center gap-3.5 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.65rem", letterSpacing: "0.04em" }}>
+            <Brain className="text-[#CBA7D2] flex-shrink-0" size={30} />
+            <span>수식 피라미드 (Formula Pyramid)</span>
           </h1>
           <Link
             href="/"
-            className="flex items-center rounded-full bg-gray-50/80 backdrop-blur-md hover:bg-gray-100 border-2 border-dashed border-[#CBA7D2]/90 text-[#CBA7D2] text-xl sm:text-2xl font-extrabold transition-all shadow-lg hover:scale-105 cursor-pointer"
-            style={{ paddingTop: "0.9rem", paddingBottom: "0.9rem", gap: "0.85rem", fontFamily: "var(--font-chalk)", textDecoration: "none", letterSpacing: "0.05em" }}
+            className="flex items-center rounded-full bg-gray-50/80 backdrop-blur-md hover:bg-gray-100 border-2 border-dashed border-[#CBA7D2]/90 text-[#CBA7D2] font-extrabold transition-all shadow-lg hover:scale-105 cursor-pointer px-5"
+            style={{ paddingTop: "0.55rem", paddingBottom: "0.55rem", gap: "0.6rem", fontFamily: "var(--font-chalk)", fontSize: "1.45rem", textDecoration: "none", letterSpacing: "0.04em" }}
           >
-            <ArrowLeft size={24} className="text-[#CBA7D2] flex-shrink-0" />
+            <ArrowLeft size={22} className="text-[#CBA7D2] flex-shrink-0" />
             <span className="leading-none">홈으로</span>
           </Link>
         </div>
