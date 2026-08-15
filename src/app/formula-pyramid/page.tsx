@@ -1308,8 +1308,8 @@ export default function FormulaPyramidPage() {
           </h1>
           <Link
             href="/"
-            className="flex items-center rounded-full bg-gray-50/80 backdrop-blur-md hover:bg-gray-100 border-2 border-dashed border-[#CBA7D2]/90 text-[#CBA7D2] font-extrabold transition-all shadow-lg hover:scale-105 cursor-pointer px-5"
-            style={{ paddingTop: "0.55rem", paddingBottom: "0.55rem", gap: "0.6rem", fontFamily: "var(--font-chalk)", fontSize: "1.45rem", textDecoration: "none", letterSpacing: "0.04em" }}
+            className="flex items-center rounded-full bg-gray-50/80 backdrop-blur-md hover:bg-gray-100 border-2 border-dashed border-[#CBA7D2]/90 text-[#CBA7D2] font-extrabold transition-all shadow-lg hover:scale-105 cursor-pointer"
+            style={{ paddingLeft: "1.5rem", paddingRight: "1.5rem", paddingTop: "0.65rem", paddingBottom: "0.65rem", gap: "0.65rem", fontFamily: "var(--font-chalk)", fontSize: "1.45rem", textDecoration: "none", letterSpacing: "0.04em" }}
           >
             <ArrowLeft size={22} className="text-[#CBA7D2] flex-shrink-0" />
             <span className="leading-none">홈으로</span>
@@ -1325,7 +1325,7 @@ export default function FormulaPyramidPage() {
           <div className="xl:col-span-3 chalk-box content-box flex flex-col bg-white/80 backdrop-blur-md h-full p-4 sm:p-5">
             <div className="flex items-center gap-3 w-full min-h-[44px]">
               <LogIn className="text-[#CBA7D2] flex-shrink-0" size={28} />
-              <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "2.5rem", lineHeight: 1.1 }}>
+              <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem", lineHeight: 1.1 }}>
                 게임 입장하기
               </h2>
             </div>
@@ -1361,7 +1361,7 @@ export default function FormulaPyramidPage() {
                 {!inGameRoom ? (
                   <form onSubmit={handleJoinGameRoom} className="flex flex-col gap-5">
                     <div className="flex flex-col gap-2">
-                      <label htmlFor="nickname-input" className="text-2xl sm:text-3xl text-gray-800 font-bold" style={{ fontFamily: "var(--font-chalk)" }}>닉네임</label>
+                      <label htmlFor="nickname-input" className="text-gray-800 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.65rem" }}>닉네임</label>
                       <input
                         id="nickname-input" type="text" placeholder="닉네임을 입력해 주세요" value={nickname}
                         onChange={(e) => setNickname(e.target.value)}
@@ -1370,7 +1370,7 @@ export default function FormulaPyramidPage() {
                       />
                     </div>
                     <div className="flex flex-col gap-2">
-                      <label htmlFor="code-input" className="text-2xl sm:text-3xl text-gray-800 font-bold" style={{ fontFamily: "var(--font-chalk)" }}>입장 코드</label>
+                      <label htmlFor="code-input" className="text-gray-800 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.65rem" }}>입장 코드</label>
                       <input
                         id="code-input" type="text" placeholder="코드를 입력해주세요." value={entryCode}
                         onChange={(e) => setEntryCode(e.target.value.toUpperCase())}
@@ -1828,7 +1828,7 @@ export default function FormulaPyramidPage() {
               <>
                 <div className="flex items-center gap-3 w-full min-h-[44px]">
                   <HelpCircle className="text-[#CBA7D2] flex-shrink-0" size={28} />
-                  <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "2.5rem", lineHeight: 1.1 }}>게임 설명</h2>
+                  <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem", lineHeight: 1.1 }}>게임 설명</h2>
                 </div>
                 <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "1.1rem", marginBottom: "1.1rem" }} />
                 <div className="flex flex-col gap-4 text-sm text-gray-700 leading-relaxed py-1" style={{ fontFamily: "var(--font-body)", wordBreak: "break-all", letterSpacing: "-0.015em" }}>
@@ -1891,7 +1891,7 @@ export default function FormulaPyramidPage() {
                 <div className="flex flex-col flex-1">
                   <div className="flex items-center gap-3 w-full min-h-[44px]">
                     <Megaphone className="text-[#CBA7D2] flex-shrink-0" size={28} />
-                    <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "2.5rem", lineHeight: 1.1 }}>
+                    <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem", lineHeight: 1.1 }}>
                       실시간 게임 공지
                     </h2>
                   </div>
@@ -1960,7 +1960,7 @@ export default function FormulaPyramidPage() {
               <>
                 <div className="flex items-center gap-3">
                   <Settings className="text-[#CBA7D2] flex-shrink-0" size={28} />
-                  <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "2.5rem", lineHeight: 1.1 }}>게임 생성</h2>
+                  <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem", lineHeight: 1.1 }}>게임 생성</h2>
                 </div>
                 <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }} />
 
