@@ -72,8 +72,8 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
                     letterSpacing: "-0.015em",
                   }}
                 >
-                  <span className="w-[0.7rem] h-[0.7rem] rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
-                  <span className="text-[1.075rem] font-medium text-gray-600" style={{ fontFamily: "var(--font-body)" }}>준비 중입니다</span>
+                  <span className="w-[0.85rem] h-[0.85rem] rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
+                  <span className="text-[1.05rem] font-medium text-gray-600" style={{ fontFamily: "var(--font-body)" }}>준비 중입니다</span>
                 </div>
               </div>
             </div>
@@ -133,8 +133,8 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
                   }}
                   onClick={() => setIsBrainOpen(false)}
                 >
-                  <span className="w-[0.7rem] h-[0.7rem] rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
-                  <span className="text-[1.075rem] font-medium text-gray-600 hover:text-gray-900" style={{ fontFamily: "var(--font-body)" }}>수식 피라미드</span>
+                  <span className="w-[0.85rem] h-[0.85rem] rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
+                  <span className="text-[1.05rem] font-medium text-gray-600 hover:text-gray-900" style={{ fontFamily: "var(--font-body)" }}>수식 피라미드</span>
                 </Link>
               </div>
             </div>
@@ -194,8 +194,8 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
                   }}
                   onClick={() => setIsClubOpen(false)}
                 >
-                  <span className="w-[0.7rem] h-[0.7rem] rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
-                  <span className="text-[1.075rem] font-medium text-gray-600 hover:text-gray-900" style={{ fontFamily: "var(--font-body)" }}>2026년 2학기</span>
+                  <span className="w-[0.85rem] h-[0.85rem] rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
+                  <span className="text-[1.05rem] font-medium text-gray-600 hover:text-gray-900" style={{ fontFamily: "var(--font-body)" }}>2026년 2학기</span>
                 </Link>
               </div>
             </div>
