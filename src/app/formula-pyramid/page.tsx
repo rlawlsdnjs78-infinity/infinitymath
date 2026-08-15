@@ -1309,7 +1309,7 @@ export default function FormulaPyramidPage() {
           <Link
             href="/"
             className="flex items-center rounded-full bg-gray-50/80 backdrop-blur-md hover:bg-gray-100 border-2 border-dashed border-[#CBA7D2]/90 text-[#CBA7D2] font-extrabold transition-all shadow-lg hover:scale-105 cursor-pointer"
-            style={{ paddingLeft: "1.5rem", paddingRight: "1.5rem", paddingTop: "0.65rem", paddingBottom: "0.65rem", gap: "0.65rem", fontFamily: "var(--font-chalk)", fontSize: "1.45rem", textDecoration: "none", letterSpacing: "0.04em" }}
+            style={{ paddingLeft: "1.45rem", paddingRight: "1.45rem", paddingTop: "0.65rem", paddingBottom: "0.65rem", gap: "0.65rem", fontFamily: "var(--font-chalk)", fontSize: "1.45rem", textDecoration: "none", letterSpacing: "0.04em" }}
           >
             <ArrowLeft size={22} className="text-[#CBA7D2] flex-shrink-0" />
             <span className="leading-none">홈으로</span>
@@ -1332,11 +1332,11 @@ export default function FormulaPyramidPage() {
                 게임 입장하기
               </h2>
             </div>
-            <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
+            <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.65rem", marginBottom: "0.65rem" }} />
 
             {/* 탭 버튼: 방에 입장 중이 아닐 때만 표시 */}
             {!inGameRoom && (
-              <div className="w-full flex justify-center" style={{ marginTop: "0.5rem", marginBottom: "2.5rem" }}>
+              <div className="w-full flex justify-center" style={{ marginTop: "0", marginBottom: "2.45rem" }}>
                 <div className="flex items-center rounded-full select-none bg-white/80 backdrop-blur-md border-2 border-[#CBA7D2]/70 shadow-sm w-full p-1 gap-0 overflow-hidden">
                   {(["player", "dealer"] as const).map((m) => (
                     <button
@@ -1363,22 +1363,22 @@ export default function FormulaPyramidPage() {
                 {/* 게임방 입장 전: 입장 폼 */}
                 {!inGameRoom ? (
                   <form onSubmit={handleJoinGameRoom} className="flex flex-col gap-5">
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col" style={{ gap: "0.45rem" }}>
                       <label htmlFor="nickname-input" className="text-gray-800 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.65rem" }}>닉네임</label>
                       <input
                         id="nickname-input" type="text" placeholder="닉네임을 입력해 주세요" value={nickname}
                         onChange={(e) => setNickname(e.target.value)}
-                        className="w-full rounded-2xl bg-gray-50/80 backdrop-blur-md border border-dashed border-gray-300 text-gray-800 text-lg focus:outline-none focus:border-[#CBA7D2] placeholder:text-gray-500/80"
-                        style={{ padding: "14px 20px", fontFamily: "var(--font-body)", lineHeight: "1.5" }}
+                        className="w-full rounded-2xl bg-gray-50/80 backdrop-blur-md border border-dashed border-gray-300 text-gray-800 focus:outline-none focus:border-[#CBA7D2] placeholder:text-gray-500/80"
+                        style={{ padding: "0.65rem 1.45rem", fontFamily: "var(--font-body)", fontSize: "1.05rem", lineHeight: "1.5" }}
                       />
                     </div>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col" style={{ gap: "0.45rem" }}>
                       <label htmlFor="code-input" className="text-gray-800 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.65rem" }}>입장 코드</label>
                       <input
                         id="code-input" type="text" placeholder="코드를 입력해주세요." value={entryCode}
                         onChange={(e) => setEntryCode(e.target.value.toUpperCase())}
-                        className="w-full rounded-2xl bg-gray-50/80 backdrop-blur-md border border-dashed border-gray-300 text-gray-800 text-lg uppercase focus:outline-none focus:border-[#CBA7D2] placeholder:text-gray-500/80"
-                        style={{ padding: "14px 20px", fontFamily: "var(--font-body)", lineHeight: "1.5" }}
+                        className="w-full rounded-2xl bg-gray-50/80 backdrop-blur-md border border-dashed border-gray-300 text-gray-800 uppercase focus:outline-none focus:border-[#CBA7D2] placeholder:text-gray-500/80"
+                        style={{ padding: "0.65rem 1.45rem", fontFamily: "var(--font-body)", fontSize: "1.05rem", lineHeight: "1.5" }}
                       />
                     </div>
                     <button
@@ -1896,7 +1896,7 @@ export default function FormulaPyramidPage() {
                   <HelpCircle className="text-[#CBA7D2] flex-shrink-0" size={28} />
                   <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem", lineHeight: 1.1 }}>게임 설명</h2>
                 </div>
-                <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
+                <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "0.65rem", marginBottom: "0.65rem" }} />
                 <div className="flex flex-col gap-3.5 text-gray-700 leading-relaxed py-1 overflow-y-auto" style={{ fontFamily: "var(--font-chalk)", fontSize: "0.85rem", wordBreak: "break-all", letterSpacing: "-0.015em" }}>
                   {/* ① 게임 소개 */}
                   <div className="flex items-start gap-2">
