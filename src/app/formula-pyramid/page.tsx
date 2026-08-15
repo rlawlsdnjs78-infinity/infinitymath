@@ -1544,26 +1544,24 @@ export default function FormulaPyramidPage() {
                         {showSolutions ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                       </button>
 
-                      {/* 정답 목록: 스크롤 없이 한눈에 볼 수 있는 2열 컴팩트 박스 */}
+                      {/* 정답 목록: 1열 배치 (4개 조합이 스크롤 없이 한눈에 다 보이도록) */}
                       {showSolutions && (
                         <div
-                          className="w-full bg-gray-50/98 rounded-2xl border-2 border-dashed border-[#CBA7D2]/90 shadow-xl backdrop-blur-md"
-                          style={{ padding: "0.45rem" }}
+                          className="w-full bg-gray-50/98 rounded-2xl border-2 border-dashed border-[#CBA7D2]/90 shadow-xl backdrop-blur-md flex flex-col"
+                          style={{ padding: "0.45rem", gap: "0.25rem" }}
                         >
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                            {validSolutions.map((sol, idx) => (
-                              <button
-                                key={idx}
-                                type="button"
-                                onClick={() => { setSelectedNodes(sol.nodes); setTempNotice(null); }}
-                                className="w-full flex items-center justify-between rounded-2xl bg-white/90 backdrop-blur-md hover:bg-[#CBA7D2] hover:text-gray-900 text-gray-800 transition-all border border-gray-200/80 cursor-pointer shadow-sm group py-1.5 px-3"
-                                style={{ fontFamily: "var(--font-chalk)" }}
-                              >
-                                <span className="font-black text-[#CBA7D2] group-hover:text-gray-900 tracking-wider" style={{ fontSize: "0.85rem" }}>{sol.nodes.join(" ")}</span>
-                                <span className="text-gray-600 group-hover:text-gray-900 font-extrabold tracking-tight" style={{ fontSize: "0.85rem" }}>{sol.formulaStr}</span>
-                              </button>
-                            ))}
-                          </div>
+                          {validSolutions.map((sol, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => { setSelectedNodes(sol.nodes); setTempNotice(null); }}
+                              className="w-full flex items-center justify-between rounded-2xl bg-white/90 backdrop-blur-md hover:bg-[#CBA7D2] hover:text-gray-900 text-gray-800 transition-all border border-gray-200/80 cursor-pointer shadow-sm group"
+                              style={{ paddingLeft: "0.65rem", paddingRight: "0.65rem", paddingTop: "0.25rem", paddingBottom: "0.25rem", fontFamily: "var(--font-chalk)" }}
+                            >
+                              <span className="font-black text-[#CBA7D2] group-hover:text-gray-900 tracking-wider" style={{ fontSize: "0.85rem" }}>{sol.nodes.join(" ")}</span>
+                              <span className="text-gray-600 group-hover:text-gray-900 font-extrabold tracking-tight" style={{ fontSize: "0.85rem" }}>{sol.formulaStr}</span>
+                            </button>
+                          ))}
                         </div>
                       )}
                     </div>
