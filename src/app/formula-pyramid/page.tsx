@@ -1654,7 +1654,7 @@ export default function FormulaPyramidPage() {
                         {inGameRoom && !isGameStarted ? "?" : currentTargetNumber}
                       </span>
                     </div>
-                    <div className="flex-1 flex flex-col justify-between" style={{ gap: "0.65rem" }}>
+                    <div className="flex-1 flex flex-col" style={{ gap: "0.45rem" }}>
                       {/* 정답 입력 문구 */}
                       <div
                         className="text-[#CBA7D2] font-extrabold flex items-center gap-1.5"
@@ -1663,44 +1663,47 @@ export default function FormulaPyramidPage() {
                         <span>정답 입력</span>
                       </div>
 
-                      {/* A~E 입력칸 */}
-                      <div className="grid grid-cols-5" style={{ gap: "0.65rem" }}>
-                        {Object.values(currentAllNodes).slice(0, 5).map((node) => {
-                          const isSel = selectedNodes.includes(node.id);
-                          return (
-                            <button
-                              key={node.id}
-                              type="button"
-                              onClick={() => handleNodeClick(node.id)}
-                              className={`py-2.5 px-2 rounded-2xl font-black transition-all ${
-                                isSel ? "bg-[#CBA7D2] text-gray-900 scale-105 shadow-sm" : "bg-gray-100/90 text-gray-800 hover:bg-gray-200"
-                              }`}
-                              style={{ fontFamily: "var(--font-chalk)", fontSize: "1.25rem" }}
-                            >
-                              {node.id}
-                            </button>
-                          );
-                        })}
-                      </div>
+                      {/* 입력 버튼 묶음 (A~E와 F~J 사이 간격 0.65rem) */}
+                      <div className="flex flex-col" style={{ gap: "0.65rem" }}>
+                        {/* A~E 입력칸 */}
+                        <div className="grid grid-cols-5" style={{ gap: "0.65rem" }}>
+                          {Object.values(currentAllNodes).slice(0, 5).map((node) => {
+                            const isSel = selectedNodes.includes(node.id);
+                            return (
+                              <button
+                                key={node.id}
+                                type="button"
+                                onClick={() => handleNodeClick(node.id)}
+                                className={`py-2.5 px-2 rounded-2xl font-black transition-all ${
+                                  isSel ? "bg-[#CBA7D2] text-gray-900 scale-105 shadow-sm" : "bg-gray-100/90 text-gray-800 hover:bg-gray-200"
+                                }`}
+                                style={{ fontFamily: "var(--font-chalk)", fontSize: "1.25rem" }}
+                              >
+                                {node.id}
+                              </button>
+                            );
+                          })}
+                        </div>
 
-                      {/* F~J 입력칸 */}
-                      <div className="grid grid-cols-5" style={{ gap: "0.65rem" }}>
-                        {Object.values(currentAllNodes).slice(5, 10).map((node) => {
-                          const isSel = selectedNodes.includes(node.id);
-                          return (
-                            <button
-                              key={node.id}
-                              type="button"
-                              onClick={() => handleNodeClick(node.id)}
-                              className={`py-2.5 px-2 rounded-2xl font-black transition-all ${
-                                isSel ? "bg-[#CBA7D2] text-gray-900 scale-105 shadow-sm" : "bg-gray-100/90 text-gray-800 hover:bg-gray-200"
-                              }`}
-                              style={{ fontFamily: "var(--font-chalk)", fontSize: "1.25rem" }}
-                            >
-                              {node.id}
-                            </button>
-                          );
-                        })}
+                        {/* F~J 입력칸 */}
+                        <div className="grid grid-cols-5" style={{ gap: "0.65rem" }}>
+                          {Object.values(currentAllNodes).slice(5, 10).map((node) => {
+                            const isSel = selectedNodes.includes(node.id);
+                            return (
+                              <button
+                                key={node.id}
+                                type="button"
+                                onClick={() => handleNodeClick(node.id)}
+                                className={`py-2.5 px-2 rounded-2xl font-black transition-all ${
+                                  isSel ? "bg-[#CBA7D2] text-gray-900 scale-105 shadow-sm" : "bg-gray-100/90 text-gray-800 hover:bg-gray-200"
+                                }`}
+                                style={{ fontFamily: "var(--font-chalk)", fontSize: "1.25rem" }}
+                              >
+                                {node.id}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   </div>
