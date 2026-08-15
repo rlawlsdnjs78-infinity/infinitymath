@@ -1637,7 +1637,7 @@ export default function FormulaPyramidPage() {
                     )}
                   </div>
 
-                  <div className="flex flex-col sm:flex-row items-end gap-4">
+                  <div className="flex flex-col sm:flex-row items-stretch gap-4">
                     <div
                       className="chalk-box-straight bg-white flex flex-col items-center justify-center min-w-[130px] border-2 border-[#CBA7D2] shadow-md rounded-2xl p-3.5"
                     >
@@ -1654,7 +1654,7 @@ export default function FormulaPyramidPage() {
                         {inGameRoom && !isGameStarted ? "?" : currentTargetNumber}
                       </span>
                     </div>
-                    <div className="flex-1 flex flex-col justify-end gap-2.5">
+                    <div className="flex-1 flex flex-col justify-between" style={{ gap: "0.65rem" }}>
                       {/* 정답 입력 문구 */}
                       <div
                         className="text-[#CBA7D2] font-extrabold flex items-center gap-1.5"
@@ -1664,7 +1664,7 @@ export default function FormulaPyramidPage() {
                       </div>
 
                       {/* A~E 입력칸 */}
-                      <div className="grid grid-cols-5 gap-2.5">
+                      <div className="grid grid-cols-5" style={{ gap: "0.65rem" }}>
                         {Object.values(currentAllNodes).slice(0, 5).map((node) => {
                           const isSel = selectedNodes.includes(node.id);
                           return (
@@ -1684,7 +1684,7 @@ export default function FormulaPyramidPage() {
                       </div>
 
                       {/* F~J 입력칸 */}
-                      <div className="grid grid-cols-5 gap-2.5">
+                      <div className="grid grid-cols-5" style={{ gap: "0.65rem" }}>
                         {Object.values(currentAllNodes).slice(5, 10).map((node) => {
                           const isSel = selectedNodes.includes(node.id);
                           return (
