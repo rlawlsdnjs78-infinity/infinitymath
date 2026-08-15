@@ -1558,7 +1558,7 @@ export default function FormulaPyramidPage() {
                               className="w-full flex items-center justify-between rounded-2xl bg-white/90 backdrop-blur-md hover:bg-[#CBA7D2] hover:text-gray-900 text-gray-800 transition-all border border-gray-200/80 cursor-pointer shadow-sm group"
                               style={{ paddingLeft: "0.65rem", paddingRight: "0.65rem", paddingTop: "0.25rem", paddingBottom: "0.25rem", fontFamily: "var(--font-chalk)" }}
                             >
-                              <span className="font-black text-[#CBA7D2] group-hover:text-gray-900 tracking-wider" style={{ fontSize: "0.85rem" }}>{sol.nodes.join(" ")}</span>
+                              <span className="font-black text-[#CBA7D2] group-hover:text-gray-900 tracking-wider" style={{ fontSize: "1.05rem" }}>{sol.nodes.join(" ")}</span>
                               <span className="text-gray-600 group-hover:text-gray-900 font-extrabold tracking-tight" style={{ fontSize: "0.85rem" }}>{sol.formulaStr}</span>
                             </button>
                           ))}
@@ -1618,7 +1618,7 @@ export default function FormulaPyramidPage() {
                   </div>
                 )}
 
-                <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
+                <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.65rem", marginBottom: "0.65rem" }} />
 
                 {/* 수식 제출 컨트롤 */}
                 <div className="flex flex-col w-full" style={{ gap: "0.85rem" }}>
@@ -1684,7 +1684,7 @@ export default function FormulaPyramidPage() {
                                 className={`rounded-2xl font-black transition-all ${
                                   isSel ? "bg-[#CBA7D2] text-gray-900 scale-105 shadow-sm" : "bg-gray-100/90 text-gray-800 hover:bg-gray-200"
                                 }`}
-                                style={{ padding: "0.65rem 0.45rem", fontFamily: "var(--font-chalk)", fontSize: "1.25rem" }}
+                                style={{ padding: "0.45rem 0.45rem", fontFamily: "var(--font-chalk)", fontSize: "1.25rem" }}
                               >
                                 {node.id}
                               </button>
@@ -1704,7 +1704,7 @@ export default function FormulaPyramidPage() {
                                 className={`rounded-2xl font-black transition-all ${
                                   isSel ? "bg-[#CBA7D2] text-gray-900 scale-105 shadow-sm" : "bg-gray-100/90 text-gray-800 hover:bg-gray-200"
                                 }`}
-                                style={{ padding: "0.65rem 0.45rem", fontFamily: "var(--font-chalk)", fontSize: "1.25rem" }}
+                                style={{ padding: "0.45rem 0.45rem", fontFamily: "var(--font-chalk)", fontSize: "1.25rem" }}
                               >
                                 {node.id}
                               </button>
