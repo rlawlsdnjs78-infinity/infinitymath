@@ -20,7 +20,7 @@ const ScoreBoard = memo(function ScoreBoard({ players, myNickname, maxH = "120px
         </div>
         <span className="text-gray-600 font-medium" style={{ fontSize: "0.85rem" }}>({nonHostPlayers.length}명)</span>
       </div>
-      <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.2rem", marginBottom: "0.3rem" }} />
+      <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
       <div className="flex flex-col gap-2 overflow-y-auto pr-1" style={{ maxHeight: maxH }}>
         {sortedPlayers.length > 0 ? (
           sortedPlayers.map((p, idx) => (

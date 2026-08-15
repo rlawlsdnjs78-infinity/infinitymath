@@ -1316,7 +1316,7 @@ export default function FormulaPyramidPage() {
           </Link>
         </div>
 
-        <div className="w-full border-t-2 border-dashed border-gray-200/80" style={{ marginTop: "0.25rem", marginBottom: "1rem" }} />
+        <div className="w-full border-t-2 border-dashed border-gray-200/80" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
 
         {/* ─── 3분할 박스 ─────────────────────────────── */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
@@ -1332,7 +1332,7 @@ export default function FormulaPyramidPage() {
                 게임 입장하기
               </h2>
             </div>
-            <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.65rem", marginBottom: "0.65rem" }} />
+            <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
 
             {/* 탭 버튼: 방에 입장 중이 아닐 때만 표시 */}
             {!inGameRoom && (
@@ -1384,7 +1384,7 @@ export default function FormulaPyramidPage() {
                     <button
                       type="submit"
                       className="btn-chalk w-full justify-center font-extrabold cursor-pointer"
-                      style={{ marginTop: "1rem", padding: "16px 24px", fontFamily: "var(--font-chalk)" }}
+                      style={{ marginTop: "2.45rem", padding: "0.65rem 1.45rem", fontFamily: "var(--font-chalk)", fontSize: "1.45rem" }}
                     >
                       입장하기
                     </button>
@@ -1591,7 +1591,7 @@ export default function FormulaPyramidPage() {
                           {currentRoundSubmittedAnswers.length}개
                         </span>
                       </div>
-                      <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.4rem", marginBottom: "0.5rem" }} />
+                      <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
                       <div
                         className="w-full bg-gray-50/98 rounded-2xl border-2 border-dashed border-[#CBA7D2]/90 shadow-lg backdrop-blur-md overflow-y-auto min-h-[120px] max-h-[200px]"
                         style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", }}
@@ -1618,7 +1618,7 @@ export default function FormulaPyramidPage() {
                   </div>
                 )}
 
-                <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.2rem", marginBottom: "0.4rem" }} />
+                <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
 
                 {/* 수식 제출 컨트롤 */}
                 <div className="flex flex-col gap-4 w-full">
@@ -1719,12 +1719,12 @@ export default function FormulaPyramidPage() {
                     type="button"
                     disabled={penaltyLockSeconds > 0 || isRoundLocked}
                     onClick={handleSubmitAnswer}
-                    className={`btn-chalk w-full justify-center py-3 font-extrabold shadow-lg transition-all ${
+                    className={`btn-chalk w-full justify-center font-extrabold shadow-lg transition-all ${
                       penaltyLockSeconds > 0 || isRoundLocked
                         ? "bg-rose-950/90 border-2 border-rose-500/80 text-rose-300 opacity-90 cursor-not-allowed"
                         : "cursor-pointer"
                     }`}
-                    style={{ fontFamily: "var(--font-chalk)", fontSize: "1.45rem", letterSpacing: penaltyLockSeconds > 0 ? "0.02em" : "0.35em" }}
+                    style={{ padding: "0.65rem 1.45rem", fontFamily: "var(--font-chalk)", fontSize: "1.45rem", letterSpacing: penaltyLockSeconds > 0 ? "0.02em" : "0.35em" }}
                   >
                     {isRoundLocked ? (
                       <div className="flex items-center justify-center gap-2 py-0.5">
@@ -1815,7 +1815,7 @@ export default function FormulaPyramidPage() {
                           총 {isGameStarted ? `${validSolutions.length}개` : "?개"}
                         </span>
                       </div>
-                      <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.4rem", marginBottom: "0.5rem" }} />
+                      <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
                       {/* 3열 그리드: 게임 시작 전에는 목록 비움, 게임 시작 후에는 칸 번호만 표시 및 맞춘 정답 초록 강조 */}
                       <div
                         className="w-full bg-gray-50/98 rounded-2xl border-2 border-dashed border-[#CBA7D2]/90 shadow-lg backdrop-blur-md overflow-y-auto min-h-[120px] max-h-[180px]"
@@ -1896,7 +1896,7 @@ export default function FormulaPyramidPage() {
                   <HelpCircle className="text-[#CBA7D2] flex-shrink-0" size={28} />
                   <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem", lineHeight: 1.1 }}>게임 설명</h2>
                 </div>
-                <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "0.65rem", marginBottom: "0.65rem" }} />
+                <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
                 <div className="flex flex-col gap-3.5 text-gray-700 leading-relaxed py-1 overflow-y-auto" style={{ fontFamily: "var(--font-chalk)", fontSize: "0.85rem", wordBreak: "break-all", letterSpacing: "-0.015em" }}>
                   {/* ① 게임 소개 */}
                   <div className="flex items-start gap-2">

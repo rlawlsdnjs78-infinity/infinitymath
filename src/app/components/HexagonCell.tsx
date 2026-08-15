@@ -34,7 +34,7 @@ const HexagonCell = memo(function HexagonCell({
         <text x="50" y="31" textAnchor="middle" fill={isSelected ? "#ffffff" : "var(--chalk-yellow)"} fontSize="28" fontWeight="bold" fontFamily="var(--font-chalk)">
           {node.id}
         </text>
-        <text x="50" y="85" textAnchor="middle" fill={isSelected ? "#CBA7D2" : "var(--chalk-white)"} fontSize={masked ? "52" : "44"} fontWeight="bold" fontFamily="var(--font-chalk)">
+        <text x="50" y="83" textAnchor="middle" fill={isSelected ? "#CBA7D2" : "var(--chalk-white)"} fontSize={masked ? "46" : "38"} fontWeight="bold" fontFamily="var(--font-chalk)">
           {masked ? "?" : node.display}
         </text>
       </svg>
