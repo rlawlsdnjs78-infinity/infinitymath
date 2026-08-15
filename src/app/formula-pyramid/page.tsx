@@ -1514,7 +1514,7 @@ export default function FormulaPyramidPage() {
                 {/* 피라미드 보드 영역 */}
                 {!inGameRoom ? (
                   /* 연습 모드: 피라미드 + 정답 확인 버튼 */
-                  <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between mb-1" style={{ gap: "1.45rem" }}>
+                  <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between" style={{ gap: "1.45rem" }}>
                     <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0">
                       {currentPyramidData.map((row, rowIndex) => (
                         <div key={rowIndex} className="flex justify-center" style={{ gap: "0.65rem", marginTop: rowIndex === 0 ? "0px" : "-0.65rem" }}>
@@ -1568,7 +1568,7 @@ export default function FormulaPyramidPage() {
                   </div>
                 ) : (
                   /* 방 입장 후: 피라미드 + 이미 제출된 정답 */
-                  <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between gap-6 mb-1">
+                  <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between gap-6">
                     <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0">
                       {currentPyramidData.map((row, rowIndex) => (
                         <div key={rowIndex} className="flex justify-center gap-2 sm:gap-2.5" style={{ marginTop: rowIndex === 0 ? "0px" : "-10px" }}>
@@ -1618,7 +1618,7 @@ export default function FormulaPyramidPage() {
                   </div>
                 )}
 
-                <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.65rem", marginBottom: "0.65rem" }} />
+                <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.45rem", marginBottom: "0.45rem" }} />
 
                 {/* 수식 제출 컨트롤 */}
                 <div className="flex flex-col w-full" style={{ gap: "0.85rem" }}>
