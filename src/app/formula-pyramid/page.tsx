@@ -1915,27 +1915,27 @@ export default function FormulaPyramidPage() {
                   </div>
 
                   {/* ③ 조합 규칙 (②와 ④ 사이) */}
-                  <div className="flex items-start gap-2">
-                    <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">③</span>
-                    <div className="flex-1 flex flex-col gap-2">
-                      <p className="leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-start gap-2">
+                      <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">③</span>
+                      <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
                         문제판이 공개되면 이 중 3개의 칸을 조합해 타깃 넘버가 답이 되는 수식을 만들어야 합니다.
                       </p>
-                      <div
-                        className="w-full rounded-2xl shadow-lg border-2 border-dashed border-[#CBA7D2]/90 bg-gray-50/80 backdrop-blur-md"
-                        style={{ padding: "0.65rem", display: "flex", flexDirection: "column", gap: "0.65rem" }}
-                      >
-                        {[
-                          "동일한 칸은 중복선택할 수 없습니다.",
-                          "수식의 맨 앞에 사용된 칸의 연산 기호는 무시합니다.",
-                          "완성된 수식은 사칙연산 순서에 따라 계산됩니다.",
-                        ].map((rule) => (
-                          <div key={rule} className="flex items-start gap-2.5 text-gray-600 font-medium" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
-                            <AlertTriangle size={16} className="flex-shrink-0 text-[#CBA7D2] mt-0.5" />
-                            <span>{rule}</span>
-                          </div>
-                        ))}
-                      </div>
+                    </div>
+                    <div
+                      className="w-full rounded-2xl shadow-lg border-2 border-dashed border-[#CBA7D2]/90 bg-gray-50/80 backdrop-blur-md"
+                      style={{ padding: "0.65rem", display: "flex", flexDirection: "column", gap: "0.65rem" }}
+                    >
+                      {[
+                        "동일한 칸은 중복선택할 수 없습니다.",
+                        "수식의 맨 앞에 사용된 칸의 연산 기호는 무시합니다.",
+                        "완성된 수식은 사칙연산 순서에 따라 계산됩니다.",
+                      ].map((rule) => (
+                        <div key={rule} className="flex items-start gap-2.5 text-gray-600 font-medium" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                          <AlertTriangle size={16} className="flex-shrink-0 text-[#CBA7D2] mt-0.5" />
+                          <span>{rule}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
