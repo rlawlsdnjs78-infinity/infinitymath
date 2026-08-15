@@ -14,11 +14,11 @@ const ScoreBoard = memo(function ScoreBoard({ players, myNickname, maxH = "120px
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[#CBA7D2] font-extrabold text-lg" style={{ fontFamily: "var(--font-chalk)" }}>
+        <div className="flex items-center gap-2 text-[#CBA7D2] font-extrabold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.25rem" }}>
           <Trophy size={18} className="text-[#CBA7D2]" />
           <span>실시간 점수판</span>
         </div>
-        <span className="text-xs text-gray-600 font-medium">({nonHostPlayers.length}명)</span>
+        <span className="text-gray-600 font-medium" style={{ fontSize: "0.85rem" }}>({nonHostPlayers.length}명)</span>
       </div>
       <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.2rem", marginBottom: "0.3rem" }} />
       <div className="flex flex-col gap-2 overflow-y-auto pr-1" style={{ maxHeight: maxH }}>
@@ -31,16 +31,16 @@ const ScoreBoard = memo(function ScoreBoard({ players, myNickname, maxH = "120px
               }`}
             >
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-sm text-[#CBA7D2] w-4 flex-shrink-0 text-center">
+                <span className="font-extrabold text-[#CBA7D2] w-4 flex-shrink-0 text-center" style={{ fontSize: "0.85rem" }}>
                   {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}`}
                 </span>
-                <span className="font-bold text-xs sm:text-sm" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>{p.name}</span>
+                <span className="font-bold" style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", letterSpacing: "-0.015em" }}>{p.name}</span>
               </div>
-              <span className="font-extrabold text-base text-[#CBA7D2] flex-shrink-0" style={{ fontFamily: "var(--font-chalk)" }}>{p.score}점</span>
+              <span className="font-extrabold text-[#CBA7D2] flex-shrink-0" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem" }}>{p.score}점</span>
             </div>
           ))
         ) : (
-          <div className="py-3 text-center text-gray-500 text-xs" style={{ fontFamily: "var(--font-body)" }}>플레이어 참가 대기 중...</div>
+          <div className="py-3 text-center text-gray-500" style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem" }}>플레이어 참가 대기 중...</div>
         )}
       </div>
     </div>
