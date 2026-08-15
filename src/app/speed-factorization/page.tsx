@@ -290,7 +290,7 @@ export default function SpeedFactorizationPage() {
               </div>
 
               {/* ② 난이도별 타깃 넘버 범위 */}
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col" style={{ gap: "0.85rem" }}>
                 <div className="flex items-start gap-2">
                   <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">②</span>
                   <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
@@ -304,17 +304,17 @@ export default function SpeedFactorizationPage() {
                   {[
                     {
                       level: "쉬움",
-                      desc: "타깃 넘버 범위 : 100 이하의 자연수 중 소인수를 2, 3, 5, 7 중 일부 또는 전체를 가지는 자연수",
+                      desc: "100 이하의 자연수 중 소인수를 2, 3, 5, 7 중 일부 또는 전체를 가지는 자연수",
                       color: "text-emerald-600",
                     },
                     {
                       level: "보통",
-                      desc: "타깃 넘버 범위 : 200 이하의 자연수 중 소인수를 2, 3, 5, 7, 11 중 일부를 가지는 자연수",
+                      desc: "200 이하의 자연수 중 소인수를 2, 3, 5, 7, 11 중 일부를 가지는 자연수",
                       color: "text-amber-600",
                     },
                     {
                       level: "어려움",
-                      desc: "타깃 넘버 범위 : 300 이하의 자연수 중 소인수를 2, 3, 5, 7, 11, 13 중 일부를 가지는 자연수",
+                      desc: "300 이하의 자연수 중 소인수를 2, 3, 5, 7, 11, 13 중 일부를 가지는 자연수",
                       color: "text-rose-600",
                     },
                   ].map(({ level, desc, color }) => (
@@ -323,7 +323,7 @@ export default function SpeedFactorizationPage() {
                       className="flex items-start gap-2.5 text-gray-600 font-medium"
                       style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}
                     >
-                      <span className="flex-shrink-0 mt-0.5">⚠️</span>
+                      <span className="flex-shrink-0 mt-0.5">💡</span>
                       <span>
                         <span className={`font-extrabold ${color}`}>{level}</span>
                         {" | "}
