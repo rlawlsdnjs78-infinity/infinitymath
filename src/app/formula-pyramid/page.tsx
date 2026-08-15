@@ -1639,11 +1639,12 @@ export default function FormulaPyramidPage() {
 
                   <div className="flex flex-col sm:flex-row items-stretch gap-4">
                     <div
-                      className="chalk-box-straight bg-white flex flex-col items-center justify-center min-w-[130px] border-2 border-[#CBA7D2] shadow-md rounded-2xl p-3.5"
+                      className="bg-white flex flex-col items-center justify-center min-w-[130px] border-2 border-[#CBA7D2] shadow-md rounded-2xl"
+                      style={{ padding: "0.5rem 1rem" }}
                     >
                       <span
-                        className="text-[#CBA7D2] font-extrabold tracking-widest"
-                        style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", marginBottom: "0.55rem" }}
+                        className="text-[#CBA7D2] font-extrabold tracking-widest leading-none"
+                        style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", marginBottom: "0.45rem" }}
                       >
                         TARGET
                       </span>
@@ -1654,11 +1655,11 @@ export default function FormulaPyramidPage() {
                         {inGameRoom && !isGameStarted ? "?" : currentTargetNumber}
                       </span>
                     </div>
-                    <div className="flex-1 flex flex-col" style={{ gap: "0.45rem" }}>
+                    <div className="flex-1 flex flex-col">
                       {/* 정답 입력 문구 */}
                       <div
                         className="text-[#CBA7D2] font-extrabold flex items-center gap-1.5"
-                        style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", lineHeight: "1.2" }}
+                        style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", lineHeight: "1.2", marginBottom: "0.45rem" }}
                       >
                         <span>정답 입력</span>
                       </div>
@@ -1856,11 +1857,12 @@ export default function FormulaPyramidPage() {
                   {/* 딜러 TARGET 표시 (A~J 버튼 그리드 제거) */}
                   <div className="flex items-center justify-start gap-4">
                     <div
-                      className="chalk-box-straight bg-white flex flex-col items-center justify-center min-w-[130px] border-2 border-[#CBA7D2] shadow-md rounded-2xl p-3.5"
+                      className="bg-white flex flex-col items-center justify-center min-w-[130px] border-2 border-[#CBA7D2] shadow-md rounded-2xl"
+                      style={{ padding: "0.75rem 1rem" }}
                     >
                       <span
-                        className="text-[#CBA7D2] font-extrabold tracking-widest"
-                        style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", marginBottom: "0.55rem" }}
+                        className="text-[#CBA7D2] font-extrabold tracking-widest leading-none"
+                        style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", marginBottom: "0.45rem" }}
                       >
                         TARGET
                       </span>
