@@ -1631,29 +1631,71 @@ export default function FormulaPyramidPage() {
                       </div>
                     ) : (
                       <div className="flex items-center gap-4">
-                        <span className="text-2xl text-gray-600 font-extrabold" style={{ fontFamily: "var(--font-chalk)" }}>선택한 수식:</span>
-                        <span className="text-3xl font-black text-[#CBA7D2] tracking-widest" style={{ fontFamily: "var(--font-chalk)" }}>{exprStr || "\u00A0"}</span>
+                        <span className="text-gray-600 font-extrabold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.45rem" }}>선택한 수식:</span>
+                        <span className="font-black text-[#CBA7D2] tracking-widest" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem" }}>{exprStr || "\u00A0"}</span>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex flex-col sm:flex-row items-stretch gap-4">
-                    <div className="chalk-box-straight bg-white flex flex-col items-center justify-center min-w-[130px] border-2 border-[#CBA7D2]/80 shadow-sm p-3" style={{ }}>
-                      <span className="text-lg text-[#CBA7D2] font-extrabold tracking-widest mb-0.5" style={{ fontFamily: "var(--font-chalk)" }}>TARGET</span>
-                      <span className="text-5xl text-gray-800 font-black" style={{ fontFamily: "var(--font-chalk)" }}>
+                  <div className="flex flex-col sm:flex-row items-end gap-4">
+                    <div
+                      className="chalk-box-straight bg-white flex flex-col items-center justify-center min-w-[130px] border-2 border-[#CBA7D2] shadow-md rounded-2xl p-3.5"
+                    >
+                      <span
+                        className="text-[#CBA7D2] font-extrabold tracking-widest"
+                        style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", marginBottom: "0.55rem" }}
+                      >
+                        TARGET
+                      </span>
+                      <span
+                        className="text-gray-800 font-black leading-none"
+                        style={{ fontFamily: "var(--font-chalk)", fontSize: "3.05rem" }}
+                      >
                         {inGameRoom && !isGameStarted ? "?" : currentTargetNumber}
                       </span>
                     </div>
-                    <div className="flex-1 flex flex-col justify-between gap-2">
-                      <div className="grid grid-cols-5 gap-2">
-                        {/* 정답 입력용 버튼: A~J ID는 항상 표시 (게임 전 대기 중에도 클릭 가능해야 함) */}
-                        {Object.values(currentAllNodes).map((node) => {
+                    <div className="flex-1 flex flex-col justify-end gap-2.5">
+                      {/* 정답 입력 문구 */}
+                      <div
+                        className="text-[#CBA7D2] font-extrabold flex items-center gap-1.5"
+                        style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", lineHeight: "1.2" }}
+                      >
+                        <span>정답 입력</span>
+                      </div>
+
+                      {/* A~E 입력칸 */}
+                      <div className="grid grid-cols-5 gap-2.5">
+                        {Object.values(currentAllNodes).slice(0, 5).map((node) => {
                           const isSel = selectedNodes.includes(node.id);
                           return (
                             <button
-                              key={node.id} type="button" onClick={() => handleNodeClick(node.id)}
-                              className={`py-2.5 px-2 rounded-2xl text-xl font-black transition-all ${isSel ? "bg-[#CBA7D2] text-gray-900 scale-105 shadow-sm" : "bg-gray-100/90 text-gray-800 hover:bg-gray-200"}`}
-                              style={{ fontFamily: "var(--font-chalk)" }}
+                              key={node.id}
+                              type="button"
+                              onClick={() => handleNodeClick(node.id)}
+                              className={`py-2.5 px-2 rounded-2xl font-black transition-all ${
+                                isSel ? "bg-[#CBA7D2] text-gray-900 scale-105 shadow-sm" : "bg-gray-100/90 text-gray-800 hover:bg-gray-200"
+                              }`}
+                              style={{ fontFamily: "var(--font-chalk)", fontSize: "1.25rem" }}
+                            >
+                              {node.id}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* F~J 입력칸 */}
+                      <div className="grid grid-cols-5 gap-2.5">
+                        {Object.values(currentAllNodes).slice(5, 10).map((node) => {
+                          const isSel = selectedNodes.includes(node.id);
+                          return (
+                            <button
+                              key={node.id}
+                              type="button"
+                              onClick={() => handleNodeClick(node.id)}
+                              className={`py-2.5 px-2 rounded-2xl font-black transition-all ${
+                                isSel ? "bg-[#CBA7D2] text-gray-900 scale-105 shadow-sm" : "bg-gray-100/90 text-gray-800 hover:bg-gray-200"
+                              }`}
+                              style={{ fontFamily: "var(--font-chalk)", fontSize: "1.25rem" }}
                             >
                               {node.id}
                             </button>
@@ -1810,9 +1852,19 @@ export default function FormulaPyramidPage() {
 
                   {/* 딜러 TARGET 표시 (A~J 버튼 그리드 제거) */}
                   <div className="flex items-center justify-start gap-4">
-                    <div className="chalk-box-straight bg-white flex flex-col items-center justify-center min-w-[130px] border-2 border-[#CBA7D2]/80 shadow-sm p-3" style={{ }}>
-                      <span className="text-lg text-[#CBA7D2] font-extrabold tracking-widest mb-0.5" style={{ fontFamily: "var(--font-chalk)" }}>TARGET</span>
-                      <span className="text-5xl text-gray-800 font-black" style={{ fontFamily: "var(--font-chalk)" }}>
+                    <div
+                      className="chalk-box-straight bg-white flex flex-col items-center justify-center min-w-[130px] border-2 border-[#CBA7D2] shadow-md rounded-2xl p-3.5"
+                    >
+                      <span
+                        className="text-[#CBA7D2] font-extrabold tracking-widest"
+                        style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", marginBottom: "0.55rem" }}
+                      >
+                        TARGET
+                      </span>
+                      <span
+                        className="text-gray-800 font-black leading-none"
+                        style={{ fontFamily: "var(--font-chalk)", fontSize: "3.05rem" }}
+                      >
                         {isGameStarted ? currentTargetNumber : "?"}
                       </span>
                     </div>
