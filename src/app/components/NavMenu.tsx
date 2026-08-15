@@ -127,16 +127,14 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
               >
                 <Link
                   href="/formula-pyramid"
-                  className="flex items-center gap-2.5 px-4 py-3 text-lg rounded transition-colors duration-150 hover:bg-gray-100"
+                  className="flex items-center gap-2.5 px-4 py-3 rounded transition-colors duration-150 hover:bg-gray-100"
                   style={{
-                    fontFamily: "var(--font-chalk)",
-                    color: "var(--chalk-yellow)",
                     textDecoration: "none",
                   }}
                   onClick={() => setIsBrainOpen(false)}
                 >
-                  <span className="w-2.5 h-2.5 rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
-                  <span>수식 피라미드</span>
+                  <span className="w-2 h-2 rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
+                  <span className="text-sm font-medium text-gray-600 hover:text-gray-900" style={{ fontFamily: "var(--font-body)" }}>수식 피라미드</span>
                 </Link>
               </div>
             </div>
