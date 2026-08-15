@@ -65,16 +65,17 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
                   borderRadius: "1rem",
                 }}
               >
-                <div
-                  className="flex items-center gap-2.5 px-4 py-3 rounded text-gray-700"
+                <Link
+                  href="/speed-factorization"
+                  className="flex items-center gap-2.5 px-4 py-3 rounded transition-colors duration-150 hover:bg-gray-100"
                   style={{
-                    fontFamily: "var(--font-chalk)",
-                    letterSpacing: "-0.015em",
+                    textDecoration: "none",
                   }}
+                  onClick={() => setIsMiniOpen(false)}
                 >
                   <span className="w-[0.85rem] h-[0.85rem] rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
-                  <span className="text-[1.05rem] font-medium text-gray-600" style={{ fontFamily: "var(--font-body)" }}>준비 중입니다</span>
-                </div>
+                  <span className="text-[1.05rem] font-medium text-gray-600 hover:text-gray-900" style={{ fontFamily: "var(--font-body)" }}>스피드 소인수분해</span>
+                </Link>
               </div>
             </div>
           )}
