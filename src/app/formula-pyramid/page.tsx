@@ -1145,7 +1145,7 @@ export default function FormulaPyramidPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm">
             <div
               className="w-full max-w-2xl mx-4 rounded-2xl shadow-2xl border-2 border-[#CBA7D2]/80 bg-white/98 flex flex-col"
-              style={{ paddingTop: "2rem", paddingBottom: "2rem", gap: "1rem" }}
+              style={{ paddingLeft: "1.45rem", paddingRight: "1.45rem", paddingTop: "1.45rem", paddingBottom: "1.45rem", gap: "1rem" }}
             >
               {/* 팝업 헤더 */}
               <div className="flex items-center gap-3">
@@ -1174,7 +1174,7 @@ export default function FormulaPyramidPage() {
                             ? "bg-emerald-900/80 border-emerald-400/90 shadow-lg"
                             : "bg-gray-100/60 border-gray-200/80"
                         }`}
-                        style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem" }}
+                        style={{ paddingLeft: "1.45rem", paddingRight: "1.45rem", paddingTop: "0.65rem", paddingBottom: "0.65rem" }}
                       >
                         <div className="flex items-center gap-3">
                           {isSubmitted && <CheckCircle2 size={18} className="text-emerald-400 flex-shrink-0" />}
@@ -1185,7 +1185,7 @@ export default function FormulaPyramidPage() {
                             {solNodeStr}
                           </span>
                           {isSubmitted && (
-                            <span className="text-emerald-400 font-bold border border-emerald-500/70 rounded-2xl px-2 py-0.5" style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem" }}>
+                            <span className="text-emerald-400 font-bold border border-emerald-500/70 rounded-2xl" style={{ paddingLeft: "0.75rem", paddingRight: "0.75rem", paddingTop: "0.25rem", paddingBottom: "0.25rem", fontFamily: "var(--font-body)", fontSize: "0.85rem" }}>
                               제출 완료
                             </span>
                           )}
@@ -1214,7 +1214,7 @@ export default function FormulaPyramidPage() {
                     type="button"
                     onClick={() => { setShowRoundEndPopup(false); setShowFinalRanking(true); }}
                     className="bg-[#CBA7D2] hover:bg-yellow-300 text-gray-900 font-extrabold rounded-2xl cursor-pointer transition-all shadow-sm flex items-center gap-2"
-                    style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", fontFamily: "var(--font-chalk)" }}
+                    style={{ paddingLeft: "1.45rem", paddingRight: "1.45rem", paddingTop: "0.65rem", paddingBottom: "0.65rem", fontFamily: "var(--font-chalk)" }}
                   >
                     <Trophy size={18} className="flex-shrink-0" />
                     전체 순위 확인하기
@@ -1224,7 +1224,7 @@ export default function FormulaPyramidPage() {
                     type="button"
                     onClick={() => setShowRoundEndPopup(false)}
                     className="bg-[#CBA7D2] hover:bg-yellow-300 text-gray-900 font-extrabold rounded-2xl cursor-pointer transition-all shadow-sm"
-                    style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", fontFamily: "var(--font-chalk)" }}
+                    style={{ paddingLeft: "1.45rem", paddingRight: "1.45rem", paddingTop: "0.65rem", paddingBottom: "0.65rem", fontFamily: "var(--font-chalk)" }}
                   >
                     닫기
                   </button>
@@ -1239,7 +1239,7 @@ export default function FormulaPyramidPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
             <div
               className="w-full max-w-lg mx-4 rounded-2xl shadow-2xl border-2 border-[#CBA7D2]/80 bg-white/98 flex flex-col"
-              style={{ paddingTop: "2rem", paddingBottom: "2rem", gap: "1rem" }}
+              style={{ paddingLeft: "1.45rem", paddingRight: "1.45rem", paddingTop: "1.45rem", paddingBottom: "1.45rem", gap: "1rem" }}
             >
               <div className="flex items-center gap-3">
                 <Trophy size={28} className="text-[#CBA7D2] flex-shrink-0" />
@@ -1261,7 +1261,7 @@ export default function FormulaPyramidPage() {
                           ? "bg-[#CBA7D2]/25 border-[#CBA7D2] shadow-xl"
                           : "bg-gray-50/70 border-gray-200/80"
                       }`}
-                      style={{ paddingTop: "0.85rem", paddingBottom: "0.85rem" }}
+                      style={{ paddingLeft: "1.45rem", paddingRight: "1.45rem", paddingTop: "0.85rem", paddingBottom: "0.85rem" }}
                     >
                       <div className="flex items-center gap-3">
                         <span className="w-8 text-center flex-shrink-0" style={{ fontSize: "1.45rem" }}>
@@ -1292,7 +1292,7 @@ export default function FormulaPyramidPage() {
                 type="button"
                 onClick={() => setShowFinalRanking(false)}
                 className="bg-[#CBA7D2] hover:bg-yellow-300 text-gray-900 font-extrabold rounded-2xl cursor-pointer transition-all shadow-sm"
-                style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", fontFamily: "var(--font-chalk)" }}
+                style={{ paddingLeft: "1.45rem", paddingRight: "1.45rem", paddingTop: "0.65rem", paddingBottom: "0.65rem", fontFamily: "var(--font-chalk)" }}
               >
                 닫기
               </button>
@@ -1301,22 +1301,26 @@ export default function FormulaPyramidPage() {
         )}
 
         {/* ─── 상단 타이틀 ─────────────────────────────── */}
-        <div className="flex items-center justify-between w-full" style={{ marginTop: "0.25rem", marginBottom: "0.85rem" }}>
-          <h1 className="text-[#CBA7D2] flex items-center gap-3.5 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.65rem", letterSpacing: "0.04em" }}>
-            <Brain className="text-[#CBA7D2] flex-shrink-0" size={30} />
-            <span>수식 피라미드 (Formula Pyramid)</span>
-          </h1>
-          <Link
-            href="/"
-            className="flex items-center rounded-full bg-gray-50/80 backdrop-blur-md hover:bg-gray-100 border-2 border-dashed border-[#CBA7D2]/90 text-[#CBA7D2] font-extrabold transition-all shadow-lg hover:scale-105 cursor-pointer"
-            style={{ paddingLeft: "1.45rem", paddingRight: "1.45rem", paddingTop: "0.65rem", paddingBottom: "0.65rem", gap: "0.65rem", fontFamily: "var(--font-chalk)", fontSize: "1.45rem", textDecoration: "none", letterSpacing: "0.04em" }}
-          >
-            <ArrowLeft size={22} className="text-[#CBA7D2] flex-shrink-0" />
-            <span className="leading-none">홈으로</span>
-          </Link>
-        </div>
+        {!inGameRoom && (
+          <>
+            <div className="flex items-center justify-between w-full" style={{ marginTop: "0.25rem", marginBottom: "0.85rem" }}>
+              <h1 className="text-[#CBA7D2] flex items-center gap-3.5 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.65rem", letterSpacing: "0.04em" }}>
+                <Brain className="text-[#CBA7D2] flex-shrink-0" size={30} />
+                <span>수식 피라미드 (Formula Pyramid)</span>
+              </h1>
+              <Link
+                href="/"
+                className="flex items-center rounded-full bg-gray-50/80 backdrop-blur-md hover:bg-gray-100 border-2 border-dashed border-[#CBA7D2]/90 text-[#CBA7D2] font-extrabold transition-all shadow-lg hover:scale-105 cursor-pointer"
+                style={{ paddingLeft: "1.45rem", paddingRight: "1.45rem", paddingTop: "0.65rem", paddingBottom: "0.65rem", gap: "0.65rem", fontFamily: "var(--font-chalk)", fontSize: "1.45rem", textDecoration: "none", letterSpacing: "0.04em" }}
+              >
+                <ArrowLeft size={22} className="text-[#CBA7D2] flex-shrink-0" />
+                <span className="leading-none">홈으로</span>
+              </Link>
+            </div>
 
-        <div className="w-full border-t-2 border-dashed border-gray-200/80" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
+            <div className="w-full border-t-2 border-dashed border-gray-200/80" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
+          </>
+        )}
 
         {/* ─── 3분할 박스 ─────────────────────────────── */}
         <div className="grid grid-cols-1 xl:grid-cols-12 items-stretch" style={{ gap: "1.45rem" }}>
@@ -1577,22 +1581,22 @@ export default function FormulaPyramidPage() {
                           <BookOpen size={20} className="text-[#CBA7D2]" />
                           <span>이미 제출된 정답</span>
                         </div>
-                        <span className="text-[#CBA7D2] font-extrabold bg-gray-50 rounded-2xl border border-gray-200/80 shadow-sm" style={{ paddingTop: "0.25rem", paddingBottom: "0.25rem", fontSize: "0.85rem" }}>
+                        <span className="text-[#CBA7D2] font-extrabold bg-gray-50 rounded-2xl border border-gray-200/80 shadow-sm" style={{ paddingTop: "0.25rem", paddingBottom: "0.25rem", paddingLeft: "1.45rem", paddingRight: "1.45rem", fontSize: "0.85rem" }}>
                           {currentRoundSubmittedAnswers.length}개
                         </span>
                       </div>
                       <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
                       <div
                         className="w-full bg-gray-50/98 rounded-2xl border-2 border-dashed border-[#CBA7D2]/90 shadow-lg backdrop-blur-md overflow-y-auto min-h-[120px] max-h-[200px]"
-                        style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", }}
+                        style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", paddingLeft: "1.45rem", paddingRight: "1.45rem" }}
                       >
                         {currentRoundSubmittedAnswers.length > 0 ? (
                           <div className="grid grid-cols-3 gap-1.5">
                             {currentRoundSubmittedAnswers.map((sol: { nodes: string; formula: string; round?: number }, idx: number) => (
                               <div
                                 key={idx}
-                                className="flex items-center justify-center rounded-2xl text-center font-black text-base tracking-widest bg-white/90 text-[#CBA7D2] border border-gray-200/80 shadow-sm"
-                                style={{ paddingTop: "0.45rem", paddingBottom: "0.45rem", paddingLeft: "0.5rem", paddingRight: "0.5rem", fontFamily: "var(--font-chalk)" }}
+                                className="flex items-center justify-center rounded-2xl text-center font-black tracking-normal bg-white/90 text-[#CBA7D2] border border-gray-200/80 shadow-sm whitespace-nowrap"
+                                style={{ paddingTop: "0.35rem", paddingBottom: "0.35rem", paddingLeft: "0.25rem", paddingRight: "0.25rem", fontFamily: "var(--font-chalk)", fontSize: "0.95rem" }}
                               >
                                 {sol.nodes}
                               </div>
@@ -1831,7 +1835,7 @@ export default function FormulaPyramidPage() {
                       {/* 3열 그리드: 게임 시작 전에는 목록 비움, 게임 시작 후에는 칸 번호만 표시 및 맞춘 정답 초록 강조 */}
                       <div
                         className="w-full bg-gray-50/98 rounded-2xl border-2 border-dashed border-[#CBA7D2]/90 shadow-lg backdrop-blur-md overflow-y-auto min-h-[120px] max-h-[180px]"
-                        style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", }}
+                        style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", paddingLeft: "1.45rem", paddingRight: "1.45rem" }}
                       >
                         {isGameStarted ? (
                           validSolutions.length > 0 ? (
@@ -1843,12 +1847,12 @@ export default function FormulaPyramidPage() {
                                 return (
                                   <div
                                     key={idx}
-                                    className={`flex items-center justify-center rounded-2xl text-center font-black text-base tracking-widest transition-all ${
+                                    className={`flex items-center justify-center rounded-2xl text-center font-black tracking-normal transition-all whitespace-nowrap ${
                                       isSubmitted
                                         ? "bg-emerald-700/90 border-2 border-emerald-400 text-emerald-200 shadow-sm"
                                         : "bg-white/80 border border-gray-200/70 text-gray-600"
                                     }`}
-                                    style={{ paddingTop: "0.45rem", paddingBottom: "0.45rem", paddingLeft: "0.5rem", paddingRight: "0.5rem", fontFamily: "var(--font-chalk)" }}
+                                    style={{ paddingTop: "0.35rem", paddingBottom: "0.35rem", paddingLeft: "0.25rem", paddingRight: "0.25rem", fontFamily: "var(--font-chalk)", fontSize: "0.95rem" }}
                                   >
                                     {sol.nodes.join(" ")}
                                   </div>
