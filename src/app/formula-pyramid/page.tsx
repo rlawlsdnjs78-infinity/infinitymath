@@ -2029,24 +2029,24 @@ export default function FormulaPyramidPage() {
             ) : (
               /* ── 딜러 방 생성 전: 게임 생성 옵션 ── */
               <>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 w-full min-h-[44px]">
                   <Settings className="text-[#CBA7D2] flex-shrink-0" size={28} />
                   <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem", lineHeight: 1.1 }}>게임 생성</h2>
                 </div>
                 <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
 
-                <div className="flex flex-col py-0.5 gap-3">
+                <div className="flex flex-col py-1 gap-3 overflow-y-auto">
                   {/* 라운드 설정 */}
                   <div className="flex flex-col gap-1">
-                    <div className="flex items-center justify-between w-full text-gray-700 font-medium" style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", letterSpacing: "-0.015em" }}>
+                    <div className="flex items-center justify-between w-full text-gray-700 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", letterSpacing: "-0.015em" }}>
                       <span>라운드 설정</span>
-                      <span className="text-[#CBA7D2] font-bold">({selectedRound}라운드)</span>
+                      <span className="text-[#CBA7D2]">({selectedRound}라운드)</span>
                     </div>
                     <div className="grid grid-cols-5 gap-1.5">
                       {Array.from({ length: 10 }, (_, i) => i + 1).map((r) => (
                         <button key={r} type="button" onClick={() => setSelectedRound(r)}
-                          className={`py-1 text-sm font-medium rounded-2xl transition-all ${selectedRound === r ? "bg-[#CBA7D2] text-gray-900 shadow scale-105" : "bg-gray-50/80 backdrop-blur-md text-gray-600 hover:bg-gray-100"}`}
-                          style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
+                          className={`py-1 rounded-2xl transition-all font-bold ${selectedRound === r ? "bg-[#CBA7D2] text-gray-900 shadow scale-105" : "bg-gray-50/80 backdrop-blur-md text-gray-600 hover:bg-gray-100"}`}
+                          style={{ fontFamily: "var(--font-chalk)", fontSize: "0.85rem", letterSpacing: "-0.015em" }}
                         >{r}R</button>
                       ))}
                     </div>
@@ -2054,15 +2054,15 @@ export default function FormulaPyramidPage() {
 
                   {/* 시간 설정 */}
                   <div className="flex flex-col gap-1">
-                    <div className="flex items-center justify-between w-full text-sm text-gray-700 font-medium" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
+                    <div className="flex items-center justify-between w-full text-gray-700 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", letterSpacing: "-0.015em" }}>
                       <span>라운드 별 시간</span>
-                      <span className="text-[#CBA7D2] font-bold">({selectedTime}분)</span>
+                      <span className="text-[#CBA7D2]">({selectedTime}분)</span>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       {[3, 5, 7].map((t) => (
                         <button key={t} type="button" onClick={() => setSelectedTime(t)}
-                          className={`py-1.5 text-sm font-medium rounded-2xl transition-all ${selectedTime === t ? "bg-[#CBA7D2] text-gray-900 shadow scale-105" : "bg-gray-50/80 backdrop-blur-md text-gray-600 hover:bg-gray-100"}`}
-                          style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
+                          className={`py-1.5 rounded-2xl transition-all font-bold ${selectedTime === t ? "bg-[#CBA7D2] text-gray-900 shadow scale-105" : "bg-gray-50/80 backdrop-blur-md text-gray-600 hover:bg-gray-100"}`}
+                          style={{ fontFamily: "var(--font-chalk)", fontSize: "0.85rem", letterSpacing: "-0.015em" }}
                         >{t}분</button>
                       ))}
                     </div>
@@ -2070,29 +2070,28 @@ export default function FormulaPyramidPage() {
 
                   {/* 페널티 설정 */}
                   <div className="flex flex-col gap-1">
-                    <div className="flex items-center justify-between w-full text-sm text-gray-700 font-medium" style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}>
+                    <div className="flex items-center justify-between w-full text-gray-700 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", letterSpacing: "-0.015em" }}>
                       <span>오답 페널티</span>
-                      <span className="text-[#CBA7D2] font-bold">({selectedPenalty})</span>
+                      <span className="text-[#CBA7D2]">({selectedPenalty})</span>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       {["없음", "1초", "2초", "3초", "4초", "5초"].map((p) => (
                         <button key={p} type="button" onClick={() => setSelectedPenalty(p)}
-                          className={`py-1 text-sm font-medium rounded-2xl transition-all ${selectedPenalty === p ? "bg-[#CBA7D2] text-gray-900 shadow scale-105" : "bg-gray-50/80 backdrop-blur-md text-gray-600 hover:bg-gray-100"}`}
-                          style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
+                          className={`py-1 rounded-2xl transition-all font-bold ${selectedPenalty === p ? "bg-[#CBA7D2] text-gray-900 shadow scale-105" : "bg-gray-50/80 backdrop-blur-md text-gray-600 hover:bg-gray-100"}`}
+                          style={{ fontFamily: "var(--font-chalk)", fontSize: "0.85rem", letterSpacing: "-0.015em" }}
                         >{p}</button>
                       ))}
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2" style={{ marginTop: "1.5rem" }}>
-                    <button
-                      type="button" onClick={handleCreateGame}
-                      className="btn-chalk w-full justify-center py-2 font-bold cursor-pointer"
-                      style={{ fontFamily: "var(--font-body)", letterSpacing: "-0.015em" }}
-                    >
-                      방 생성하기
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCreateGame}
+                    className="btn-chalk w-full justify-center font-extrabold cursor-pointer"
+                    style={{ marginTop: "2.45rem", padding: "0.65rem 1.45rem", fontFamily: "var(--font-chalk)", fontSize: "1.45rem" }}
+                  >
+                    방 생성하기
+                  </button>
                 </div>
               </>
             )}
