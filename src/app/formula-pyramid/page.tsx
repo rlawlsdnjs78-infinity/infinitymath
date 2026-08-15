@@ -298,7 +298,7 @@ export default function FormulaPyramidPage() {
       (a: { nodes: string; formula: string; round?: number }) => normalizeNodesKey(a.nodes) === currentNormalizedKey
     );
 
-    if (isAlreadySubmitted) {
+    if (isAlreadySubmitted && inGameRoom) {
       const nextScore = myScore - 1;
       setMyScore(nextScore);
       setPlayers((prev) => prev.map((p) => (p.name === myNickname ? { ...p, score: nextScore } : p)));
