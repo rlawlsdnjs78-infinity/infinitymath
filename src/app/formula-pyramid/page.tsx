@@ -1406,10 +1406,11 @@ export default function FormulaPyramidPage() {
                       </span>
                       <button
                         type="button" onClick={handleLeaveRoom}
-                        className="bg-rose-900/90 hover:bg-rose-800 text-rose-200 font-extrabold text-sm sm:text-base rounded-2xl border border-rose-600/80 cursor-pointer shadow flex-shrink-0"
-                        style={{ paddingLeft: "1.1rem", paddingRight: "1.1rem", paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
+                        className="flex items-center gap-1.5 bg-rose-900/90 hover:bg-rose-800 text-rose-200 font-extrabold text-sm sm:text-base rounded-2xl border border-rose-600/80 cursor-pointer shadow flex-shrink-0"
+                        style={{ paddingLeft: "1.1rem", paddingRight: "1.1rem", paddingTop: "0.5rem", paddingBottom: "0.5rem", fontFamily: "var(--font-chalk)" }}
                       >
-                        퇴장
+                        <LogOut size={16} className="flex-shrink-0" />
+                        <span>퇴장</span>
                       </button>
                     </div>
 
@@ -1427,6 +1428,13 @@ export default function FormulaPyramidPage() {
               /* ── 딜러 모드 대기 정보 ── */
               <div className="flex flex-col justify-between flex-1 gap-4 text-sm text-gray-700 leading-relaxed py-1" style={{ fontFamily: "var(--font-body)" }}>
                 <div className="flex flex-col gap-4">
+                  {/* 방 생성 전 안내 문구 (방을 생성하기 전에만 표시) */}
+                  {!inGameRoom && (
+                    <p className="leading-loose text-gray-700" style={{ fontSize: "1.05rem", fontFamily: "var(--font-body)" }}>
+                      딜러 모드에서는 라운드 수, 라운드 별 시간, 오답 페널티를 설정하여 방을 생성할 수 있습니다.
+                    </p>
+                  )}
+
                   {/* 입장 코드 박스 (플레이어 모드 대기 창 입력란 스타일과 동일) */}
                   {inGameRoom && isDealerHost && (
                     <div
@@ -1475,7 +1483,7 @@ export default function FormulaPyramidPage() {
               <div className="flex flex-col gap-4 w-full h-full">
                 {/* 방 접속 중 상태 바 */}
                 {inGameRoom && (
-                  <div className="flex flex-wrap items-center justify-between gap-3 w-full">
+                  <div className="flex flex-wrap items-center justify-start gap-3 w-full">
                     <div className="flex items-center gap-3 flex-wrap">
                       {[
                         { label: "라운드", value: `${currentRound} / ${selectedRound}`, urgent: false },
@@ -1494,14 +1502,6 @@ export default function FormulaPyramidPage() {
                         </div>
                       ))}
                     </div>
-                    <button
-                      type="button" onClick={handleLeaveRoom}
-                      className="flex items-center justify-center gap-2 bg-rose-900/90 hover:bg-rose-800 text-rose-100 rounded-2xl text-sm sm:text-base font-extrabold border-2 border-rose-600/90 cursor-pointer shadow-lg transition-all"
-                      style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", paddingLeft: "1.45rem", paddingRight: "1.45rem", fontFamily: "var(--font-chalk)" }}
-                    >
-                      <LogOut size={18} className="flex-shrink-0" />
-                      <span className="whitespace-nowrap">퇴장</span>
-                    </button>
                   </div>
                 )}
 
@@ -1585,7 +1585,6 @@ export default function FormulaPyramidPage() {
                           {currentRoundSubmittedAnswers.length}개
                         </span>
                       </div>
-                      <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
                       <div
                         className="w-full bg-gray-50/98 rounded-2xl border-2 border-dashed border-[#CBA7D2]/90 shadow-lg backdrop-blur-md overflow-y-auto min-h-[120px] max-h-[200px]"
                         style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", paddingLeft: "1.45rem", paddingRight: "1.45rem" }}
@@ -1745,7 +1744,7 @@ export default function FormulaPyramidPage() {
                     <div className="w-full flex items-center justify-center bg-white/90 rounded-2xl border-2 border-dashed border-gray-300/90 shadow-sm text-center" style={{ paddingTop: "0.85rem", paddingBottom: "0.85rem" }}>
                       <div className="text-gray-800 font-medium flex items-center justify-center gap-3" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem" }}>
                         <Megaphone size={20} className="text-[#CBA7D2] flex-shrink-0 animate-bounce" />
-                        <span>우측 [입장 코드 생성하기]를 클릭하면 딜러 대시보드가 실시간으로 연결됩니다.</span>
+                        <span>우측 [방 생성하기]를 클릭하면 딜러 대시보드가 실시간으로 연결됩니다.</span>
                       </div>
                     </div>
                   </div>
