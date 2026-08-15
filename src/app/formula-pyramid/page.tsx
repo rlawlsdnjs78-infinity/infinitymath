@@ -2035,52 +2035,54 @@ export default function FormulaPyramidPage() {
                 </div>
                 <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
 
-                <div className="flex flex-col py-1 gap-3 overflow-y-auto">
-                  {/* 라운드 설정 */}
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center justify-between w-full text-gray-700 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", letterSpacing: "-0.015em" }}>
-                      <span>라운드 설정</span>
-                      <span className="text-[#CBA7D2]">({selectedRound}라운드)</span>
+                <div className="flex flex-col justify-between flex-1 py-1" style={{ gap: "0.95rem" }}>
+                  <div className="flex flex-col" style={{ gap: "0.95rem" }}>
+                    {/* 라운드 설정 */}
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center justify-between w-full text-gray-700 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", letterSpacing: "-0.015em" }}>
+                        <span>라운드 설정</span>
+                        <span className="text-[#CBA7D2]">({selectedRound}라운드)</span>
+                      </div>
+                      <div className="grid grid-cols-5 gap-1.5">
+                        {Array.from({ length: 10 }, (_, i) => i + 1).map((r) => (
+                          <button key={r} type="button" onClick={() => setSelectedRound(r)}
+                            className={`py-1 rounded-2xl transition-all font-bold cursor-pointer ${selectedRound === r ? "bg-[#CBA7D2] text-gray-900 shadow-sm" : "bg-gray-50/80 backdrop-blur-md text-gray-600 hover:bg-gray-100"}`}
+                            style={{ fontFamily: "var(--font-chalk)", fontSize: "0.85rem", letterSpacing: "-0.015em" }}
+                          >{r}R</button>
+                        ))}
+                      </div>
                     </div>
-                    <div className="grid grid-cols-5 gap-1.5">
-                      {Array.from({ length: 10 }, (_, i) => i + 1).map((r) => (
-                        <button key={r} type="button" onClick={() => setSelectedRound(r)}
-                          className={`py-1 rounded-2xl transition-all font-bold ${selectedRound === r ? "bg-[#CBA7D2] text-gray-900 shadow scale-105" : "bg-gray-50/80 backdrop-blur-md text-gray-600 hover:bg-gray-100"}`}
-                          style={{ fontFamily: "var(--font-chalk)", fontSize: "0.85rem", letterSpacing: "-0.015em" }}
-                        >{r}R</button>
-                      ))}
-                    </div>
-                  </div>
 
-                  {/* 시간 설정 */}
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center justify-between w-full text-gray-700 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", letterSpacing: "-0.015em" }}>
-                      <span>라운드 별 시간</span>
-                      <span className="text-[#CBA7D2]">({selectedTime}분)</span>
+                    {/* 시간 설정 */}
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center justify-between w-full text-gray-700 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", letterSpacing: "-0.015em" }}>
+                        <span>라운드 별 시간</span>
+                        <span className="text-[#CBA7D2]">({selectedTime}분)</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[3, 5, 7].map((t) => (
+                          <button key={t} type="button" onClick={() => setSelectedTime(t)}
+                            className={`py-1 rounded-2xl transition-all font-bold cursor-pointer ${selectedTime === t ? "bg-[#CBA7D2] text-gray-900 shadow-sm" : "bg-gray-50/80 backdrop-blur-md text-gray-600 hover:bg-gray-100"}`}
+                            style={{ fontFamily: "var(--font-chalk)", fontSize: "0.85rem", letterSpacing: "-0.015em" }}
+                          >{t}분</button>
+                        ))}
+                      </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      {[3, 5, 7].map((t) => (
-                        <button key={t} type="button" onClick={() => setSelectedTime(t)}
-                          className={`py-1.5 rounded-2xl transition-all font-bold ${selectedTime === t ? "bg-[#CBA7D2] text-gray-900 shadow scale-105" : "bg-gray-50/80 backdrop-blur-md text-gray-600 hover:bg-gray-100"}`}
-                          style={{ fontFamily: "var(--font-chalk)", fontSize: "0.85rem", letterSpacing: "-0.015em" }}
-                        >{t}분</button>
-                      ))}
-                    </div>
-                  </div>
 
-                  {/* 페널티 설정 */}
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center justify-between w-full text-gray-700 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", letterSpacing: "-0.015em" }}>
-                      <span>오답 페널티</span>
-                      <span className="text-[#CBA7D2]">({selectedPenalty})</span>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      {["없음", "1초", "2초", "3초", "4초", "5초"].map((p) => (
-                        <button key={p} type="button" onClick={() => setSelectedPenalty(p)}
-                          className={`py-1 rounded-2xl transition-all font-bold ${selectedPenalty === p ? "bg-[#CBA7D2] text-gray-900 shadow scale-105" : "bg-gray-50/80 backdrop-blur-md text-gray-600 hover:bg-gray-100"}`}
-                          style={{ fontFamily: "var(--font-chalk)", fontSize: "0.85rem", letterSpacing: "-0.015em" }}
-                        >{p}</button>
-                      ))}
+                    {/* 페널티 설정 */}
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center justify-between w-full text-gray-700 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", letterSpacing: "-0.015em" }}>
+                        <span>오답 페널티</span>
+                        <span className="text-[#CBA7D2]">({selectedPenalty})</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {["없음", "1초", "2초", "3초", "4초", "5초"].map((p) => (
+                          <button key={p} type="button" onClick={() => setSelectedPenalty(p)}
+                            className={`py-1 rounded-2xl transition-all font-bold cursor-pointer ${selectedPenalty === p ? "bg-[#CBA7D2] text-gray-900 shadow-sm" : "bg-gray-50/80 backdrop-blur-md text-gray-600 hover:bg-gray-100"}`}
+                            style={{ fontFamily: "var(--font-chalk)", fontSize: "0.85rem", letterSpacing: "-0.015em" }}
+                          >{p}</button>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
@@ -2088,7 +2090,7 @@ export default function FormulaPyramidPage() {
                     type="button"
                     onClick={handleCreateGame}
                     className="btn-chalk w-full justify-center font-extrabold cursor-pointer"
-                    style={{ marginTop: "2.45rem", padding: "0.65rem 1.45rem", fontFamily: "var(--font-chalk)", fontSize: "1.45rem" }}
+                    style={{ marginTop: "1rem", padding: "0.65rem 1.45rem", fontFamily: "var(--font-chalk)", fontSize: "1.45rem" }}
                   >
                     방 생성하기
                   </button>
