@@ -1329,7 +1329,7 @@ export default function FormulaPyramidPage() {
                 게임 입장하기
               </h2>
             </div>
-            <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.5rem", marginBottom: "0.85rem" }} />
+            <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
 
             {/* 탭 버튼: 방에 입장 중이 아닐 때만 표시 */}
             {!inGameRoom && (
@@ -1887,7 +1887,7 @@ export default function FormulaPyramidPage() {
                   <HelpCircle className="text-[#CBA7D2] flex-shrink-0" size={28} />
                   <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem", lineHeight: 1.1 }}>게임 설명</h2>
                 </div>
-                <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "0.75rem", marginBottom: "0.75rem" }} />
+                <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
                 <div className="flex flex-col gap-3.5 text-gray-700 leading-relaxed py-1 overflow-y-auto" style={{ fontFamily: "var(--font-chalk)", fontSize: "0.85rem", wordBreak: "break-all", letterSpacing: "-0.015em" }}>
                   {/* ① 게임 소개 */}
                   <div className="flex items-start gap-2">
@@ -1957,7 +1957,7 @@ export default function FormulaPyramidPage() {
                       실시간 게임 공지
                     </h2>
                   </div>
-                  <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "0.5rem", marginBottom: "0.75rem" }} />
+                  <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
 
                   {/* 말머리 기준 들여쓰기된 실시간 공지 리스트 (시간순 위->아래 배치 & 스크롤) */}
                   <div className="flex-1 flex flex-col gap-2.5 overflow-y-auto pr-1.5 max-h-[420px]">
@@ -2024,7 +2024,7 @@ export default function FormulaPyramidPage() {
                   <Settings className="text-[#CBA7D2] flex-shrink-0" size={28} />
                   <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem", lineHeight: 1.1 }}>게임 생성</h2>
                 </div>
-                <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }} />
+                <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
 
                 <div className="flex flex-col py-0.5 gap-3">
                   {/* 라운드 설정 */}
