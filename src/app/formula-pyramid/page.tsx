@@ -1337,16 +1337,16 @@ export default function FormulaPyramidPage() {
             {/* 탭 버튼: 방에 입장 중이 아닐 때만 표시 */}
             {!inGameRoom && (
               <div className="w-full flex justify-center" style={{ marginTop: "0.5rem", marginBottom: "2.5rem" }}>
-                <div className="flex items-center rounded-full select-none bg-white/80 backdrop-blur-md border-2 border-[#CBA7D2]/70 shadow-lg w-full p-1.5 gap-2">
+                <div className="flex items-center rounded-full select-none bg-white/80 backdrop-blur-md border-2 border-[#CBA7D2]/70 shadow-sm w-full p-1 gap-0 overflow-hidden">
                   {(["player", "dealer"] as const).map((m) => (
                     <button
                       key={m}
                       type="button"
                       onClick={() => setMode(m)}
-                      className={`flex-1 py-2.5 rounded-full text-base sm:text-lg font-bold transition-all duration-200 cursor-pointer text-center ${
-                        mode === m ? "bg-[#CBA7D2] text-gray-900 shadow-sm scale-102" : "text-gray-600 hover:text-gray-800"
-                      }`}
-                      style={{ fontFamily: "var(--font-chalk)" }}
+                      className={`flex-1 py-2.5 font-bold transition-all duration-200 cursor-pointer text-center ${
+                        mode === m ? "bg-[#CBA7D2] text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-800"
+                      } ${m === "player" ? "rounded-l-full" : "rounded-r-full"}`}
+                      style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem" }}
                     >
                       {m === "player" ? "플레이어 모드" : "딜러 모드"}
                     </button>
@@ -1527,8 +1527,8 @@ export default function FormulaPyramidPage() {
 
                     {/* 우측: 연습 설명 & 정답 확인 (overflow 방지: relative→static, 박스 안에서 스크롤) */}
                     <div className="flex-1 w-full flex flex-col items-center xl:items-stretch gap-2.5">
-                      <div className="flex items-center gap-2 text-gray-700 font-semibold justify-center xl:justify-start" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem" }}>
-                        <Pencil size={18} className="text-[#CBA7D2] flex-shrink-0" />
+                      <div className="flex items-center gap-2 text-gray-700 font-semibold justify-center xl:justify-start" style={{ fontFamily: "var(--font-chalk)", fontSize: "0.85rem" }}>
+                        <Pencil size={16} className="text-[#CBA7D2] flex-shrink-0" />
                         <span>게임 시작을 기다리는 동안 연습해 보세요.</span>
                       </div>
 
@@ -1544,24 +1544,26 @@ export default function FormulaPyramidPage() {
                         {showSolutions ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                       </button>
 
-                      {/* 정답 목록: 고정 높이 박스(피라미드 높이 내에 쏙 들어가도록 컴팩트 조정) */}
+                      {/* 정답 목록: 스크롤 없이 한눈에 볼 수 있는 2열 컴팩트 박스 */}
                       {showSolutions && (
                         <div
-                          className="w-full bg-gray-50/98 rounded-2xl border-2 border-dashed border-[#CBA7D2]/90 shadow-xl flex flex-col backdrop-blur-md overflow-y-auto"
-                          style={{ padding: "0.35rem 0.45rem", gap: "0.25rem", maxHeight: "135px" }}
+                          className="w-full bg-gray-50/98 rounded-2xl border-2 border-dashed border-[#CBA7D2]/90 shadow-xl backdrop-blur-md"
+                          style={{ padding: "0.45rem" }}
                         >
-                          {validSolutions.map((sol, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() => { setSelectedNodes(sol.nodes); setTempNotice(null); }}
-                              className="w-full flex items-center justify-between rounded-2xl bg-white/80 backdrop-blur-md hover:bg-[#CBA7D2] hover:text-gray-900 text-gray-800 transition-all border border-gray-200/80 cursor-pointer shadow-sm group flex-shrink-0"
-                              style={{ paddingTop: "0.25rem", paddingBottom: "0.25rem", paddingLeft: "0.65rem", paddingRight: "0.65rem", fontFamily: "var(--font-chalk)" }}
-                            >
-                              <span className="font-black text-[#CBA7D2] group-hover:text-gray-900 tracking-widest" style={{ fontSize: "1.05rem" }}>{sol.nodes.join(" ")}</span>
-                              <span className="text-gray-600 group-hover:text-gray-900 font-extrabold tracking-wide" style={{ fontSize: "0.85rem" }}>{sol.formulaStr}</span>
-                            </button>
-                          ))}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                            {validSolutions.map((sol, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => { setSelectedNodes(sol.nodes); setTempNotice(null); }}
+                                className="w-full flex items-center justify-between rounded-2xl bg-white/90 backdrop-blur-md hover:bg-[#CBA7D2] hover:text-gray-900 text-gray-800 transition-all border border-gray-200/80 cursor-pointer shadow-sm group py-1.5 px-3"
+                                style={{ fontFamily: "var(--font-chalk)" }}
+                              >
+                                <span className="font-black text-[#CBA7D2] group-hover:text-gray-900 tracking-wider" style={{ fontSize: "0.85rem" }}>{sol.nodes.join(" ")}</span>
+                                <span className="text-gray-600 group-hover:text-gray-900 font-extrabold tracking-tight" style={{ fontSize: "0.85rem" }}>{sol.formulaStr}</span>
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1923,7 +1925,7 @@ export default function FormulaPyramidPage() {
                       </p>
                       <div
                         className="w-full rounded-2xl shadow-lg border-2 border-dashed border-[#CBA7D2]/90 bg-gray-50/80 backdrop-blur-md"
-                        style={{ paddingLeft: "1.5rem", paddingRight: "1.5rem", paddingTop: "0.65rem", paddingBottom: "0.65rem", display: "flex", flexDirection: "column", gap: "0.65rem" }}
+                        style={{ padding: "0.65rem", display: "flex", flexDirection: "column", gap: "0.65rem" }}
                       >
                         {[
                           "동일한 칸은 중복선택할 수 없습니다.",
