@@ -290,7 +290,7 @@ export default function SpeedFactorizationPage() {
               </div>
 
               {/* ② 난이도별 타깃 넘버 범위 */}
-              <div className="flex flex-col" style={{ gap: "0.85rem" }}>
+              <div className="flex flex-col" style={{ gap: "1.05rem" }}>
                 <div className="flex items-start gap-2">
                   <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">②</span>
                   <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
@@ -324,11 +324,10 @@ export default function SpeedFactorizationPage() {
                       style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}
                     >
                       <span className="flex-shrink-0 mt-0.5">💡</span>
-                      <span>
+                      <div className="flex flex-col" style={{ gap: "0.1rem" }}>
                         <span className={`font-extrabold ${color}`}>{level}</span>
-                        {" | "}
-                        {desc}
-                      </span>
+                        <span className="pl-1">{desc}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -339,8 +338,9 @@ export default function SpeedFactorizationPage() {
                 <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">③</span>
                 <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
                   정답을 제출하면 1점을 획득합니다. 오답을 제출한 경우{" "}
-                  <strong className="text-[#CBA7D2]">쉬움, 보통</strong>의 경우에는 감점이 없지만{" "}
-                  <strong className="text-rose-500">어려움</strong>의 경우에는 1점이 감점됩니다.
+                  <span className="font-bold text-emerald-600">쉬움</span>,{" "}
+                  <span className="font-bold text-amber-600">보통</span>의 경우에는 감점이 없지만{" "}
+                  <span className="font-bold text-rose-600">어려움</span>의 경우에는 1점이 감점됩니다.
                 </p>
               </div>
 
