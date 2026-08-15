@@ -1394,8 +1394,8 @@ export default function FormulaPyramidPage() {
                   <div className="flex flex-col flex-1 gap-4">
                     {/* 접속 완료 뱃지 */}
                     <div
-                      className="flex items-center justify-between rounded-2xl bg-emerald-950/95 border-2 border-emerald-500/90 text-emerald-200 shadow-sm"
-                      style={{ paddingTop: "1.1rem", paddingBottom: "1.1rem" }}
+                      className="flex items-center justify-between rounded-2xl bg-gray-50/80 backdrop-blur-md border border-dashed border-gray-300 text-gray-800 shadow-sm"
+                      style={{ paddingLeft: "1.45rem", paddingRight: "1.45rem", paddingTop: "0.9rem", paddingBottom: "0.9rem" }}
                     >
                       <span className="font-black text-lg sm:text-xl text-[#CBA7D2] flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
                         🪪 {myNickname}
@@ -1412,7 +1412,7 @@ export default function FormulaPyramidPage() {
                     {/* 실시간 점수판 (입장 후 좌측 패널로 이동) */}
                     <div
                       className="flex-1 rounded-2xl border-2 border-dashed border-gray-300/80 bg-gray-50/40"
-                      style={{ paddingTop: "2rem", paddingBottom: "2rem" }}
+                      style={{ paddingTop: "2rem", paddingBottom: "2rem", paddingLeft: "1.45rem", paddingRight: "1.45rem" }}
                     >
                       <ScoreBoard players={players} myNickname={myNickname} maxH="calc(100% - 60px)" />
                     </div>
@@ -1422,12 +1422,18 @@ export default function FormulaPyramidPage() {
             ) : (
               /* ── 딜러 모드 대기 정보 ── */
               <div className="flex flex-col justify-between flex-1 gap-4 text-sm text-gray-700 leading-relaxed py-1" style={{ fontFamily: "var(--font-body)" }}>
-                <div className="flex flex-col gap-3">
-                  <p className="leading-loose" style={{ fontSize: "1.05rem" }}>
-                    딜러 모드에서는 라운드 수, 제한 시간, 오답 패널티를 설정하여 방을 생성할 수 있습니다.
-                  </p>
-                  
-
+                <div className="flex flex-col gap-4">
+                  {/* 입장 코드 박스 (플레이어 모드 대기 창 입력란 스타일과 동일) */}
+                  {inGameRoom && isDealerHost && (
+                    <div
+                      className="w-full rounded-2xl bg-gray-50/80 backdrop-blur-md border border-dashed border-gray-300 text-gray-800 flex items-center justify-between shadow-sm"
+                      style={{ padding: "0.65rem 1.45rem", fontFamily: "var(--font-body)", fontSize: "1.05rem", lineHeight: "1.5" }}
+                    >
+                      <span className="font-black text-lg sm:text-xl text-[#CBA7D2] flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
+                        👑 입장 코드 : {activeRoomCode}
+                      </span>
+                    </div>
+                  )}
 
                   {/* 중간 버튼 (두 블록 사이에 독립 위치) */}
                   {inGameRoom && isDealerHost && !isGameStarted && !isRoundLocked && (
@@ -1451,22 +1457,6 @@ export default function FormulaPyramidPage() {
                     </button>
                   )}
                 </div>
-
-                {/* 하단 딜러 방 운영 중 상자 */}
-                {inGameRoom && isDealerHost ? (
-                  <div
-                    className="flex items-center justify-between rounded-2xl bg-white/80 backdrop-blur-md border-2 border-gray-300/90 text-gray-700 shadow-sm"
-                    style={{ paddingTop: "1.1rem", paddingBottom: "1.1rem" }}
-                  >
-                    <span className="font-black text-lg sm:text-xl text-[#CBA7D2] flex items-center gap-2" style={{ fontFamily: "var(--font-chalk)" }}>
-                      👑 입장 코드 : {activeRoomCode}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="invisible flex items-center rounded-2xl" style={{ paddingTop: "1.1rem", paddingBottom: "1.1rem" }}>
-                    <span className="font-black" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.25rem" }}>👑 입장 코드 : 000000</span>
-                  </div>
-                )}
               </div>
             )}
           </div>
@@ -1486,12 +1476,12 @@ export default function FormulaPyramidPage() {
                       {[
                         { label: "라운드", value: `${currentRound} / ${selectedRound}`, urgent: false },
                         { label: "남은 시간", value: !isGameStarted ? `${formatTime(roomTimerSeconds)} (대기 중)` : formatTime(roomTimerSeconds), urgent: roomTimerSeconds <= 30 && isGameStarted },
-                        { label: "오답 패널티", value: selectedPenalty, urgent: false },
+                        { label: "오답 페널티", value: selectedPenalty, urgent: false },
                       ].map(({ label, value, urgent }) => (
                         <div
                           key={label}
                           className={`border-2 border-dashed rounded-2xl flex items-center gap-2 shadow-sm ${urgent ? "border-rose-500/90 bg-rose-950/80" : "border-gray-300/80 bg-gray-50/80 backdrop-blur-md"}`}
-                          style={{ paddingTop: "0.6rem", paddingBottom: "0.6rem" }}
+                          style={{ paddingTop: "0.6rem", paddingBottom: "0.6rem", paddingLeft: "1.45rem", paddingRight: "1.45rem" }}
                         >
                           {label === "남은 시간" && <Clock size={18} className={urgent ? "text-rose-400 animate-spin" : "text-[#CBA7D2]"} />}
                           <span className={`font-extrabold text-sm sm:text-base whitespace-nowrap ${urgent ? "text-rose-300 animate-pulse" : "text-[#CBA7D2]"}`} style={{ fontFamily: "var(--font-chalk)" }}>
@@ -1503,7 +1493,7 @@ export default function FormulaPyramidPage() {
                     <button
                       type="button" onClick={handleLeaveRoom}
                       className="flex items-center justify-center gap-2 bg-rose-900/90 hover:bg-rose-800 text-rose-100 rounded-2xl text-sm sm:text-base font-extrabold border-2 border-rose-600/90 cursor-pointer shadow-lg transition-all"
-                      style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", fontFamily: "var(--font-chalk)" }}
+                      style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", paddingLeft: "1.45rem", paddingRight: "1.45rem", fontFamily: "var(--font-chalk)" }}
                     >
                       <LogOut size={18} className="flex-shrink-0" />
                       <span className="whitespace-nowrap">퇴장</span>
@@ -1770,7 +1760,7 @@ export default function FormulaPyramidPage() {
                         <div
                           key={label}
                           className={`border-2 border-dashed rounded-2xl flex items-center gap-2 shadow-sm ${urgent ? "border-rose-500/90 bg-rose-950/80" : "border-gray-300/80 bg-gray-50/80 backdrop-blur-md"}`}
-                          style={{ paddingTop: "0.6rem", paddingBottom: "0.6rem" }}
+                          style={{ paddingTop: "0.6rem", paddingBottom: "0.6rem", paddingLeft: "1.45rem", paddingRight: "1.45rem" }}
                         >
                           {label === "남은 시간" && <Clock size={18} className={urgent ? "text-rose-400 animate-spin" : "text-[#CBA7D2]"} />}
                           <span className={`font-extrabold text-sm sm:text-base whitespace-nowrap ${urgent ? "text-rose-300 animate-pulse" : "text-[#CBA7D2]"}`} style={{ fontFamily: "var(--font-chalk)" }}>
@@ -1784,7 +1774,7 @@ export default function FormulaPyramidPage() {
                       <button
                         type="button" onClick={handleLeaveRoom}
                         className="flex items-center justify-center gap-2 bg-rose-900/90 hover:bg-rose-800 text-rose-100 rounded-2xl text-sm sm:text-base font-extrabold border-2 border-rose-600/90 cursor-pointer shadow-lg transition-all"
-                        style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", fontFamily: "var(--font-chalk)" }}
+                        style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", paddingLeft: "1.45rem", paddingRight: "1.45rem", fontFamily: "var(--font-chalk)" }}
                       >
                         <LogOut size={18} className="flex-shrink-0" />
                         <span className="whitespace-nowrap">퇴장</span>
@@ -1794,14 +1784,37 @@ export default function FormulaPyramidPage() {
 
                   {/* 피라미드 보드 (딜러) - 게임 시작 전 마스킹 */}
                   <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between gap-6 mb-1">
-                    <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0">
-                      {currentPyramidData.map((row, rowIndex) => (
-                        <div key={rowIndex} className="flex justify-center gap-2 sm:gap-2.5" style={{ marginTop: rowIndex === 0 ? "0px" : "-10px" }}>
-                          {row.map((node) => (
-                            <HexagonCell key={node.id} node={node} isSelected={false} masked={!isGameStarted && inGameRoom} />
-                          ))}
-                        </div>
-                      ))}
+                    {/* 좌측: TARGET 가로 바 + 피라미드 (살짝 밑으로 이동) */}
+                    <div className="flex flex-col items-center justify-center flex-shrink-0 mx-auto xl:mx-0 w-full xl:w-auto" style={{ gap: "0.85rem" }}>
+                      {/* 가로로 긴 TARGET 바 (양쪽 정렬) */}
+                      <div
+                        className="w-full bg-white flex items-center justify-between border-2 border-[#CBA7D2] shadow-md rounded-2xl"
+                        style={{ paddingLeft: "1.45rem", paddingRight: "1.45rem", paddingTop: "0.55rem", paddingBottom: "0.55rem" }}
+                      >
+                        <span
+                          className="text-[#CBA7D2] font-extrabold tracking-widest leading-none"
+                          style={{ fontFamily: "var(--font-chalk)", fontSize: "1.25rem" }}
+                        >
+                          TARGET
+                        </span>
+                        <span
+                          className="text-gray-800 font-black leading-none"
+                          style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem" }}
+                        >
+                          {isGameStarted ? currentTargetNumber : "?"}
+                        </span>
+                      </div>
+
+                      {/* 피라미드 (살짝 밑으로 이동) */}
+                      <div className="flex flex-col items-center justify-center py-1">
+                        {currentPyramidData.map((row, rowIndex) => (
+                          <div key={rowIndex} className="flex justify-center gap-2 sm:gap-2.5" style={{ marginTop: rowIndex === 0 ? "0px" : "-10px" }}>
+                            {row.map((node) => (
+                              <HexagonCell key={node.id} node={node} isSelected={false} masked={!isGameStarted && inGameRoom} />
+                            ))}
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
                     {/* 전체 정답 보기 + 점수판 */}
@@ -1811,11 +1824,10 @@ export default function FormulaPyramidPage() {
                           <BookOpen size={20} className="text-[#CBA7D2]" />
                           <span>전체 정답 보기</span>
                         </div>
-                        <span className="text-[#CBA7D2] font-extrabold bg-gray-50 rounded-2xl border border-gray-200/80 shadow-sm" style={{ paddingTop: "0.25rem", paddingBottom: "0.25rem", fontSize: "0.85rem" }}>
+                        <span className="text-[#CBA7D2] font-extrabold bg-gray-50 rounded-2xl border border-gray-200/80 shadow-sm" style={{ paddingTop: "0.25rem", paddingBottom: "0.25rem", paddingLeft: "1.45rem", paddingRight: "1.45rem", fontSize: "0.85rem" }}>
                           총 {isGameStarted ? `${validSolutions.length}개` : "?개"}
                         </span>
                       </div>
-                      <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
                       {/* 3열 그리드: 게임 시작 전에는 목록 비움, 게임 시작 후에는 칸 번호만 표시 및 맞춘 정답 초록 강조 */}
                       <div
                         className="w-full bg-gray-50/98 rounded-2xl border-2 border-dashed border-[#CBA7D2]/90 shadow-lg backdrop-blur-md overflow-y-auto min-h-[120px] max-h-[180px]"
@@ -1857,27 +1869,6 @@ export default function FormulaPyramidPage() {
 
                       {/* 딜러 점수판 */}
                       <ScoreBoard players={players} myNickname={myNickname} maxH="130px" />
-                    </div>
-                  </div>
-
-                  {/* 딜러 TARGET 표시 (A~J 버튼 그리드 제거) */}
-                  <div className="flex items-center justify-start gap-4">
-                    <div
-                      className="bg-white flex flex-col items-center justify-center min-w-[130px] border-2 border-[#CBA7D2] shadow-md rounded-2xl"
-                      style={{ padding: "0.75rem 1rem" }}
-                    >
-                      <span
-                        className="text-[#CBA7D2] font-extrabold tracking-widest leading-none"
-                        style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", marginBottom: "0.45rem" }}
-                      >
-                        TARGET
-                      </span>
-                      <span
-                        className="text-gray-800 font-black leading-none"
-                        style={{ fontFamily: "var(--font-chalk)", fontSize: "3.05rem" }}
-                      >
-                        {isGameStarted ? currentTargetNumber : "?"}
-                      </span>
                     </div>
                   </div>
                 </div>
