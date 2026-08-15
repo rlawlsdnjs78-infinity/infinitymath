@@ -1322,7 +1322,10 @@ export default function FormulaPyramidPage() {
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
 
           {/* ════════════════════ [좌측 박스] ════════════════════ */}
-          <div className="xl:col-span-3 chalk-box content-box flex flex-col bg-white/80 backdrop-blur-md h-full p-4 sm:p-5">
+          <div
+            className="xl:col-span-3 chalk-box flex flex-col bg-white/80 backdrop-blur-md h-full"
+            style={{ padding: "0.85rem" }}
+          >
             <div className="flex items-center gap-3 w-full min-h-[44px]">
               <LogIn className="text-[#CBA7D2] flex-shrink-0" size={28} />
               <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem", lineHeight: 1.1 }}>
@@ -1469,7 +1472,10 @@ export default function FormulaPyramidPage() {
           </div>
 
           {/* ════════════════════ [중앙 박스] ════════════════════ */}
-          <div className="xl:col-span-6 chalk-box content-box flex flex-col bg-white/85 backdrop-blur-md h-full p-4 sm:p-5 gap-4">
+          <div
+            className="xl:col-span-6 chalk-box flex flex-col bg-white/85 backdrop-blur-md h-full gap-4"
+            style={{ padding: "0.85rem" }}
+          >
             {mode === "player" ? (
               /* ── 플레이어 모드 가운데 UI ── */
               <div className="flex flex-col gap-4 w-full h-full">
@@ -1880,7 +1886,10 @@ export default function FormulaPyramidPage() {
           </div>
 
           {/* ════════════════════ [우측 박스] ════════════════════ */}
-          <div className="xl:col-span-3 chalk-box content-box flex flex-col bg-white/80 backdrop-blur-md h-full p-4 sm:p-5">
+          <div
+            className="xl:col-span-3 chalk-box flex flex-col bg-white/80 backdrop-blur-md h-full"
+            style={{ padding: "0.85rem" }}
+          >
             {mode === "player" ? (
               <>
                 <div className="flex items-center gap-3 w-full min-h-[44px]">
