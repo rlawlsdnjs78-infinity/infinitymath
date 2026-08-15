@@ -290,7 +290,7 @@ export default function SpeedFactorizationPage() {
               </div>
 
               {/* ② 난이도별 타깃 넘버 범위 */}
-              <div className="flex flex-col" style={{ gap: "1.05rem" }}>
+              <div className="flex flex-col" style={{ gap: "0.5rem", marginBottom: "0.2rem" }}>
                 <div className="flex items-start gap-2">
                   <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">②</span>
                   <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
