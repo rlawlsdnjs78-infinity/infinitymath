@@ -1831,18 +1831,18 @@ export default function FormulaPyramidPage() {
                   <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem", lineHeight: 1.1 }}>게임 설명</h2>
                 </div>
                 <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "0.75rem", marginBottom: "0.75rem" }} />
-                <div className="flex flex-col gap-4 text-gray-700 leading-relaxed py-1 overflow-y-auto" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.45rem", wordBreak: "break-all", letterSpacing: "-0.015em" }}>
+                <div className="flex flex-col gap-3.5 text-gray-700 leading-relaxed py-1 overflow-y-auto" style={{ fontFamily: "var(--font-chalk)", fontSize: "0.85rem", wordBreak: "break-all", letterSpacing: "-0.015em" }}>
                   {/* ① 게임 소개 */}
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-6">①</span>
+                  <div className="flex items-start gap-2">
+                    <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">①</span>
                     <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
                       <strong className="text-[#CBA7D2] font-bold">&lsquo;수식 피라미드&rsquo;</strong>는 문제 판에서 3개의 칸을 선택하여 타깃 넘버가 될 수 있도록 수식을 만드는 게임입니다.
                     </p>
                   </div>
 
                   {/* ② 문제판 설명 */}
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-6">②</span>
+                  <div className="flex items-start gap-2">
+                    <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">②</span>
                     <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
                       라운드가 시작되면 피라미드 모양의 문제판과 타깃 넘버가 공개됩니다. 문제판은 총 10개의 칸으로 이루어져 있으며, 각 칸에는 사칙연산 기호 중 하나와 숫자가 한 쌍을 이루고 있습니다.
                     </p>
@@ -1850,8 +1850,8 @@ export default function FormulaPyramidPage() {
 
                   {/* ③ 조합 규칙 (②와 ④ 사이) */}
                   <div className="flex flex-col gap-2">
-                    <div className="flex items-start gap-2.5">
-                      <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-6">③</span>
+                    <div className="flex items-start gap-2">
+                      <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">③</span>
                       <p className="flex-1 leading-relaxed">문제판이 공개되면 이 중 3개의 칸을 조합해 타깃 넘버가 답이 되는 수식을 만들어야 합니다.</p>
                     </div>
                     <div
@@ -1863,8 +1863,8 @@ export default function FormulaPyramidPage() {
                         "수식의 맨 앞에 사용된 칸의 연산 기호는 무시합니다.",
                         "완성된 수식은 사칙연산 순서에 따라 계산됩니다.",
                       ].map((rule) => (
-                        <div key={rule} className="flex items-start gap-3 text-gray-600 font-medium" style={{ fontSize: "1.45rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
-                          <AlertTriangle size={20} className="flex-shrink-0 text-[#CBA7D2] mt-1" />
+                        <div key={rule} className="flex items-start gap-2.5 text-gray-600 font-medium" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                          <AlertTriangle size={16} className="flex-shrink-0 text-[#CBA7D2] mt-0.5" />
                           <span>{rule}</span>
                         </div>
                       ))}
@@ -1872,16 +1872,16 @@ export default function FormulaPyramidPage() {
                   </div>
 
                   {/* ④ 점수 */}
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-6">④</span>
+                  <div className="flex items-start gap-2">
+                    <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">④</span>
                     <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
                       정답을 제출하면 1점을 획득하고, 오답을 제출하거나 이번 라운드에서 이미 제출된 정답을 다시 제출하는 경우 1점이 감점됩니다.
                     </p>
                   </div>
 
                   {/* ⑤ 종료 */}
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-6">⑤</span>
+                  <div className="flex items-start gap-2">
+                    <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">⑤</span>
                     <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
                       라운드 진행 시간이 지났거나 모든 정답이 제출되면 라운드가 종료됩니다.
                     </p>
