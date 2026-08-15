@@ -1301,7 +1301,7 @@ export default function FormulaPyramidPage() {
         )}
 
         {/* ─── 상단 타이틀 ─────────────────────────────── */}
-        <div className="flex items-center justify-between w-full" style={{ marginTop: "0.25rem", marginBottom: "0.75rem" }}>
+        <div className="flex items-center justify-between w-full" style={{ marginTop: "0.25rem", marginBottom: "0.85rem" }}>
           <h1 className="text-[#CBA7D2] flex items-center gap-3.5 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.65rem", letterSpacing: "0.04em" }}>
             <Brain className="text-[#CBA7D2] flex-shrink-0" size={30} />
             <span>수식 피라미드 (Formula Pyramid)</span>
@@ -1319,7 +1319,7 @@ export default function FormulaPyramidPage() {
         <div className="w-full border-t-2 border-dashed border-gray-200/80" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
 
         {/* ─── 3분할 박스 ─────────────────────────────── */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
+        <div className="grid grid-cols-1 xl:grid-cols-12 items-stretch" style={{ gap: "1.45rem" }}>
 
           {/* ════════════════════ [좌측 박스] ════════════════════ */}
           <div
@@ -1343,10 +1343,10 @@ export default function FormulaPyramidPage() {
                       key={m}
                       type="button"
                       onClick={() => setMode(m)}
-                      className={`flex-1 py-2.5 font-bold transition-all duration-200 cursor-pointer text-center ${
+                      className={`flex-1 font-bold transition-all duration-200 cursor-pointer text-center ${
                         mode === m ? "bg-[#CBA7D2] text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-800"
                       } ${m === "player" ? "rounded-l-full" : "rounded-r-full"}`}
-                      style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem" }}
+                      style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", fontFamily: "var(--font-chalk)", fontSize: "1.05rem" }}
                     >
                       {m === "player" ? "플레이어 모드" : "딜러 모드"}
                     </button>
@@ -1514,10 +1514,10 @@ export default function FormulaPyramidPage() {
                 {/* 피라미드 보드 영역 */}
                 {!inGameRoom ? (
                   /* 연습 모드: 피라미드 + 정답 확인 버튼 */
-                  <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between gap-6 mb-1">
+                  <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between mb-1" style={{ gap: "1.45rem" }}>
                     <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0">
                       {currentPyramidData.map((row, rowIndex) => (
-                        <div key={rowIndex} className="flex justify-center gap-2 sm:gap-2.5" style={{ marginTop: rowIndex === 0 ? "0px" : "-10px" }}>
+                        <div key={rowIndex} className="flex justify-center" style={{ gap: "0.65rem", marginTop: rowIndex === 0 ? "0px" : "-0.65rem" }}>
                           {row.map((node) => (
                             <HexagonCell key={node.id} node={node} isSelected={selectedNodes.includes(node.id)} />
                           ))}
@@ -1526,7 +1526,7 @@ export default function FormulaPyramidPage() {
                     </div>
 
                     {/* 우측: 연습 설명 & 정답 확인 (overflow 방지: relative→static, 박스 안에서 스크롤) */}
-                    <div className="flex-1 w-full flex flex-col items-center xl:items-stretch gap-2.5">
+                    <div className="flex-1 w-full flex flex-col items-center xl:items-stretch" style={{ gap: "0.65rem" }}>
                       <div className="flex items-center gap-2 text-gray-700 font-semibold justify-center xl:justify-start" style={{ fontFamily: "var(--font-chalk)", fontSize: "0.85rem" }}>
                         <Pencil size={16} className="text-[#CBA7D2] flex-shrink-0" />
                         <span>게임 시작을 기다리는 동안 연습해 보세요.</span>
@@ -1536,8 +1536,8 @@ export default function FormulaPyramidPage() {
                       <button
                         type="button"
                         onClick={() => setShowSolutions(!showSolutions)}
-                        className="w-full flex items-center justify-center gap-3 rounded-full bg-gray-50/80 backdrop-blur-md hover:bg-gray-100 border-2 border-dashed border-[#CBA7D2]/80 text-[#CBA7D2] font-bold transition-all cursor-pointer shadow-sm"
-                        style={{ paddingTop: "0.45rem", paddingBottom: "0.45rem", fontFamily: "var(--font-chalk)", fontSize: "1.05rem" }}
+                        className="w-full flex items-center justify-center rounded-full bg-gray-50/80 backdrop-blur-md hover:bg-gray-100 border-2 border-dashed border-[#CBA7D2]/80 text-[#CBA7D2] font-bold transition-all cursor-pointer shadow-sm"
+                        style={{ paddingTop: "0.45rem", paddingBottom: "0.45rem", gap: "0.65rem", fontFamily: "var(--font-chalk)", fontSize: "1.05rem" }}
                       >
                         <Sparkles size={18} className="text-[#CBA7D2] animate-pulse" />
                         <span>정답 확인 ({validSolutions.length}개 조합)</span>
@@ -1621,14 +1621,14 @@ export default function FormulaPyramidPage() {
                 <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
 
                 {/* 수식 제출 컨트롤 */}
-                <div className="flex flex-col gap-4 w-full">
+                <div className="flex flex-col w-full" style={{ gap: "0.85rem" }}>
                   <div
                     className={`w-full rounded-2xl border border-dashed transition-all duration-200 flex items-center justify-between min-h-[58px] h-[58px] ${
                       tempNotice
                         ? tempNotice.type === "success" ? "bg-emerald-950/90 border-emerald-500 text-emerald-200" : "bg-rose-950/90 border-rose-500 text-rose-200"
                         : "bg-white border-gray-300 text-[#CBA7D2]"
                     }`}
-                    style={{ paddingTop: "0.6rem", paddingBottom: "0.6rem", paddingLeft: "0.65rem", paddingRight: "0.65rem" }}
+                    style={{ padding: "0.65rem" }}
                   >
                     {tempNotice ? (
                       <div className={`flex items-center gap-3 w-full justify-center font-bold ${tempNotice.type === "success" ? "text-emerald-300" : "text-rose-300"}`}>
@@ -1643,10 +1643,10 @@ export default function FormulaPyramidPage() {
                     )}
                   </div>
 
-                  <div className="flex flex-col sm:flex-row items-stretch gap-4">
+                  <div className="flex flex-col sm:flex-row items-stretch" style={{ gap: "0.85rem" }}>
                     <div
                       className="bg-white flex flex-col items-center justify-center min-w-[130px] border-2 border-[#CBA7D2] shadow-md rounded-2xl"
-                      style={{ padding: "0.5rem 1rem" }}
+                      style={{ padding: "0.45rem 1.05rem" }}
                     >
                       <span
                         className="text-[#CBA7D2] font-extrabold tracking-widest leading-none"
@@ -1681,10 +1681,10 @@ export default function FormulaPyramidPage() {
                                 key={node.id}
                                 type="button"
                                 onClick={() => handleNodeClick(node.id)}
-                                className={`py-2.5 px-2 rounded-2xl font-black transition-all ${
+                                className={`rounded-2xl font-black transition-all ${
                                   isSel ? "bg-[#CBA7D2] text-gray-900 scale-105 shadow-sm" : "bg-gray-100/90 text-gray-800 hover:bg-gray-200"
                                 }`}
-                                style={{ fontFamily: "var(--font-chalk)", fontSize: "1.25rem" }}
+                                style={{ padding: "0.65rem 0.45rem", fontFamily: "var(--font-chalk)", fontSize: "1.25rem" }}
                               >
                                 {node.id}
                               </button>
@@ -1701,10 +1701,10 @@ export default function FormulaPyramidPage() {
                                 key={node.id}
                                 type="button"
                                 onClick={() => handleNodeClick(node.id)}
-                                className={`py-2.5 px-2 rounded-2xl font-black transition-all ${
+                                className={`rounded-2xl font-black transition-all ${
                                   isSel ? "bg-[#CBA7D2] text-gray-900 scale-105 shadow-sm" : "bg-gray-100/90 text-gray-800 hover:bg-gray-200"
                                 }`}
-                                style={{ fontFamily: "var(--font-chalk)", fontSize: "1.25rem" }}
+                                style={{ padding: "0.65rem 0.45rem", fontFamily: "var(--font-chalk)", fontSize: "1.25rem" }}
                               >
                                 {node.id}
                               </button>
@@ -1897,7 +1897,7 @@ export default function FormulaPyramidPage() {
                   <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem", lineHeight: 1.1 }}>게임 설명</h2>
                 </div>
                 <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
-                <div className="flex flex-col gap-3.5 text-gray-700 leading-relaxed py-1 overflow-y-auto" style={{ fontFamily: "var(--font-chalk)", fontSize: "0.85rem", wordBreak: "break-all", letterSpacing: "-0.015em" }}>
+                <div className="flex flex-col text-gray-700 leading-relaxed py-1 overflow-y-auto" style={{ gap: "0.85rem", fontFamily: "var(--font-chalk)", fontSize: "0.85rem", wordBreak: "break-all", letterSpacing: "-0.015em" }}>
                   {/* ① 게임 소개 */}
                   <div className="flex items-start gap-2">
                     <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">①</span>
