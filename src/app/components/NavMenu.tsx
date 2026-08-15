@@ -52,7 +52,7 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
           {/* 미니게임 상세메뉴 드롭다운 (메뉴와 상세창 사이 여백 pt-3 적용) */}
           {isMiniOpen && (
             <div
-              className="absolute left-1/2 -translate-x-1/2 top-full pt-3 z-50 min-w-[200px]"
+              className="absolute left-1/2 -translate-x-1/2 top-full pt-3 z-50 min-w-[240px]"
               style={{ animation: "slideInUp 0.2s ease forwards" }}
             >
               <div
@@ -74,7 +74,7 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
                   onClick={() => setIsMiniOpen(false)}
                 >
                   <span className="w-[0.85rem] h-[0.85rem] rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
-                  <span className="text-[1.05rem] font-medium text-gray-600 hover:text-gray-900" style={{ fontFamily: "var(--font-body)" }}>스피드 소인수분해</span>
+                  <span className="text-[1.05rem] font-medium text-gray-600 hover:text-gray-900 whitespace-nowrap" style={{ fontFamily: "var(--font-body)" }}>스피드 소인수분해</span>
                 </Link>
               </div>
             </div>

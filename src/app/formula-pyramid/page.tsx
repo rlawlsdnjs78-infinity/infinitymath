@@ -1909,7 +1909,7 @@ export default function FormulaPyramidPage() {
                   </div>
 
                   {/* ③ 조합 규칙 (②와 ④ 사이) */}
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2" style={{ marginBottom: "0.2rem" }}>
                     <div className="flex items-start gap-2">
                       <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">③</span>
                       <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
