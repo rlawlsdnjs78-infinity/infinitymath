@@ -1526,7 +1526,7 @@ export default function FormulaPyramidPage() {
                     </div>
 
                     {/* 우측: 연습 설명 & 정답 확인 (overflow 방지: relative→static, 박스 안에서 스크롤) */}
-                    <div className="flex-1 w-full flex flex-col items-center xl:items-stretch gap-4">
+                    <div className="flex-1 w-full flex flex-col items-center xl:items-stretch gap-2.5">
                       <div className="flex items-center gap-2 text-gray-700 font-semibold justify-center xl:justify-start" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem" }}>
                         <Pencil size={18} className="text-[#CBA7D2] flex-shrink-0" />
                         <span>게임 시작을 기다리는 동안 연습해 보세요.</span>
@@ -1537,18 +1537,18 @@ export default function FormulaPyramidPage() {
                         type="button"
                         onClick={() => setShowSolutions(!showSolutions)}
                         className="w-full flex items-center justify-center gap-3 rounded-full bg-gray-50/80 backdrop-blur-md hover:bg-gray-100 border-2 border-dashed border-[#CBA7D2]/80 text-[#CBA7D2] font-bold transition-all cursor-pointer shadow-sm"
-                        style={{ paddingTop: "0.65rem", paddingBottom: "0.65rem", fontFamily: "var(--font-chalk)", fontSize: "1.05rem" }}
+                        style={{ paddingTop: "0.45rem", paddingBottom: "0.45rem", fontFamily: "var(--font-chalk)", fontSize: "1.05rem" }}
                       >
                         <Sparkles size={18} className="text-[#CBA7D2] animate-pulse" />
                         <span>정답 확인 ({validSolutions.length}개 조합)</span>
                         {showSolutions ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                       </button>
 
-                      {/* 정답 목록: 고정 높이 박스(초록 점선 벗어나지 않도록) */}
+                      {/* 정답 목록: 고정 높이 박스(피라미드 높이 내에 쏙 들어가도록 컴팩트 조정) */}
                       {showSolutions && (
                         <div
                           className="w-full bg-gray-50/98 rounded-2xl border-2 border-dashed border-[#CBA7D2]/90 shadow-xl flex flex-col backdrop-blur-md overflow-y-auto"
-                          style={{ paddingTop: "0.55rem", paddingBottom: "0.55rem", gap: "0.35rem", maxHeight: "200px" }}
+                          style={{ padding: "0.35rem 0.45rem", gap: "0.25rem", maxHeight: "135px" }}
                         >
                           {validSolutions.map((sol, idx) => (
                             <button
@@ -1556,10 +1556,10 @@ export default function FormulaPyramidPage() {
                               type="button"
                               onClick={() => { setSelectedNodes(sol.nodes); setTempNotice(null); }}
                               className="w-full flex items-center justify-between rounded-2xl bg-white/80 backdrop-blur-md hover:bg-[#CBA7D2] hover:text-gray-900 text-gray-800 transition-all border border-gray-200/80 cursor-pointer shadow-sm group flex-shrink-0"
-                              style={{ paddingTop: "0.35rem", paddingBottom: "0.35rem", paddingLeft: "0.65rem", paddingRight: "0.65rem", fontFamily: "var(--font-chalk)" }}
+                              style={{ paddingTop: "0.25rem", paddingBottom: "0.25rem", paddingLeft: "0.65rem", paddingRight: "0.65rem", fontFamily: "var(--font-chalk)" }}
                             >
-                              <span className="font-black text-[#CBA7D2] group-hover:text-gray-900 tracking-widest" style={{ fontSize: "1.25rem" }}>{sol.nodes.join(" ")}</span>
-                              <span className="text-gray-600 group-hover:text-gray-900 font-extrabold tracking-wide" style={{ fontSize: "1.05rem" }}>{sol.formulaStr}</span>
+                              <span className="font-black text-[#CBA7D2] group-hover:text-gray-900 tracking-widest" style={{ fontSize: "1.05rem" }}>{sol.nodes.join(" ")}</span>
+                              <span className="text-gray-600 group-hover:text-gray-900 font-extrabold tracking-wide" style={{ fontSize: "0.85rem" }}>{sol.formulaStr}</span>
                             </button>
                           ))}
                         </div>
