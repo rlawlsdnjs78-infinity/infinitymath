@@ -847,15 +847,25 @@ export default function FormulaPyramidPage() {
         const curr = roomStateRef.current;
 
         // 플레이어 목록 및 내 점수 동기화
+        // ★ 버그 수정: 서버 점수가 로컬 점수보다 낮을 경우 로컬 값을 보존 (서버 반영 지연으로 인한 점수 0점 초기화 방지)
         if (r.players && Array.isArray(r.players)) {
           setPlayers((prev) => {
             const map = new Map<string, { name: string; score: number; isHost?: boolean }>();
             prev.forEach((p) => map.set(p.name, p));
-            r.players.forEach((p: { name: string; score: number; isHost?: boolean }) => map.set(p.name, p));
+            r.players.forEach((p: { name: string; score: number; isHost?: boolean }) => {
+              const existing = map.get(p.name);
+              // 이미 로컬에 존재하면 점수는 더 높은 값을 유지 (서버 반영 지연 대비)
+              if (existing) {
+                map.set(p.name, { ...p, score: Math.max(existing.score, p.score) });
+              } else {
+                map.set(p.name, p);
+              }
+            });
             return Array.from(map.values());
           });
           const me = r.players.find((p: { name: string; score: number }) => p.name === curr.myNickname);
-          if (me && me.score !== curr.myScore) {
+          if (me && me.score > curr.myScore) {
+            // 서버 점수가 로컬보다 높은 경우에만 동기화 (다른 기기에서의 점수 반영)
             setMyScore(me.score);
           }
         }
@@ -894,14 +904,24 @@ export default function FormulaPyramidPage() {
         }
 
         // 정답 제출 동기화 (현재 라운드 정답만 안전하게 반영)
+        // ★ 버그 수정: 서버 데이터로 완전 덮어쓰지 않고, 로컬+서버 목록을 병합하여 로컬에서 제출한 최신 정답이 사라지지 않도록 함
         if (r.submittedAnswersList && Array.isArray(r.submittedAnswersList)) {
           if (r.currentRound === curr.currentRound) {
-            setSubmittedAnswersList(
-              r.submittedAnswersList.map((a: { nodes: string; formula: string; round?: number }) => ({
+            setSubmittedAnswersList((prev) => {
+              // 현재 라운드 정답만 필터
+              const localAnswers = prev.filter((a) => a.round === undefined || a.round === curr.currentRound);
+              const serverAnswers = r.submittedAnswersList.map((a: { nodes: string; formula: string; round?: number }) => ({
                 ...a,
                 round: curr.currentRound,
-              }))
-            );
+              }));
+              // 서버 정답과 로컬 정답을 병합 (중복 제거: normalizeNodesKey 기준)
+              const merged = [...localAnswers];
+              serverAnswers.forEach((sa: { nodes: string; formula: string; round?: number }) => {
+                const isDup = merged.some((la) => normalizeNodesKey(la.nodes) === normalizeNodesKey(sa.nodes));
+                if (!isDup) merged.push(sa);
+              });
+              return merged;
+            });
           }
         }
       } catch {}
