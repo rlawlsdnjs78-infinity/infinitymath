@@ -75,7 +75,7 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
                   onClick={() => setIsMiniOpen(false)}
                 >
                   <span className="w-[0.85rem] h-[0.85rem] rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
-                  <span className="text-[1.05rem] font-medium text-gray-600 hover:text-gray-900 whitespace-nowrap" style={{ fontFamily: "var(--font-body)" }}>스피드 소인수분해</span>
+                  <span className="text-[1.05rem] font-medium text-gray-600 hover:text-gray-900 whitespace-nowrap" style={{ fontFamily: "var(--font-body)" }}>스피드 소인수분해(개발 중)</span>
                 </Link>
               </div>
             </div>
@@ -250,7 +250,7 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
                 }}
               >
                 <Link
-                  href="#"
+                  href="/triangle-centers"
                   className="flex items-center gap-2.5 px-4 py-3 rounded transition-colors duration-150 hover:bg-gray-100"
                   style={{ textDecoration: "none" }}
                   onClick={() => setIsYorioOpen(false)}
