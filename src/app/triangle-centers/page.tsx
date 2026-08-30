@@ -204,6 +204,33 @@ function hashIdx(s: string, len: number) {
   return Math.abs(h) % len;
 }
 
+/** 생성된 점들을 캔버스 영역 내에 자연스럽게 배치하는 헬퍼 */
+function fitInCanvas(pts: Pt2[], width: number, height: number, margin = 60): Pt2[] {
+  const minX = Math.min(...pts.map(p => p.x));
+  const maxX = Math.max(...pts.map(p => p.x));
+  const minY = Math.min(...pts.map(p => p.y));
+  const maxY = Math.max(...pts.map(p => p.y));
+
+  const polyW = maxX - minX;
+  const polyH = maxY - minY;
+
+  const availMinX = margin;
+  const availMaxX = Math.max(margin, width - margin - polyW);
+  const availMinY = margin;
+  const availMaxY = Math.max(margin, height - margin - polyH);
+
+  const targetX = availMinX + Math.random() * (availMaxX - availMinX);
+  const targetY = availMinY + Math.random() * (availMaxY - availMinY);
+
+  const dx = targetX - minX;
+  const dy = targetY - minY;
+
+  return pts.map(p => ({
+    x: Math.round(p.x + dx),
+    y: Math.round(p.y + dy),
+  }));
+}
+
 /* ══════════════════════════════════════════════
    COMPONENT
 ══════════════════════════════════════════════ */
@@ -459,39 +486,75 @@ export default function TriangleCentersPage() {
     setFoldSource(null);
   };
 
-  /* 삼각형 자동 생성 */
+  /* 삼각형 자동 생성 — 위치, 각도, 변 길이 등 모든 요소를 완전 무작위화 */
   const generateTriangle = useCallback((type: "acute" | "right" | "obtuse") => {
     const svg = svgRef.current;
     const rect = svg?.getBoundingClientRect();
-    const width = rect ? rect.width : 750;
-    const height = rect ? rect.height : 460;
-    const cx = width / 2;
-    const cy = height / 2;
+    const width = rect && rect.width > 200 ? rect.width : 780;
+    const height = rect && rect.height > 200 ? rect.height : 480;
 
-    const rx = (Math.random() - 0.5) * 50;
-    const ry = (Math.random() - 0.5) * 40;
-
-    let p1: Pt2, p2: Pt2, p3: Pt2;
+    let rawPts: Pt2[] = [];
 
     if (type === "acute") {
-      p1 = { x: Math.round(cx + rx), y: Math.round(cy - 115 + ry) };
-      p2 = { x: Math.round(cx - 135 + rx), y: Math.round(cy + 95 + ry) };
-      p3 = { x: Math.round(cx + 145 + rx), y: Math.round(cy + 95 + ry) };
+      /* ── 예각삼각형 무작위 생성 (모든 내각 < 90도) ── */
+      const R = 80 + Math.random() * 70; // 반지름 무작위 (80 ~ 150)
+      const baseAngle = Math.random() * Math.PI * 2; // 전체 회전각 무작위
+
+      // 외접원 위의 3개 호의 각도 (모두 < 180도이어야 세 내각이 모두 < 90도 예각 보장)
+      let a1 = 70 + Math.random() * 70; // 70 ~ 140도
+      let a2 = 70 + Math.random() * 70; // 70 ~ 140도
+      let a3 = 360 - (a1 + a2);
+      while (a3 < 65 || a3 > 150) {
+        a1 = 70 + Math.random() * 70;
+        a2 = 70 + Math.random() * 70;
+        a3 = 360 - (a1 + a2);
+      }
+
+      const t1 = baseAngle;
+      const t2 = t1 + (a1 * Math.PI) / 180;
+      const t3 = t2 + (a2 * Math.PI) / 180;
+
+      rawPts = [
+        { x: R * Math.cos(t1), y: R * Math.sin(t1) },
+        { x: R * Math.cos(t2), y: R * Math.sin(t2) },
+        { x: R * Math.cos(t3), y: R * Math.sin(t3) },
+      ];
     } else if (type === "right") {
-      p1 = { x: Math.round(cx - 105 + rx), y: Math.round(cy - 105 + ry) };
-      p2 = { x: Math.round(cx - 105 + rx), y: Math.round(cy + 105 + ry) };
-      p3 = { x: Math.round(cx + 145 + rx), y: Math.round(cy + 105 + ry) };
+      /* ── 직각삼각형 무작위 생성 (한 각 = 90도, 변 길이 및 회전 무작위) ── */
+      const L1 = 90 + Math.random() * 120; // 밑변 길이 무작위 (90 ~ 210)
+      const L2 = 80 + Math.random() * 120; // 높이 길이 무작위 (80 ~ 200)
+      const rot = Math.random() * Math.PI * 2; // 전체 회전각 무작위
+
+      // P2가 직각 꼭짓점 (0,0)
+      const P2: Pt2 = { x: 0, y: 0 };
+      const P1: Pt2 = { x: L1 * Math.cos(rot), y: L1 * Math.sin(rot) };
+      const P3: Pt2 = { x: -L2 * Math.sin(rot), y: L2 * Math.cos(rot) };
+
+      rawPts = [P1, P2, P3];
     } else {
-      p1 = { x: Math.round(cx - 50 + rx), y: Math.round(cy - 50 + ry) };
-      p2 = { x: Math.round(cx - 165 + rx), y: Math.round(cy + 95 + ry) };
-      p3 = { x: Math.round(cx + 155 + rx), y: Math.round(cy + 95 + ry) };
+      /* ── 둔각삼각형 무작위 생성 (한 각 > 90도, 각도 및 변 길이 무작위) ── */
+      const obtuseAngleDeg = 98 + Math.random() * 52; // 둔각 크기 무작위 (98도 ~ 150도)
+      const obtuseAngleRad = (obtuseAngleDeg * Math.PI) / 180;
+      const L1 = 90 + Math.random() * 110; // 첫 번째 변 길이 무작위 (90 ~ 200)
+      const L2 = 80 + Math.random() * 110; // 두 번째 변 길이 무작위 (80 ~ 190)
+      const rot = Math.random() * Math.PI * 2; // 회전각 무작위
+
+      // P1이 둔각 꼭짓점 (0,0)
+      const P1: Pt2 = { x: 0, y: 0 };
+      const P2: Pt2 = { x: L1 * Math.cos(rot), y: L1 * Math.sin(rot) };
+      const P3: Pt2 = { x: L2 * Math.cos(rot + obtuseAngleRad), y: L2 * Math.sin(rot + obtuseAngleRad) };
+
+      rawPts = [P1, P2, P3];
     }
+
+    // 캔버스 내 무작위 위치로 배치
+    const finalPts = fitInCanvas(rawPts, width, height, 55);
 
     updateCurrentCanvas(prev => {
       const startIndex = prev.points.length;
-      const pt1: Point = { id: `pt_${Date.now()}_1`, x: p1.x, y: p1.y, label: makeLabel(startIndex) };
-      const pt2: Point = { id: `pt_${Date.now()}_2`, x: p2.x, y: p2.y, label: makeLabel(startIndex + 1) };
-      const pt3: Point = { id: `pt_${Date.now()}_3`, x: p3.x, y: p3.y, label: makeLabel(startIndex + 2) };
+      const pt1: Point = { id: `pt_${Date.now()}_1`, x: finalPts[0].x, y: finalPts[0].y, label: makeLabel(startIndex) };
+      const pt2: Point = { id: `pt_${Date.now()}_2`, x: finalPts[1].x, y: finalPts[1].y, label: makeLabel(startIndex + 1) };
+      const pt3: Point = { id: `pt_${Date.now()}_3`, x: finalPts[2].x, y: finalPts[2].y, label: makeLabel(startIndex + 2) };
 
       const seg1: Segment = { id: `seg_${Date.now()}_1`, p1Id: pt1.id, p2Id: pt2.id, x1: pt1.x, y1: pt1.y, x2: pt2.x, y2: pt2.y };
       const seg2: Segment = { id: `seg_${Date.now()}_2`, p1Id: pt2.id, p2Id: pt3.id, x1: pt2.x, y1: pt2.y, x2: pt3.x, y2: pt3.y };
@@ -691,35 +754,46 @@ export default function TriangleCentersPage() {
           {/* ════ 우측: 도화지 ════ */}
           <div className="xl:col-span-9 chalk-box flex flex-col bg-white/85 backdrop-blur-md" style={{ padding: "0.85rem", minHeight: "520px" }}>
 
-            {/* 1, 2, 3 도화지 선택 탭 */}
-            <div className="flex items-center gap-2 mb-2.5">
-              <span className="text-sm font-bold text-gray-500 mr-1" style={{ fontFamily: "var(--font-chalk)" }}>
-                도화지:
-              </span>
-              {([1, 2, 3] as const).map(num => {
-                const isActive = currentCanvasId === num;
-                return (
-                  <button
-                    key={num}
-                    type="button"
-                    onClick={() => {
-                      setCurrentCanvasId(num);
-                      setSelectedItem(null);
-                      setPendingStart(null);
-                      setCursorPos(null);
-                      setFoldSource(null);
-                    }}
-                    className={`w-9 h-9 rounded-xl font-bold flex items-center justify-center transition-all cursor-pointer ${
-                      isActive
-                        ? "bg-[#CBA7D2] text-white shadow-md scale-105"
-                        : "bg-gray-100/90 text-gray-600 hover:bg-gray-200"
-                    }`}
-                    style={{ fontFamily: "var(--font-chalk)", fontSize: "1.1rem" }}
-                  >
-                    {num}
-                  </button>
-                );
-              })}
+            {/* 1, 2, 3 도화지 선택 탭 바 (도화지와 명확하고 넉넉한 간격 mb-4 / 1.25rem 제공) */}
+            <div
+              className="flex items-center justify-between pb-3"
+              style={{
+                marginBottom: "1.25rem",
+                borderBottom: "1.5px dashed rgba(203, 167, 210, 0.45)",
+              }}
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="text-sm font-bold text-gray-600 mr-1" style={{ fontFamily: "var(--font-chalk)" }}>
+                  도화지 선택:
+                </span>
+                {([1, 2, 3] as const).map(num => {
+                  const isActive = currentCanvasId === num;
+                  return (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => {
+                        setCurrentCanvasId(num);
+                        setSelectedItem(null);
+                        setPendingStart(null);
+                        setCursorPos(null);
+                        setFoldSource(null);
+                      }}
+                      className={`w-9 h-9 rounded-xl font-bold flex items-center justify-center transition-all cursor-pointer ${
+                        isActive
+                          ? "bg-[#CBA7D2] text-white shadow-md scale-105"
+                          : "bg-gray-100/90 text-gray-600 hover:bg-gray-200"
+                      }`}
+                      style={{ fontFamily: "var(--font-chalk)", fontSize: "1.1rem" }}
+                    >
+                      {num}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="text-xs font-semibold text-[#A855F7]/80 bg-[#CBA7D2]/15 px-3 py-1 rounded-full" style={{ fontFamily: "var(--font-body)" }}>
+                {currentCanvasId}번 도화지 편집 중
+              </div>
             </div>
 
             {/* SVG 도화지 영역 */}
