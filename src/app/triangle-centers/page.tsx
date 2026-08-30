@@ -10,7 +10,7 @@ import { useState, useRef, useCallback, useMemo } from "react";
 /* ══════════════════════════════════════════════
    TYPES
 ══════════════════════════════════════════════ */
-type Tool = "선택" | "점" | "직선" | "종이접기" | "각의 이등분선";
+type Tool = "선택" | "점" | "선분" | "종이접기" | "각의 이등분선" | "컴퍼스";
 type Pt2 = { x: number; y: number };
 
 interface Point { id: string; x: number; y: number; label: string; }
@@ -40,6 +40,12 @@ interface AngleBisectorLine {
   x2: number;
   y2: number;
 }
+interface CircleItem {
+  id: string;
+  cx: number;
+  cy: number;
+  r: number;
+}
 type SelectedItem = { type: "point"; id: string } | { type: "segment"; id: string } | null;
 
 interface CanvasData {
@@ -48,6 +54,7 @@ interface CanvasData {
   foldResults: FoldResult[];
   creaseLines: CreaseLine[];
   bisectorLines: AngleBisectorLine[];
+  circles: CircleItem[];
 }
 
 const initialCanvasData = (): CanvasData => ({
@@ -56,6 +63,7 @@ const initialCanvasData = (): CanvasData => ({
   foldResults: [],
   creaseLines: [],
   bisectorLines: [],
+  circles: [],
 });
 
 /* ══════════════════════════════════════════════
@@ -90,6 +98,19 @@ function AngleBisectorIcon({ size = 20, color = "currentColor" }: { size?: numbe
       <path d="M4 20 L20 20" />
       <path d="M4 20 L16 4" />
       <path d="M4 20 L21 11" strokeDasharray="3 2" />
+    </svg>
+  );
+}
+
+function CompassIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="4" r="2" />
+      <path d="M10.5 5.5 L4 21" />
+      <path d="M13.5 5.5 L20 21" />
+      <path d="M7 14.5 L17 14.5" strokeWidth="1.4" />
+      <path d="M4 21 L3 23" strokeWidth="2" strokeLinecap="square" />
+      <circle cx="20" cy="21" r="1" fill={color} />
     </svg>
   );
 }
@@ -252,6 +273,30 @@ function computeAngleBisector(s1: Segment, s2: Segment, length = 4000): { x1: nu
   };
 }
 
+/** 삼각형의 외심 (Circumcenter) 계산 */
+function getTriangleCircumcenter(A: Pt2, B: Pt2, C: Pt2): Pt2 | null {
+  const d = 2 * (A.x * (B.y - C.y) + B.x * (C.y - A.y) + C.x * (A.y - B.y));
+  if (Math.abs(d) < 1e-7) return null;
+  const a2 = A.x * A.x + A.y * A.y;
+  const b2 = B.x * B.x + B.y * B.y;
+  const c2 = C.x * C.x + C.y * C.y;
+  const ox = (a2 * (B.y - C.y) + b2 * (C.y - A.y) + c2 * (A.y - B.y)) / d;
+  const oy = (a2 * (C.x - B.x) + b2 * (A.x - C.x) + c2 * (B.x - A.x)) / d;
+  return { x: Math.round(ox), y: Math.round(oy) };
+}
+
+/** 삼각형의 내심 (Incenter) 계산 */
+function getTriangleIncenter(A: Pt2, B: Pt2, C: Pt2): Pt2 | null {
+  const a = Math.hypot(B.x - C.x, B.y - C.y); // BC 길이
+  const b = Math.hypot(C.x - A.x, C.y - A.y); // CA 길이
+  const c = Math.hypot(A.x - B.x, A.y - B.y); // AB 길이
+  const p = a + b + c;
+  if (p < 1e-5) return null;
+  const ix = (a * A.x + b * B.x + c * C.x) / p;
+  const iy = (a * A.y + b * B.y + c * C.y) / p;
+  return { x: Math.round(ix), y: Math.round(iy) };
+}
+
 function canonicalize(cycle: string[]) {
   let mi = 0; for (let i = 1; i < cycle.length; i++) if (cycle[i] < cycle[mi]) mi = i;
   const rot = [...cycle.slice(mi), ...cycle.slice(0, mi)];
@@ -307,6 +352,21 @@ function fitInCanvas(pts: Pt2[], width: number, height: number, margin = 30): Pt
   }));
 }
 
+/** SVG Arc 패스 생성 헬퍼 */
+function describeArc(cx: number, cy: number, r: number, startAngle: number, endAngle: number): string {
+  const diff = endAngle - startAngle;
+  if (diff >= Math.PI * 2 - 1e-4) {
+    // 완전한 원
+    return `M ${cx + r} ${cy} A ${r} ${r} 0 1 0 ${cx - r} ${cy} A ${r} ${r} 0 1 0 ${cx + r} ${cy}`;
+  }
+  const x1 = cx + r * Math.cos(startAngle);
+  const y1 = cy + r * Math.sin(startAngle);
+  const x2 = cx + r * Math.cos(endAngle);
+  const y2 = cy + r * Math.sin(endAngle);
+  const largeArcFlag = diff > Math.PI ? 1 : 0;
+  return `M ${x1} ${y1} A ${r} ${r} 0 ${largeArcFlag} 1 ${x2} ${y2}`;
+}
+
 /* ══════════════════════════════════════════════
    COMPONENT
 ══════════════════════════════════════════════ */
@@ -324,6 +384,20 @@ export default function TriangleCentersPage() {
   const [cursorPos, setCursorPos] = useState<Pt2 | null>(null);
   const [foldSource, setFoldSource] = useState<{ pt: Point; polygonId: string } | null>(null);
   const [pendingAngleSeg, setPendingAngleSeg] = useState<Segment | null>(null);
+  const [pendingCompassCenter, setPendingCompassCenter] = useState<Point | null>(null);
+
+  /* 컴퍼스 애니메이션 상태 */
+  const [compassAnim, setCompassAnim] = useState<{
+    cx: number;
+    cy: number;
+    px: number;
+    py: number;
+    r: number;
+    startAngle: number;
+    currentAngle: number;
+    progress: number;
+  } | null>(null);
+
   const svgRef = useRef<SVGSVGElement>(null);
 
   /* 현재 활성 도화지 데이터 */
@@ -333,6 +407,7 @@ export default function TriangleCentersPage() {
   const foldResults = currentData.foldResults;
   const creaseLines = currentData.creaseLines;
   const bisectorLines = currentData.bisectorLines;
+  const circles = currentData.circles || [];
 
   /* 현재 도화지 데이터 업데이트 헬퍼 */
   const updateCurrentCanvas = useCallback((updater: (prev: CanvasData) => CanvasData) => {
@@ -424,7 +499,51 @@ export default function TriangleCentersPage() {
     setSelectedItem(null);
     setFoldSource(null);
     setPendingAngleSeg(null);
+    setPendingCompassCenter(null);
   }, []);
+
+  /* 컴퍼스 애니메이션 실행 */
+  const runCompassAnimation = useCallback((C: Pt2, P: Pt2, r: number, startAngle: number) => {
+    const duration = 1400; // 1.4초 동안 한 바퀴 회전
+    const startTime = performance.now();
+
+    const frame = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      // easeInOutQuad
+      const eased = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+      const angle = startAngle + eased * Math.PI * 2;
+
+      setCompassAnim({
+        cx: C.x,
+        cy: C.y,
+        px: C.x + r * Math.cos(angle),
+        py: C.y + r * Math.sin(angle),
+        r,
+        startAngle,
+        currentAngle: angle,
+        progress: eased,
+      });
+
+      if (progress < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        setCompassAnim(null);
+        const newCircle: CircleItem = {
+          id: `circle_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+          cx: C.x,
+          cy: C.y,
+          r,
+        };
+        updateCurrentCanvas(prev => ({
+          ...prev,
+          circles: [...(prev.circles || []), newCircle],
+        }));
+      }
+    };
+
+    requestAnimationFrame(frame);
+  }, [updateCurrentCanvas]);
 
   /* 캔버스 클릭 */
   const handleClick = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
@@ -440,19 +559,45 @@ export default function TriangleCentersPage() {
       setSelectedItem(null); return;
     }
 
-    /* ── 점 ── */
+    /* ── 점 (외심/내심 스마트 스냅 기믹 적용) ── */
     if (activeTool === "점") {
+      let finalCoord = { x, y };
+
+      // 다각형 중 3각형 탐색
+      const triangle = polygons.find(p => p.pts.length === 3);
+      if (triangle) {
+        const [A, B, C] = triangle.pts;
+
+        // 1) 외심 스냅: 해당 삼각형의 접은선이 3개 이상 존재할 때
+        const triangleCreases = validCreaseLines.filter(cl => cl.polygonId === triangle.id);
+        if (triangleCreases.length >= 3) {
+          const circumcenter = getTriangleCircumcenter(A, B, C);
+          if (circumcenter && Math.hypot(circumcenter.x - x, circumcenter.y - y) <= 35) {
+            finalCoord = circumcenter;
+          }
+        }
+
+        // 2) 내심 스냅: 해당 삼각형의 각의 이등분선이 3개 이상 존재할 때
+        const triangleBisectors = validBisectorLines.filter(bl => bl.polygonId === triangle.id);
+        if (triangleBisectors.length >= 3) {
+          const incenter = getTriangleIncenter(A, B, C);
+          if (incenter && Math.hypot(incenter.x - x, incenter.y - y) <= 35) {
+            finalCoord = incenter;
+          }
+        }
+      }
+
       const id = `pt_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`;
       updateCurrentCanvas(prev => ({
         ...prev,
-        points: [...prev.points, { id, x, y, label: makeLabel(prev.points.length) }],
+        points: [...prev.points, { id, x: finalCoord.x, y: finalCoord.y, label: makeLabel(prev.points.length) }],
       }));
       setSelectedItem(null);
       return;
     }
 
-    /* ── 직선 ── */
-    if (activeTool === "직선") {
+    /* ── 선분 ── */
+    if (activeTool === "선분") {
       if (!pendingStart) {
         const snapped = nearestPt(points, x, y, 12);
         if (snapped) {
@@ -577,7 +722,39 @@ export default function TriangleCentersPage() {
       }
       return;
     }
-  }, [activeTool, points, segments, pendingStart, foldSource, pendingAngleSeg, polygons, getCoords, updateCurrentCanvas]);
+
+    /* ── 컴퍼스 ── */
+    if (activeTool === "컴퍼스") {
+      if (!pendingCompassCenter) {
+        // 첫 번째 클릭: 원의 중심점
+        const center = nearestPt(points, x, y, 16) || {
+          id: `pt_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+          x, y, label: makeLabel(points.length)
+        };
+        if (!points.some(p => p.id === center.id)) {
+          updateCurrentCanvas(prev => ({ ...prev, points: [...prev.points, center] }));
+        }
+        setPendingCompassCenter(center);
+      } else {
+        // 두 번째 클릭: 원 위의 통과점
+        const passPt = nearestPt(points, x, y, 16) || {
+          id: `pt_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+          x, y, label: makeLabel(points.length + 1)
+        };
+        if (!points.some(p => p.id === passPt.id)) {
+          updateCurrentCanvas(prev => ({ ...prev, points: [...prev.points, passPt] }));
+        }
+
+        const r = Math.hypot(passPt.x - pendingCompassCenter.x, passPt.y - pendingCompassCenter.y);
+        if (r > 6) {
+          const startAngle = Math.atan2(passPt.y - pendingCompassCenter.y, passPt.x - pendingCompassCenter.x);
+          runCompassAnimation(pendingCompassCenter, passPt, r, startAngle);
+        }
+        setPendingCompassCenter(null);
+      }
+      return;
+    }
+  }, [activeTool, points, segments, pendingStart, foldSource, pendingAngleSeg, pendingCompassCenter, polygons, validCreaseLines, validBisectorLines, getCoords, updateCurrentCanvas, runCompassAnimation]);
 
   /* 펼치기 */
   const handleUnfold = useCallback((polyId: string) => {
@@ -589,9 +766,12 @@ export default function TriangleCentersPage() {
 
   /* 마우스 이동 */
   const handleMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
-    if (activeTool === "직선" && pendingStart) setCursorPos(getCoords(e));
-    else setCursorPos(null);
-  }, [activeTool, pendingStart, getCoords]);
+    if ((activeTool === "선분" && pendingStart) || (activeTool === "컴퍼스" && pendingCompassCenter)) {
+      setCursorPos(getCoords(e));
+    } else {
+      setCursorPos(null);
+    }
+  }, [activeTool, pendingStart, pendingCompassCenter, getCoords]);
 
   /* 삭제 */
   const handleDelete = useCallback(() => {
@@ -625,6 +805,8 @@ export default function TriangleCentersPage() {
     setCursorPos(null);
     setFoldSource(null);
     setPendingAngleSeg(null);
+    setPendingCompassCenter(null);
+    setCompassAnim(null);
   };
 
   /* 전체 초기화 (3개 도화지 모두 초기화) */
@@ -639,6 +821,8 @@ export default function TriangleCentersPage() {
     setCursorPos(null);
     setFoldSource(null);
     setPendingAngleSeg(null);
+    setPendingCompassCenter(null);
+    setCompassAnim(null);
   };
 
   /* 삼각형 자동 생성 — 2배 크기 완전 무작위화 */
@@ -687,7 +871,6 @@ export default function TriangleCentersPage() {
       const R = 140 + Math.random() * 80;
       const baseAngle = Math.random() * Math.PI * 2;
 
-      // 둔각 조건: 한 호의 각도가 180도 초과 (190도 ~ 235도)
       const a1 = 190 + Math.random() * 45;
       const rem = 360 - a1;
       const a2 = 40 + Math.random() * (rem - 80);
@@ -701,7 +884,6 @@ export default function TriangleCentersPage() {
       const P3: Pt2 = { x: R * Math.cos(t3), y: R * Math.sin(t3) };
       const circumcenter: Pt2 = { x: 0, y: 0 }; // 외심
 
-      // 외심과 삼각형 꼭짓점을 모두 포함하여 캔버스 내부에 배치
       rawPts = [P1, P2, P3, circumcenter];
     }
 
@@ -730,7 +912,7 @@ export default function TriangleCentersPage() {
 
   const svgCursor = activeTool === "선택" ? "default"
     : activeTool === "종이접기" ? (foldSource ? "crosshair" : "pointer")
-    : (activeTool === "직선" && pendingStart) || activeTool === "각의 이등분선" ? "crosshair" : "cell";
+    : (activeTool === "선분" && pendingStart) || activeTool === "각의 이등분선" || activeTool === "컴퍼스" ? "crosshair" : "cell";
 
   const foldedPolySegIds = useMemo(() => {
     const s = new Set<string>();
@@ -764,7 +946,7 @@ export default function TriangleCentersPage() {
             </div>
             <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
 
-            {/* 1. 기본 도구 목록 (3열 그리드) */}
+            {/* 1. 기본 도구 목록 (3열 2행 그리드) */}
             <div className="grid grid-cols-3 gap-2">
               {/* 선택 */}
               <button
@@ -796,19 +978,19 @@ export default function TriangleCentersPage() {
                 <span className={`font-extrabold text-sm ${activeTool === "점" ? "text-[#CBA7D2]" : "text-gray-600"}`}>점</span>
               </button>
 
-              {/* 직선 */}
+              {/* 선분 */}
               <button
                 type="button"
-                onClick={() => changeTool("직선")}
+                onClick={() => changeTool("선분")}
                 className={`flex flex-col items-center justify-center gap-1 rounded-2xl border-2 transition-all cursor-pointer ${
-                  activeTool === "직선"
+                  activeTool === "선분"
                     ? "bg-[#CBA7D2]/20 border-[#CBA7D2] shadow-md"
                     : "bg-gray-50/80 border-gray-200 hover:bg-gray-100/80 hover:border-[#CBA7D2]/50"
                 }`}
                 style={{ padding: "0.75rem 0.3rem", fontFamily: "var(--font-chalk)" }}
               >
-                <span className={`text-xl leading-none ${activeTool === "직선" ? "text-[#CBA7D2]" : "text-gray-400"}`}>∕</span>
-                <span className={`font-extrabold text-sm ${activeTool === "직선" ? "text-[#CBA7D2]" : "text-gray-600"}`}>직선</span>
+                <span className={`text-xl leading-none ${activeTool === "선분" ? "text-[#CBA7D2]" : "text-gray-400"}`}>∕</span>
+                <span className={`font-extrabold text-sm ${activeTool === "선분" ? "text-[#CBA7D2]" : "text-gray-600"}`}>선분</span>
               </button>
 
               {/* 종이접기 */}
@@ -842,7 +1024,24 @@ export default function TriangleCentersPage() {
                 <span className="flex items-center justify-center">
                   <AngleBisectorIcon size={20} color={activeTool === "각의 이등분선" ? "#CBA7D2" : "#9CA3AF"} />
                 </span>
-                <span className={`font-extrabold text-[0.78rem] whitespace-nowrap ${activeTool === "각의 이등분선" ? "text-[#CBA7D2]" : "text-gray-600"}`}>각의 이등분선</span>
+                <span className={`font-extrabold text-[0.75rem] whitespace-nowrap ${activeTool === "각의 이등분선" ? "text-[#CBA7D2]" : "text-gray-600"}`}>각의 이등분선</span>
+              </button>
+
+              {/* 컴퍼스 */}
+              <button
+                type="button"
+                onClick={() => changeTool("컴퍼스")}
+                className={`flex flex-col items-center justify-center gap-1 rounded-2xl border-2 transition-all cursor-pointer ${
+                  activeTool === "컴퍼스"
+                    ? "bg-[#CBA7D2]/20 border-[#CBA7D2] shadow-md"
+                    : "bg-gray-50/80 border-gray-200 hover:bg-gray-100/80 hover:border-[#CBA7D2]/50"
+                }`}
+                style={{ padding: "0.75rem 0.3rem", fontFamily: "var(--font-chalk)" }}
+              >
+                <span className="flex items-center justify-center">
+                  <CompassIcon size={20} color={activeTool === "컴퍼스" ? "#CBA7D2" : "#9CA3AF"} />
+                </span>
+                <span className={`font-extrabold text-sm ${activeTool === "컴퍼스" ? "text-[#CBA7D2]" : "text-gray-600"}`}>컴퍼스</span>
               </button>
             </div>
 
@@ -892,7 +1091,7 @@ export default function TriangleCentersPage() {
 
             {/* 상태 안내 */}
             <div style={{ marginTop: "1.25rem" }}>
-              {activeTool === "직선" && (
+              {activeTool === "선분" && (
                 <div className="rounded-2xl bg-[#CBA7D2]/10 border border-dashed border-[#CBA7D2]/40 text-[#CBA7D2] text-xs leading-relaxed" style={{ padding: "0.75rem 1rem", fontFamily: "var(--font-body)" }}>
                   {pendingStart ? <><span className="font-bold">{pendingStart.label}</span> 에서 시작 — 끝점을 클릭하세요.</> : "시작점을 클릭하세요."}
                 </div>
@@ -916,6 +1115,17 @@ export default function TriangleCentersPage() {
               {activeTool === "각의 이등분선" && (
                 <div className="rounded-2xl bg-[#CBA7D2]/10 border border-dashed border-[#CBA7D2]/40 text-[#CBA7D2] text-xs leading-relaxed" style={{ padding: "0.75rem 1rem", fontFamily: "var(--font-body)" }}>
                   {pendingAngleSeg ? "이등분할 각의 두 번째 선분을 클릭하세요." : "이등분할 각의 첫 번째 선분을 클릭하세요."}
+                </div>
+              )}
+              {activeTool === "컴퍼스" && (
+                <div className="rounded-2xl bg-[#CBA7D2]/10 border border-dashed border-[#CBA7D2]/40 text-[#CBA7D2] text-xs leading-relaxed" style={{ padding: "0.75rem 1rem", fontFamily: "var(--font-body)" }}>
+                  {pendingCompassCenter ? (
+                    <>
+                      <span className="font-bold text-[#A855F7]">{pendingCompassCenter.label}</span> 중심 — 원이 지나갈 점을 클릭하세요.
+                    </>
+                  ) : (
+                    "원의 중심이 될 점을 클릭하세요."
+                  )}
                 </div>
               )}
             </div>
@@ -965,6 +1175,8 @@ export default function TriangleCentersPage() {
                       setCursorPos(null);
                       setFoldSource(null);
                       setPendingAngleSeg(null);
+                      setPendingCompassCenter(null);
+                      setCompassAnim(null);
                     }}
                     className={`w-9 h-9 rounded-xl font-bold flex items-center justify-center transition-all cursor-pointer ${
                       isActive
@@ -1026,7 +1238,20 @@ export default function TriangleCentersPage() {
                     strokeDasharray="6 4" strokeLinecap="round" />
                 ))}
 
-                {/* ── 3. 다각형 렌더링 ── */}
+                {/* ── 3. 원(Circles) 렌더링 ── */}
+                {circles.map(c => (
+                  <circle
+                    key={c.id}
+                    cx={c.cx}
+                    cy={c.cy}
+                    r={c.r}
+                    fill="none"
+                    stroke="#CBA7D2"
+                    strokeWidth={2}
+                  />
+                ))}
+
+                {/* ── 4. 다각형 렌더링 ── */}
                 {polygons.map(poly => {
                   const fold = foldMap.get(poly.id);
                   const pts2: Pt2[] = poly.pts.map(p => ({ x: p.x, y: p.y }));
@@ -1070,7 +1295,7 @@ export default function TriangleCentersPage() {
                   );
                 })}
 
-                {/* ── 4. 선분 렌더링 ── */}
+                {/* ── 5. 선분 렌더링 ── */}
                 {segments.map(seg => {
                   if (foldedPolySegIds.has(seg.id)) return null;
                   const sel = selectedItem?.type === "segment" && selectedItem.id === seg.id;
@@ -1085,29 +1310,98 @@ export default function TriangleCentersPage() {
                   );
                 })}
 
-                {/* ── 5. 선분 미리보기 ── */}
-                {activeTool === "직선" && pendingStart && cursorPos && (
+                {/* ── 6. 선분 미리보기 ── */}
+                {activeTool === "선분" && pendingStart && cursorPos && (
                   <line x1={pendingStart.x} y1={pendingStart.y} x2={cursorPos.x} y2={cursorPos.y}
                     stroke="#CBA7D2" strokeWidth={1.5} strokeDasharray="6 4" strokeLinecap="round" />
                 )}
 
-                {/* ── 6. 점 렌더링 ── */}
+                {/* ── 7. 컴퍼스 반지름 미리보기 ── */}
+                {activeTool === "컴퍼스" && pendingCompassCenter && cursorPos && (
+                  <g>
+                    <line x1={pendingCompassCenter.x} y1={pendingCompassCenter.y} x2={cursorPos.x} y2={cursorPos.y}
+                      stroke="#CBA7D2" strokeWidth={1.5} strokeDasharray="4 3" strokeLinecap="round" />
+                    <circle cx={pendingCompassCenter.x} cy={pendingCompassCenter.y}
+                      r={Math.hypot(cursorPos.x - pendingCompassCenter.x, cursorPos.y - pendingCompassCenter.y)}
+                      fill="none" stroke="#CBA7D2" strokeWidth={1.2} strokeDasharray="4 4" opacity={0.6} />
+                  </g>
+                )}
+
+                {/* ── 8. 컴퍼스 원 그리기 애니메이션 ── */}
+                {compassAnim && (
+                  <g>
+                    {/* 진행 중인 원호 */}
+                    <path
+                      d={describeArc(compassAnim.cx, compassAnim.cy, compassAnim.r, compassAnim.startAngle, compassAnim.currentAngle)}
+                      fill="none"
+                      stroke="#CBA7D2"
+                      strokeWidth={2.5}
+                      strokeLinecap="round"
+                    />
+
+                    {/* 컴퍼스 힌지(상단 관절) 계산 */}
+                    {(() => {
+                      const midX = (compassAnim.cx + compassAnim.px) / 2;
+                      const midY = (compassAnim.cy + compassAnim.py) / 2;
+                      const legDx = compassAnim.px - compassAnim.cx;
+                      const legDy = compassAnim.py - compassAnim.cy;
+                      const legLen = Math.hypot(legDx, legDy);
+                      const normX = -legDy / (legLen || 1);
+                      const normY = legDx / (legLen || 1);
+                      // 힌지 높이
+                      const hingeHeight = Math.max(70, compassAnim.r * 0.9);
+                      const hingeX = midX + normX * hingeHeight;
+                      const hingeY = midY + normY * hingeHeight;
+
+                      return (
+                        <g>
+                          {/* 침 다리 (Needle leg) */}
+                          <line x1={hingeX} y1={hingeY} x2={compassAnim.cx} y2={compassAnim.cy}
+                            stroke="#475569" strokeWidth={4} strokeLinecap="round" />
+                          <circle cx={compassAnim.cx} cy={compassAnim.cy} r={3} fill="#0F172A" />
+
+                          {/* 연필 다리 (Pencil leg) */}
+                          <line x1={hingeX} y1={hingeY} x2={compassAnim.px} y2={compassAnim.py}
+                            stroke="#9333EA" strokeWidth={4} strokeLinecap="round" />
+                          <circle cx={compassAnim.px} cy={compassAnim.py} r={3.5} fill="#CBA7D2" stroke="#6B21A8" strokeWidth={1} />
+
+                          {/* 중간 고정 연결 바 */}
+                          <line
+                            x1={hingeX + (compassAnim.cx - hingeX) * 0.45}
+                            y1={hingeY + (compassAnim.cy - hingeY) * 0.45}
+                            x2={hingeX + (compassAnim.px - hingeX) * 0.45}
+                            y2={hingeY + (compassAnim.py - hingeY) * 0.45}
+                            stroke="#64748B" strokeWidth={2.5}
+                          />
+
+                          {/* 상단 힌지 머리 / 손잡이 */}
+                          <circle cx={hingeX} cy={hingeY} r={6} fill="#E2E8F0" stroke="#334155" strokeWidth={2} />
+                          <line x1={hingeX} y1={hingeY - 6} x2={hingeX + normX * 12} y2={hingeY - 6 + normY * 12}
+                            stroke="#334155" strokeWidth={3} strokeLinecap="round" />
+                        </g>
+                      );
+                    })()}
+                  </g>
+                )}
+
+                {/* ── 9. 점 렌더링 ── */}
                 {points.map(pt => {
                   const isPending = pendingStart?.id === pt.id;
                   const isSel     = selectedItem?.type === "point" && selectedItem.id === pt.id;
                   const isFoldSrc = foldSource?.pt.id === pt.id;
-                  const hl = isPending || isSel || isFoldSrc;
+                  const isCompassCenter = pendingCompassCenter?.id === pt.id;
+                  const hl = isPending || isSel || isFoldSrc || isCompassCenter;
                   return (
                     <g key={pt.id}>
                       {hl && <circle cx={pt.x} cy={pt.y} r={11}
-                        fill={isFoldSrc ? "rgba(168,85,247,0.2)" : "rgba(203,167,210,0.2)"}
-                        stroke={isFoldSrc ? "#A855F7" : "#CBA7D2"}
+                        fill={isFoldSrc || isCompassCenter ? "rgba(168,85,247,0.2)" : "rgba(203,167,210,0.2)"}
+                        stroke={isFoldSrc || isCompassCenter ? "#A855F7" : "#CBA7D2"}
                         strokeWidth={1.8} strokeDasharray="4 3" />}
                       <circle cx={pt.x} cy={pt.y} r={5}
-                        fill={isFoldSrc ? "#A855F7" : hl ? "#CBA7D2" : "#374151"}
+                        fill={isFoldSrc || isCompassCenter ? "#A855F7" : hl ? "#CBA7D2" : "#374151"}
                         stroke="white" strokeWidth={1.5} />
                       <text x={pt.x + 9} y={pt.y - 7}
-                        fill={isFoldSrc ? "#A855F7" : hl ? "#CBA7D2" : "#4B5563"}
+                        fill={isFoldSrc || isCompassCenter ? "#A855F7" : hl ? "#CBA7D2" : "#4B5563"}
                         fontSize={13} fontWeight="bold"
                         style={{ fontFamily: "var(--font-chalk)", userSelect: "none" }}>
                         {pt.label}
