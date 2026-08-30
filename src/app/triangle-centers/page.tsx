@@ -10,7 +10,7 @@ import { useState, useRef, useCallback, useMemo } from "react";
 /* ══════════════════════════════════════════════
    TYPES
 ══════════════════════════════════════════════ */
-type Tool = "선택" | "점" | "직선" | "종이접기";
+type Tool = "선택" | "점" | "직선" | "종이접기" | "각의 이등분선";
 type Pt2 = { x: number; y: number };
 
 interface Point { id: string; x: number; y: number; label: string; }
@@ -32,6 +32,14 @@ interface CreaseLine {
   x2: number;
   y2: number;
 }
+interface AngleBisectorLine {
+  id: string;
+  polygonId?: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
 type SelectedItem = { type: "point"; id: string } | { type: "segment"; id: string } | null;
 
 interface CanvasData {
@@ -39,6 +47,7 @@ interface CanvasData {
   segments: Segment[];
   foldResults: FoldResult[];
   creaseLines: CreaseLine[];
+  bisectorLines: AngleBisectorLine[];
 }
 
 const initialCanvasData = (): CanvasData => ({
@@ -46,6 +55,7 @@ const initialCanvasData = (): CanvasData => ({
   segments: [],
   foldResults: [],
   creaseLines: [],
+  bisectorLines: [],
 });
 
 /* ══════════════════════════════════════════════
@@ -70,6 +80,16 @@ function OrigamiCraneIcon({ size = 20, color = "currentColor" }: { size?: number
       <path d="M6 10 L11 15 L17 16" />
       <path d="M2 13 L4 15 L6 10" />
       <path d="M11 15 L14 20" />
+    </svg>
+  );
+}
+
+function AngleBisectorIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 20 L20 20" />
+      <path d="M4 20 L16 4" />
+      <path d="M4 20 L21 11" strokeDasharray="3 2" />
     </svg>
   );
 }
@@ -176,6 +196,62 @@ function getExtendedBisector(P: Pt2, Q: Pt2, length = 4000): { x1: number; y1: n
   };
 }
 
+/** 두 선분의 각의 이등분선 직선 계산 */
+function computeAngleBisector(s1: Segment, s2: Segment, length = 4000): { x1: number; y1: number; x2: number; y2: number } | null {
+  const pA1 = { x: s1.x1, y: s1.y1, id: s1.p1Id };
+  const pA2 = { x: s1.x2, y: s1.y2, id: s1.p2Id };
+  const pB1 = { x: s2.x1, y: s2.y1, id: s2.p1Id };
+  const pB2 = { x: s2.x2, y: s2.y2, id: s2.p2Id };
+
+  let V: Pt2;
+  let A: Pt2;
+  let B: Pt2;
+
+  if (pA1.id === pB1.id || Math.hypot(pA1.x - pB1.x, pA1.y - pB1.y) < 1e-3) {
+    V = pA1; A = pA2; B = pB2;
+  } else if (pA1.id === pB2.id || Math.hypot(pA1.x - pB2.x, pA1.y - pB2.y) < 1e-3) {
+    V = pA1; A = pA2; B = pB1;
+  } else if (pA2.id === pB1.id || Math.hypot(pA2.x - pB1.x, pA2.y - pB1.y) < 1e-3) {
+    V = pA2; A = pA1; B = pB2;
+  } else if (pA2.id === pB2.id || Math.hypot(pA2.x - pB2.x, pA2.y - pB2.y) < 1e-3) {
+    V = pA2; A = pA1; B = pB1;
+  } else {
+    const isect = lineIsect(pA1, pA2, pB1, pB2);
+    if (!isect) return null;
+    V = isect;
+    A = { x: (pA1.x + pA2.x) / 2, y: (pA1.y + pA2.y) / 2 };
+    B = { x: (pB1.x + pB2.x) / 2, y: (pB1.y + pB2.y) / 2 };
+  }
+
+  const dAx = A.x - V.x, dAy = A.y - V.y;
+  const dBx = B.x - V.x, dBy = B.y - V.y;
+  const lenA = Math.hypot(dAx, dAy);
+  const lenB = Math.hypot(dBx, dBy);
+  if (lenA < 1e-5 || lenB < 1e-5) return null;
+
+  const uAx = dAx / lenA, uAy = dAy / lenA;
+  const uBx = dBx / lenB, uBy = dBy / lenB;
+
+  let bisX = uAx + uBx;
+  let bisY = uAy + uBy;
+  let bisLen = Math.hypot(bisX, bisY);
+
+  if (bisLen < 1e-5) {
+    bisX = -uAy;
+    bisY = uAx;
+  } else {
+    bisX /= bisLen;
+    bisY /= bisLen;
+  }
+
+  return {
+    x1: Math.round(V.x - length * bisX),
+    y1: Math.round(V.y - length * bisY),
+    x2: Math.round(V.x + length * bisX),
+    y2: Math.round(V.y + length * bisY),
+  };
+}
+
 function canonicalize(cycle: string[]) {
   let mi = 0; for (let i = 1; i < cycle.length; i++) if (cycle[i] < cycle[mi]) mi = i;
   const rot = [...cycle.slice(mi), ...cycle.slice(0, mi)];
@@ -205,7 +281,7 @@ function hashIdx(s: string, len: number) {
 }
 
 /** 생성된 점들을 캔버스 영역 내에 자연스럽게 배치하는 헬퍼 */
-function fitInCanvas(pts: Pt2[], width: number, height: number, margin = 60): Pt2[] {
+function fitInCanvas(pts: Pt2[], width: number, height: number, margin = 30): Pt2[] {
   const minX = Math.min(...pts.map(p => p.x));
   const maxX = Math.max(...pts.map(p => p.x));
   const minY = Math.min(...pts.map(p => p.y));
@@ -247,6 +323,7 @@ export default function TriangleCentersPage() {
   const [pendingStart, setPendingStart] = useState<Point | null>(null);
   const [cursorPos, setCursorPos] = useState<Pt2 | null>(null);
   const [foldSource, setFoldSource] = useState<{ pt: Point; polygonId: string } | null>(null);
+  const [pendingAngleSeg, setPendingAngleSeg] = useState<Segment | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
   /* 현재 활성 도화지 데이터 */
@@ -255,6 +332,7 @@ export default function TriangleCentersPage() {
   const segments = currentData.segments;
   const foldResults = currentData.foldResults;
   const creaseLines = currentData.creaseLines;
+  const bisectorLines = currentData.bisectorLines;
 
   /* 현재 도화지 데이터 업데이트 헬퍼 */
   const updateCurrentCanvas = useCallback((updater: (prev: CanvasData) => CanvasData) => {
@@ -307,6 +385,10 @@ export default function TriangleCentersPage() {
     return creaseLines.filter(cl => validPolyIds.has(cl.polygonId));
   }, [creaseLines, validPolyIds]);
 
+  const validBisectorLines = useMemo(() => {
+    return bisectorLines.filter(bl => !bl.polygonId || validPolyIds.has(bl.polygonId));
+  }, [bisectorLines, validPolyIds]);
+
   /* 삭제 버튼 위치 */
   const delBtnPos = useMemo(() => {
     if (!selectedItem) return null;
@@ -325,6 +407,7 @@ export default function TriangleCentersPage() {
     setCursorPos(null);
     setSelectedItem(null);
     setFoldSource(null);
+    setPendingAngleSeg(null);
   }, []);
 
   /* 캔버스 클릭 */
@@ -352,7 +435,7 @@ export default function TriangleCentersPage() {
       return;
     }
 
-    /* ── 직선(선분) ── */
+    /* ── 직선 ── */
     if (activeTool === "직선") {
       if (!pendingStart) {
         const snapped = nearestPt(points, x, y, 12);
@@ -436,7 +519,49 @@ export default function TriangleCentersPage() {
       }
       return;
     }
-  }, [activeTool, points, segments, pendingStart, foldSource, polygons, getCoords, updateCurrentCanvas]);
+
+    /* ── 각의 이등분선 ── */
+    if (activeTool === "각의 이등분선") {
+      let clickedSeg: Segment | null = null;
+      let minD = 14;
+      for (const s of segments) {
+        const d = distSeg(x, y, s.x1, s.y1, s.x2, s.y2);
+        if (d < minD) { minD = d; clickedSeg = s; }
+      }
+      if (!clickedSeg) return;
+
+      if (!pendingAngleSeg) {
+        setPendingAngleSeg(clickedSeg);
+      } else {
+        if (pendingAngleSeg.id === clickedSeg.id) {
+          setPendingAngleSeg(null);
+          return;
+        }
+
+        const bisector = computeAngleBisector(pendingAngleSeg, clickedSeg);
+        if (bisector) {
+          const matchedPoly = polygons.find(p => {
+            const hasSeg1 = p.pts.some(pt => pt.id === pendingAngleSeg!.p1Id) && p.pts.some(pt => pt.id === pendingAngleSeg!.p2Id);
+            const hasSeg2 = p.pts.some(pt => pt.id === clickedSeg!.p1Id) && p.pts.some(pt => pt.id === clickedSeg!.p2Id);
+            return hasSeg1 && hasSeg2;
+          });
+
+          const newLine: AngleBisectorLine = {
+            id: `bisector_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+            polygonId: matchedPoly?.id,
+            ...bisector,
+          };
+
+          updateCurrentCanvas(prev => ({
+            ...prev,
+            bisectorLines: [...prev.bisectorLines, newLine],
+          }));
+        }
+        setPendingAngleSeg(null);
+      }
+      return;
+    }
+  }, [activeTool, points, segments, pendingStart, foldSource, pendingAngleSeg, polygons, getCoords, updateCurrentCanvas]);
 
   /* 펼치기 */
   const handleUnfold = useCallback((polyId: string) => {
@@ -473,6 +598,19 @@ export default function TriangleCentersPage() {
     setSelectedItem(null);
   }, [selectedItem, updateCurrentCanvas]);
 
+  /* 현재 도화지만 초기화 */
+  const handleClearCurrent = () => {
+    setCanvases(prev => ({
+      ...prev,
+      [currentCanvasId]: initialCanvasData(),
+    }));
+    setSelectedItem(null);
+    setPendingStart(null);
+    setCursorPos(null);
+    setFoldSource(null);
+    setPendingAngleSeg(null);
+  };
+
   /* 전체 초기화 (3개 도화지 모두 초기화) */
   const handleClearAll = () => {
     setCanvases({
@@ -484,9 +622,10 @@ export default function TriangleCentersPage() {
     setPendingStart(null);
     setCursorPos(null);
     setFoldSource(null);
+    setPendingAngleSeg(null);
   };
 
-  /* 삼각형 자동 생성 — 위치, 각도, 변 길이 등 모든 요소를 완전 무작위화 */
+  /* 삼각형 자동 생성 — 2배 크기 완전 무작위화 */
   const generateTriangle = useCallback((type: "acute" | "right" | "obtuse") => {
     const svg = svgRef.current;
     const rect = svg?.getBoundingClientRect();
@@ -496,11 +635,9 @@ export default function TriangleCentersPage() {
     let rawPts: Pt2[] = [];
 
     if (type === "acute") {
-      /* ── 예각삼각형 무작위 생성 (크기 2배, 모든 내각 < 90도) ── */
-      const R = 150 + Math.random() * 90; // 2배 크기 반지름 (150 ~ 240)
+      const R = 150 + Math.random() * 90;
       const baseAngle = Math.random() * Math.PI * 2;
 
-      // 외접원 위의 3개 호의 각도 (< 180도)
       let a1 = 70 + Math.random() * 70;
       let a2 = 70 + Math.random() * 70;
       let a3 = 360 - (a1 + a2);
@@ -520,9 +657,8 @@ export default function TriangleCentersPage() {
         { x: R * Math.cos(t3), y: R * Math.sin(t3) },
       ];
     } else if (type === "right") {
-      /* ── 직각삼각형 무작위 생성 (크기 2배, 한 각 = 90도) ── */
-      const L1 = 180 + Math.random() * 180; // 2배 크기 밑변 (180 ~ 360)
-      const L2 = 160 + Math.random() * 180; // 2배 크기 높이 (160 ~ 340)
+      const L1 = 180 + Math.random() * 180;
+      const L2 = 160 + Math.random() * 180;
       const rot = Math.random() * Math.PI * 2;
 
       const P2: Pt2 = { x: 0, y: 0 };
@@ -531,11 +667,10 @@ export default function TriangleCentersPage() {
 
       rawPts = [P1, P2, P3];
     } else {
-      /* ── 둔각삼각형 무작위 생성 (크기 2배, 한 각 > 90도) ── */
       const obtuseAngleDeg = 98 + Math.random() * 52;
       const obtuseAngleRad = (obtuseAngleDeg * Math.PI) / 180;
-      const L1 = 180 + Math.random() * 180; // 2배 크기 첫 번째 변 (180 ~ 360)
-      const L2 = 160 + Math.random() * 160; // 2배 크기 두 번째 변 (160 ~ 320)
+      const L1 = 180 + Math.random() * 180;
+      const L2 = 160 + Math.random() * 160;
       const rot = Math.random() * Math.PI * 2;
 
       const P1: Pt2 = { x: 0, y: 0 };
@@ -545,7 +680,6 @@ export default function TriangleCentersPage() {
       rawPts = [P1, P2, P3];
     }
 
-    // 캔버스 내 무작위 위치로 배치 (여백 30px)
     const finalPts = fitInCanvas(rawPts, width, height, 30);
 
     updateCurrentCanvas(prev => {
@@ -570,7 +704,7 @@ export default function TriangleCentersPage() {
 
   const svgCursor = activeTool === "선택" ? "default"
     : activeTool === "종이접기" ? (foldSource ? "crosshair" : "pointer")
-    : activeTool === "직선" && pendingStart ? "crosshair" : "cell";
+    : (activeTool === "직선" && pendingStart) || activeTool === "각의 이등분선" ? "crosshair" : "cell";
 
   const foldedPolySegIds = useMemo(() => {
     const s = new Set<string>();
@@ -667,6 +801,23 @@ export default function TriangleCentersPage() {
                 </span>
                 <span className={`font-extrabold text-sm ${activeTool === "종이접기" ? "text-[#CBA7D2]" : "text-gray-600"}`}>종이접기</span>
               </button>
+
+              {/* 각의 이등분선 */}
+              <button
+                type="button"
+                onClick={() => changeTool("각의 이등분선")}
+                className={`flex flex-col items-center justify-center gap-1 rounded-2xl border-2 transition-all cursor-pointer ${
+                  activeTool === "각의 이등분선"
+                    ? "bg-[#CBA7D2]/20 border-[#CBA7D2] shadow-md"
+                    : "bg-gray-50/80 border-gray-200 hover:bg-gray-100/80 hover:border-[#CBA7D2]/50"
+                }`}
+                style={{ padding: "0.75rem 0.15rem", fontFamily: "var(--font-chalk)" }}
+              >
+                <span className="flex items-center justify-center">
+                  <AngleBisectorIcon size={20} color={activeTool === "각의 이등분선" ? "#CBA7D2" : "#9CA3AF"} />
+                </span>
+                <span className={`font-extrabold text-[0.78rem] whitespace-nowrap ${activeTool === "각의 이등분선" ? "text-[#CBA7D2]" : "text-gray-600"}`}>각의 이등분선</span>
+              </button>
             </div>
 
             {/* 2. 삼각형 생성 도구 (3열 그리드, 줄 간격 추가) */}
@@ -736,17 +887,32 @@ export default function TriangleCentersPage() {
                   )}
                 </div>
               )}
+              {activeTool === "각의 이등분선" && (
+                <div className="rounded-2xl bg-[#CBA7D2]/10 border border-dashed border-[#CBA7D2]/40 text-[#CBA7D2] text-xs leading-relaxed" style={{ padding: "0.75rem 1rem", fontFamily: "var(--font-body)" }}>
+                  {pendingAngleSeg ? "이등분할 각의 두 번째 선분을 클릭하세요." : "이등분할 각의 첫 번째 선분을 클릭하세요."}
+                </div>
+              )}
             </div>
 
-            {/* 초기화 — 가장 아래 고정 (3개 도화지 모두 초기화) */}
-            <button
-              type="button"
-              onClick={handleClearAll}
-              className="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-rose-300/60 text-rose-400 hover:bg-rose-50/60 transition-all cursor-pointer font-bold"
-              style={{ padding: "0.65rem 1rem", fontFamily: "var(--font-chalk)", fontSize: "1.05rem", marginTop: "auto", paddingTop: "0.65rem" }}
-            >
-              초기화
-            </button>
+            {/* 초기화 — 좌우 반반 (현재 초기화 / 전체 초기화) */}
+            <div className="grid grid-cols-2 gap-2" style={{ marginTop: "auto", paddingTop: "0.65rem" }}>
+              <button
+                type="button"
+                onClick={handleClearCurrent}
+                className="w-full flex items-center justify-center rounded-2xl border-2 border-dashed border-rose-300/60 text-rose-400 hover:bg-rose-50/60 transition-all cursor-pointer font-bold"
+                style={{ padding: "0.65rem 0.5rem", fontFamily: "var(--font-chalk)", fontSize: "0.95rem" }}
+              >
+                현재 초기화
+              </button>
+              <button
+                type="button"
+                onClick={handleClearAll}
+                className="w-full flex items-center justify-center rounded-2xl border-2 border-dashed border-rose-400 text-rose-500 hover:bg-rose-50 transition-all cursor-pointer font-bold"
+                style={{ padding: "0.65rem 0.5rem", fontFamily: "var(--font-chalk)", fontSize: "0.95rem" }}
+              >
+                전체 초기화
+              </button>
+            </div>
           </div>
 
           {/* ════ 우측: 도화지 ════ */}
@@ -772,6 +938,7 @@ export default function TriangleCentersPage() {
                       setPendingStart(null);
                       setCursorPos(null);
                       setFoldSource(null);
+                      setPendingAngleSeg(null);
                     }}
                     className={`w-9 h-9 rounded-xl font-bold flex items-center justify-center transition-all cursor-pointer ${
                       isActive
@@ -825,7 +992,15 @@ export default function TriangleCentersPage() {
                     strokeDasharray="6 4" strokeLinecap="round" />
                 ))}
 
-                {/* ── 2. 다각형 렌더링 ── */}
+                {/* ── 2. 각의 이등분선 직선 렌더링 ── */}
+                {validBisectorLines.map(bl => (
+                  <line key={bl.id}
+                    x1={bl.x1} y1={bl.y1} x2={bl.x2} y2={bl.y2}
+                    stroke="#6366F1" strokeWidth={1.6}
+                    strokeDasharray="6 4" strokeLinecap="round" />
+                ))}
+
+                {/* ── 3. 다각형 렌더링 ── */}
                 {polygons.map(poly => {
                   const fold = foldMap.get(poly.id);
                   const pts2: Pt2[] = poly.pts.map(p => ({ x: p.x, y: p.y }));
@@ -869,25 +1044,28 @@ export default function TriangleCentersPage() {
                   );
                 })}
 
-                {/* ── 3. 선분 렌더링 ── */}
+                {/* ── 4. 선분 렌더링 ── */}
                 {segments.map(seg => {
                   if (foldedPolySegIds.has(seg.id)) return null;
                   const sel = selectedItem?.type === "segment" && selectedItem.id === seg.id;
+                  const isAnglePending = pendingAngleSeg?.id === seg.id;
                   return (
                     <line key={seg.id}
                       x1={seg.x1} y1={seg.y1} x2={seg.x2} y2={seg.y2}
-                      stroke={sel ? "#CBA7D2" : "#374151"}
-                      strokeWidth={sel ? 3 : 2} strokeLinecap="round" />
+                      stroke={isAnglePending ? "#6366F1" : sel ? "#CBA7D2" : "#374151"}
+                      strokeWidth={isAnglePending ? 3.5 : sel ? 3 : 2}
+                      strokeDasharray={isAnglePending ? "5 3" : undefined}
+                      strokeLinecap="round" />
                   );
                 })}
 
-                {/* ── 4. 선분 미리보기 ── */}
+                {/* ── 5. 선분 미리보기 ── */}
                 {activeTool === "직선" && pendingStart && cursorPos && (
                   <line x1={pendingStart.x} y1={pendingStart.y} x2={cursorPos.x} y2={cursorPos.y}
                     stroke="#CBA7D2" strokeWidth={1.5} strokeDasharray="6 4" strokeLinecap="round" />
                 )}
 
-                {/* ── 5. 점 렌더링 ── */}
+                {/* ── 6. 점 렌더링 ── */}
                 {points.map(pt => {
                   const isPending = pendingStart?.id === pt.id;
                   const isSel     = selectedItem?.type === "point" && selectedItem.id === pt.id;
