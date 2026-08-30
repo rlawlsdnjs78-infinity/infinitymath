@@ -389,15 +389,31 @@ export default function TriangleCentersPage() {
     return bisectorLines.filter(bl => !bl.polygonId || validPolyIds.has(bl.polygonId));
   }, [bisectorLines, validPolyIds]);
 
-  /* 삭제 버튼 위치 */
+  /* 삭제 버튼 위치 (도화지 경계를 벗어나지 않도록 클램프) */
   const delBtnPos = useMemo(() => {
     if (!selectedItem) return null;
+    let rawX = 0;
+    let rawY = 0;
     if (selectedItem.type === "point") {
       const p = points.find(p => p.id === selectedItem.id);
-      return p ? { x: p.x + 13, y: p.y - 16 } : null;
+      if (!p) return null;
+      rawX = p.x + 13;
+      rawY = p.y - 16;
+    } else {
+      const s = segments.find(s => s.id === selectedItem.id);
+      if (!s) return null;
+      rawX = (s.x1 + s.x2) / 2 + 10;
+      rawY = (s.y1 + s.y2) / 2 - 16;
     }
-    const s = segments.find(s => s.id === selectedItem.id);
-    return s ? { x: (s.x1 + s.x2) / 2 + 10, y: (s.y1 + s.y2) / 2 - 16 } : null;
+
+    const svg = svgRef.current;
+    const maxW = svg && svg.clientWidth > 200 ? svg.clientWidth : 780;
+    const maxH = svg && svg.clientHeight > 200 ? svg.clientHeight : 480;
+
+    const clampedX = Math.max(8, Math.min(maxW - 55, rawX));
+    const clampedY = Math.max(8, Math.min(maxH - 32, rawY));
+
+    return { x: clampedX, y: clampedY };
   }, [selectedItem, points, segments]);
 
   /* 도구 전환 */
@@ -667,20 +683,30 @@ export default function TriangleCentersPage() {
 
       rawPts = [P1, P2, P3];
     } else {
-      const obtuseAngleDeg = 98 + Math.random() * 52;
-      const obtuseAngleRad = (obtuseAngleDeg * Math.PI) / 180;
-      const L1 = 180 + Math.random() * 180;
-      const L2 = 160 + Math.random() * 160;
-      const rot = Math.random() * Math.PI * 2;
+      /* ── 둔각삼각형 (외심 (0,0)이 도화지 안에 무조건 포함되도록 생성) ── */
+      const R = 140 + Math.random() * 80;
+      const baseAngle = Math.random() * Math.PI * 2;
 
-      const P1: Pt2 = { x: 0, y: 0 };
-      const P2: Pt2 = { x: L1 * Math.cos(rot), y: L1 * Math.sin(rot) };
-      const P3: Pt2 = { x: L2 * Math.cos(rot + obtuseAngleRad), y: L2 * Math.sin(rot + obtuseAngleRad) };
+      // 둔각 조건: 한 호의 각도가 180도 초과 (190도 ~ 235도)
+      const a1 = 190 + Math.random() * 45;
+      const rem = 360 - a1;
+      const a2 = 40 + Math.random() * (rem - 80);
 
-      rawPts = [P1, P2, P3];
+      const t1 = baseAngle;
+      const t2 = t1 + (a1 * Math.PI) / 180;
+      const t3 = t2 + (a2 * Math.PI) / 180;
+
+      const P1: Pt2 = { x: R * Math.cos(t1), y: R * Math.sin(t1) };
+      const P2: Pt2 = { x: R * Math.cos(t2), y: R * Math.sin(t2) };
+      const P3: Pt2 = { x: R * Math.cos(t3), y: R * Math.sin(t3) };
+      const circumcenter: Pt2 = { x: 0, y: 0 }; // 외심
+
+      // 외심과 삼각형 꼭짓점을 모두 포함하여 캔버스 내부에 배치
+      rawPts = [P1, P2, P3, circumcenter];
     }
 
-    const finalPts = fitInCanvas(rawPts, width, height, 30);
+    const fitted = fitInCanvas(rawPts, width, height, 35);
+    const finalPts = fitted.slice(0, 3);
 
     updateCurrentCanvas(prev => {
       const startIndex = prev.points.length;
@@ -1091,7 +1117,7 @@ export default function TriangleCentersPage() {
                 })}
               </svg>
 
-              {/* 삭제 버튼 */}
+              {/* 삭제 버튼 (도화지 내부에 머무르도록 클램프) */}
               {selectedItem && delBtnPos && (
                 <button type="button"
                   onClick={e => { e.stopPropagation(); handleDelete(); }}
@@ -1107,12 +1133,20 @@ export default function TriangleCentersPage() {
                 </button>
               )}
 
-              {/* 펼치기 버튼들 */}
+              {/* 펼치기 버튼들 (도화지 내부에 머무르도록 클램프) */}
               {validFoldResults.map(fold => {
                 const allPts = [...fold.gonePoly, ...fold.flapPoly, ...fold.remainingPoly];
                 if (!allPts.length) return null;
                 const maxX = Math.max(...allPts.map(p => p.x));
                 const minY = Math.min(...allPts.map(p => p.y));
+
+                const svg = svgRef.current;
+                const maxW = svg && svg.clientWidth > 200 ? svg.clientWidth : 780;
+                const maxH = svg && svg.clientHeight > 200 ? svg.clientHeight : 480;
+
+                const clampedX = Math.max(8, Math.min(maxW - 75, maxX + 10));
+                const clampedY = Math.max(8, Math.min(maxH - 36, minY));
+
                 return (
                   <button
                     key={fold.polygonId}
@@ -1123,8 +1157,8 @@ export default function TriangleCentersPage() {
                     }}
                     className="absolute z-10 font-bold transition-all hover:bg-purple-100 active:scale-95 flex items-center gap-1 shadow-sm"
                     style={{
-                      left: maxX + 10,
-                      top: Math.max(12, minY),
+                      left: clampedX,
+                      top: clampedY,
                       background: "#EDE9FE",
                       border: "1.5px solid #C4B5FD",
                       borderRadius: "0.5rem",
