@@ -26,6 +26,7 @@ interface FoldResult {
 }
 interface CreaseLine {
   id: string;
+  polygonId: string;
   x1: number;
   y1: number;
   x2: number;
@@ -83,20 +84,6 @@ function lineIsect(A: Pt2, B: Pt2, C: Pt2, D: Pt2): Pt2 | null {
   return { x: (c1 * b2 - c2 * b1) / det, y: (a1 * c2 - a2 * c1) / det };
 }
 
-/** 선분 CD와 직선 AB의 교점 (C-D 선분 내에 존재할 때만 반환) */
-function segmentLineIsect(C: Pt2, D: Pt2, A: Pt2, B: Pt2): Pt2 | null {
-  const isect = lineIsect(C, D, A, B);
-  if (!isect) return null;
-  const minX = Math.min(C.x, D.x) - 1e-5;
-  const maxX = Math.max(C.x, D.x) + 1e-5;
-  const minY = Math.min(C.y, D.y) - 1e-5;
-  const maxY = Math.max(C.y, D.y) + 1e-5;
-  if (isect.x >= minX && isect.x <= maxX && isect.y >= minY && isect.y <= maxY) {
-    return isect;
-  }
-  return null;
-}
-
 /** Sutherland-Hodgman: A→B의 왼쪽(inside) 으로 다각형 클리핑 */
 function clipHalf(poly: Pt2[], A: Pt2, B: Pt2): Pt2[] {
   if (!poly.length) return [];
@@ -140,28 +127,20 @@ function computeFold(polyPts: Pt2[], P: Pt2, Q: Pt2) {
   return { gonePoly, remainingPoly, flapPoly };
 }
 
-/** 수직이등분선과 다각형의 교선 (접힌 흔적 선분) 계산 */
-function getCreaseSegment(polyPts: Pt2[], P: Pt2, Q: Pt2): { x1: number; y1: number; x2: number; y2: number } | null {
+/** 수직이등분선 직선을 다각형 외부로 길게 연장하여 계산 (직선 생성) */
+function getExtendedBisector(P: Pt2, Q: Pt2, length = 4000): { x1: number; y1: number; x2: number; y2: number } {
   const M = { x: (P.x + Q.x) / 2, y: (P.y + Q.y) / 2 };
   const nx = Q.x - P.x, ny = Q.y - P.y;
-  const A = M;
-  const B = { x: M.x - ny, y: M.y + nx };
-
-  const isects: Pt2[] = [];
-  for (let i = 0; i < polyPts.length; i++) {
-    const C = polyPts[i];
-    const D = polyPts[(i + 1) % polyPts.length];
-    const pt = segmentLineIsect(C, D, A, B);
-    if (pt) {
-      if (!isects.some(p => Math.hypot(p.x - pt.x, p.y - pt.y) < 1e-3)) {
-        isects.push(pt);
-      }
-    }
-  }
-  if (isects.length >= 2) {
-    return { x1: isects[0].x, y1: isects[0].y, x2: isects[1].x, y2: isects[1].y };
-  }
-  return null;
+  const len = Math.hypot(nx, ny);
+  if (len < 1e-10) return { x1: M.x, y1: M.y, x2: M.x, y2: M.y };
+  const ux = -ny / len;
+  const uy = nx / len;
+  return {
+    x1: Math.round(M.x - length * ux),
+    y1: Math.round(M.y - length * uy),
+    x2: Math.round(M.x + length * ux),
+    y2: Math.round(M.y + length * uy),
+  };
 }
 
 /* 사이클 탐색 */
@@ -233,11 +212,24 @@ export default function TriangleCentersPage() {
       });
   }, [points, segments]);
 
+  /* 유효한 다각형 ID 집합 */
+  const validPolyIds = useMemo(() => new Set(polygons.map(p => p.id)), [polygons]);
+
+  /* 유효한 다각형에 속한 접기 결과만 필터링 */
+  const validFoldResults = useMemo(() => {
+    return foldResults.filter(f => validPolyIds.has(f.polygonId));
+  }, [foldResults, validPolyIds]);
+
   const foldMap = useMemo(() => {
     const m = new Map<string, FoldResult>();
-    for (const f of foldResults) m.set(f.polygonId, f);
+    for (const f of validFoldResults) m.set(f.polygonId, f);
     return m;
-  }, [foldResults]);
+  }, [validFoldResults]);
+
+  /* 다각형 요소가 사라지면 해당 다각형의 접힌 흔적 직선도 함께 제거 */
+  const validCreaseLines = useMemo(() => {
+    return creaseLines.filter(cl => validPolyIds.has(cl.polygonId));
+  }, [creaseLines, validPolyIds]);
 
   /* 삭제 버튼 위치 */
   const delBtnPos = useMemo(() => {
@@ -324,7 +316,6 @@ export default function TriangleCentersPage() {
 
         const q = nearestPt(poly.pts, x, y, 20);
         if (!q || q.id === foldSource.pt.id) {
-          // 같은 점이거나 꼭짓점이 아니면 취소 또는 재선택 대기
           if (q && q.id === foldSource.pt.id) setFoldSource(null);
           return;
         }
@@ -334,14 +325,16 @@ export default function TriangleCentersPage() {
         const polyPts2: Pt2[] = poly.pts.map(pp => ({ x: pp.x, y: pp.y }));
 
         const { gonePoly, flapPoly, remainingPoly } = computeFold(polyPts2, P, Q);
-        const crease = getCreaseSegment(polyPts2, P, Q);
+        const extendedLine = getExtendedBisector(P, Q);
 
-        if (crease) {
-          setCreaseLines(prev => [
-            ...prev,
-            { id: `crease_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`, ...crease }
-          ]);
-        }
+        setCreaseLines(prev => [
+          ...prev,
+          {
+            id: `crease_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+            polygonId: foldSource.polygonId,
+            ...extendedLine
+          }
+        ]);
 
         const fid = `fold_${Date.now()}`;
         setFoldResults(prev => {
@@ -354,7 +347,7 @@ export default function TriangleCentersPage() {
     }
   }, [activeTool, points, segments, pendingStart, foldSource, polygons, getCoords]);
 
-  /* 펼치기 (해당 다각형의 접힌 상태 원복, 접힌 자국은 유지) */
+  /* 펼치기 (해당 다각형의 접힌 상태 원복, 연장된 접힌 자국 직선은 유지) */
   const handleUnfold = useCallback((polyId: string) => {
     setFoldResults(prev => prev.filter(f => f.polygonId !== polyId));
   }, []);
@@ -394,7 +387,7 @@ export default function TriangleCentersPage() {
   /* 접힌 다각형들에 속해있는 선분 집합 (ID 집합) */
   const foldedPolySegIds = useMemo(() => {
     const s = new Set<string>();
-    for (const fold of foldResults) {
+    for (const fold of validFoldResults) {
       const poly = polygons.find(p => p.id === fold.polygonId);
       if (!poly) continue;
       for (let i = 0; i < poly.pts.length; i++) {
@@ -407,7 +400,7 @@ export default function TriangleCentersPage() {
       }
     }
     return s;
-  }, [foldResults, polygons, segments]);
+  }, [validFoldResults, polygons, segments]);
 
   return (
     <div className="w-full flex-1 flex flex-col items-center justify-start"
@@ -441,28 +434,30 @@ export default function TriangleCentersPage() {
               })}
             </div>
 
-            {/* 상태 안내 */}
-            {activeTool === "선분" && (
-              <div className="mt-3 rounded-2xl bg-[#CBA7D2]/10 border border-dashed border-[#CBA7D2]/40 text-[#CBA7D2] text-xs leading-relaxed" style={{ padding: "0.65rem 1rem", fontFamily: "var(--font-body)" }}>
-                {pendingStart ? <><span className="font-bold">{pendingStart.label}</span> 에서 시작 — 끝점을 클릭하세요.</> : "시작점을 클릭하세요."}
-              </div>
-            )}
-            {activeTool === "선택" && selectedItem && (
-              <div className="mt-3 rounded-2xl bg-rose-50 border border-dashed border-rose-300/60 text-rose-500 text-xs leading-relaxed" style={{ padding: "0.65rem 1rem", fontFamily: "var(--font-body)" }}>
-                {selectedItem.type === "point" ? "점" : "선분"}이 선택됨 — 도화지의 <span className="font-bold">삭제</span> 버튼을 클릭하세요.
-              </div>
-            )}
-            {activeTool === "종이접기" && (
-              <div className="mt-3 rounded-2xl bg-[#CBA7D2]/10 border border-dashed border-[#CBA7D2]/40 text-[#CBA7D2] text-xs leading-relaxed" style={{ padding: "0.65rem 1rem", fontFamily: "var(--font-body)" }}>
-                {foldSource ? (
-                  <>
-                    <span className="font-bold text-[#A855F7]">{foldSource.pt.label}</span> 점에서 시작 — 접어 도착할 꼭짓점을 클릭하세요.
-                  </>
-                ) : (
-                  "접기 시작할 다각형의 꼭짓점을 클릭하세요."
-                )}
-              </div>
-            )}
+            {/* 상태 안내 (도구 버튼 목록과 넉넉한 간격 제공) */}
+            <div style={{ marginTop: "1.25rem" }}>
+              {activeTool === "선분" && (
+                <div className="rounded-2xl bg-[#CBA7D2]/10 border border-dashed border-[#CBA7D2]/40 text-[#CBA7D2] text-xs leading-relaxed" style={{ padding: "0.75rem 1rem", fontFamily: "var(--font-body)" }}>
+                  {pendingStart ? <><span className="font-bold">{pendingStart.label}</span> 에서 시작 — 끝점을 클릭하세요.</> : "시작점을 클릭하세요."}
+                </div>
+              )}
+              {activeTool === "선택" && selectedItem && (
+                <div className="rounded-2xl bg-rose-50 border border-dashed border-rose-300/60 text-rose-500 text-xs leading-relaxed" style={{ padding: "0.75rem 1rem", fontFamily: "var(--font-body)" }}>
+                  {selectedItem.type === "point" ? "점" : "선분"}이 선택됨 — 도화지의 <span className="font-bold">삭제</span> 버튼을 클릭하세요.
+                </div>
+              )}
+              {activeTool === "종이접기" && (
+                <div className="rounded-2xl bg-[#CBA7D2]/10 border border-dashed border-[#CBA7D2]/40 text-[#CBA7D2] text-xs leading-relaxed" style={{ padding: "0.75rem 1rem", fontFamily: "var(--font-body)" }}>
+                  {foldSource ? (
+                    <>
+                      <span className="font-bold text-[#A855F7]">{foldSource.pt.label}</span> 점에서 시작 — 접어 도착할 꼭짓점을 클릭하세요.
+                    </>
+                  ) : (
+                    "접기 시작할 다각형의 꼭짓점을 클릭하세요."
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* 초기화 — 가장 아래 고정 */}
             <button type="button" onClick={handleClear}
@@ -474,7 +469,7 @@ export default function TriangleCentersPage() {
 
           {/* ════ 우측: 도화지 ════ */}
           <div className="xl:col-span-9 chalk-box flex flex-col bg-white/85 backdrop-blur-md" style={{ padding: "0.85rem", minHeight: "520px" }}>
-            <div className="relative flex-1" style={{ minHeight: "460px" }}>
+            <div className="relative flex-1 overflow-hidden rounded-2xl" style={{ minHeight: "460px" }}>
               <svg ref={svgRef}
                 style={{
                   position: "absolute", inset: 0, width: "100%", height: "100%",
@@ -505,7 +500,15 @@ export default function TriangleCentersPage() {
                 {/* 배경 격자 */}
                 <rect width="100%" height="100%" fill="url(#tc-grid)" rx="16" />
 
-                {/* ── 1. 다각형 렌더링 ── */}
+                {/* ── 1. 접혔던 흔적(Crease lines) 연장된 직선 렌더링 (다각형 아래 레이어) ── */}
+                {validCreaseLines.map(cl => (
+                  <line key={cl.id}
+                    x1={cl.x1} y1={cl.y1} x2={cl.x2} y2={cl.y2}
+                    stroke="#9CA3AF" strokeWidth={1.5}
+                    strokeDasharray="6 4" strokeLinecap="round" />
+                ))}
+
+                {/* ── 2. 다각형 렌더링 ── */}
                 {polygons.map(poly => {
                   const fold = foldMap.get(poly.id);
                   const pts2: Pt2[] = poly.pts.map(p => ({ x: p.x, y: p.y }));
@@ -548,14 +551,6 @@ export default function TriangleCentersPage() {
                     </g>
                   );
                 })}
-
-                {/* ── 2. 접혔던 흔적(Crease lines) 영구 렌더링 ── */}
-                {creaseLines.map(cl => (
-                  <line key={cl.id}
-                    x1={cl.x1} y1={cl.y1} x2={cl.x2} y2={cl.y2}
-                    stroke="#9CA3AF" strokeWidth={1.5}
-                    strokeDasharray="4 3" strokeLinecap="round" />
-                ))}
 
                 {/* ── 3. 선분 렌더링 (접힌 다각형의 변은 다각형 내부 테두리로 처리) ── */}
                 {segments.map(seg => {
@@ -618,7 +613,7 @@ export default function TriangleCentersPage() {
               )}
 
               {/* 펼치기 버튼들 */}
-              {foldResults.map(fold => {
+              {validFoldResults.map(fold => {
                 const allPts = [...fold.gonePoly, ...fold.flapPoly, ...fold.remainingPoly];
                 if (!allPts.length) return null;
                 const maxX = Math.max(...allPts.map(p => p.x));
