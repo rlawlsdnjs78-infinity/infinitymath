@@ -17,9 +17,19 @@ interface Point { id: string; x: number; y: number; label: string; }
 interface Segment { id: string; p1Id: string; p2Id: string; x1: number; y1: number; x2: number; y2: number; }
 interface DetectedPoly { id: string; pts: Point[]; color: { fill: string; stroke: string }; }
 interface FoldResult {
-  id: string; polygonId: string;
-  gonePoly: Pt2[]; flapPoly: Pt2[]; remainingPoly: Pt2[];
+  id: string;
+  polygonId: string;
+  gonePoly: Pt2[];
+  flapPoly: Pt2[];
+  remainingPoly: Pt2[];
   color: { fill: string; stroke: string };
+}
+interface CreaseLine {
+  id: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
 }
 type SelectedItem = { type: "point"; id: string } | { type: "segment"; id: string } | null;
 
@@ -73,6 +83,20 @@ function lineIsect(A: Pt2, B: Pt2, C: Pt2, D: Pt2): Pt2 | null {
   return { x: (c1 * b2 - c2 * b1) / det, y: (a1 * c2 - a2 * c1) / det };
 }
 
+/** 선분 CD와 직선 AB의 교점 (C-D 선분 내에 존재할 때만 반환) */
+function segmentLineIsect(C: Pt2, D: Pt2, A: Pt2, B: Pt2): Pt2 | null {
+  const isect = lineIsect(C, D, A, B);
+  if (!isect) return null;
+  const minX = Math.min(C.x, D.x) - 1e-5;
+  const maxX = Math.max(C.x, D.x) + 1e-5;
+  const minY = Math.min(C.y, D.y) - 1e-5;
+  const maxY = Math.max(C.y, D.y) + 1e-5;
+  if (isect.x >= minX && isect.x <= maxX && isect.y >= minY && isect.y <= maxY) {
+    return isect;
+  }
+  return null;
+}
+
 /** Sutherland-Hodgman: A→B의 왼쪽(inside) 으로 다각형 클리핑 */
 function clipHalf(poly: Pt2[], A: Pt2, B: Pt2): Pt2[] {
   if (!poly.length) return [];
@@ -84,14 +108,6 @@ function clipHalf(poly: Pt2[], A: Pt2, B: Pt2): Pt2[] {
     if ((sc > 0 && sn < 0) || (sc < 0 && sn > 0)) { const p = lineIsect(A, B, c, n); if (p) out.push(p); }
   }
   return out;
-}
-
-/** 클립 다각형의 각 변으로 subject 클리핑 (Sutherland-Hodgman) */
-function clipByPoly(subject: Pt2[], clip: Pt2[]): Pt2[] {
-  let res = [...subject];
-  for (let i = 0; i < clip.length && res.length > 0; i++)
-    res = clipHalf(res, clip[i], clip[(i + 1) % clip.length]);
-  return res;
 }
 
 /** P→Q의 수직이등분선 기준 점 V를 반사 */
@@ -122,6 +138,30 @@ function computeFold(polyPts: Pt2[], P: Pt2, Q: Pt2) {
   const remainingPoly = clipHalf(polyPts, M, Bq);
   const flapPoly      = gonePoly.map(v => reflectPt(v, P, Q));
   return { gonePoly, remainingPoly, flapPoly };
+}
+
+/** 수직이등분선과 다각형의 교선 (접힌 흔적 선분) 계산 */
+function getCreaseSegment(polyPts: Pt2[], P: Pt2, Q: Pt2): { x1: number; y1: number; x2: number; y2: number } | null {
+  const M = { x: (P.x + Q.x) / 2, y: (P.y + Q.y) / 2 };
+  const nx = Q.x - P.x, ny = Q.y - P.y;
+  const A = M;
+  const B = { x: M.x - ny, y: M.y + nx };
+
+  const isects: Pt2[] = [];
+  for (let i = 0; i < polyPts.length; i++) {
+    const C = polyPts[i];
+    const D = polyPts[(i + 1) % polyPts.length];
+    const pt = segmentLineIsect(C, D, A, B);
+    if (pt) {
+      if (!isects.some(p => Math.hypot(p.x - pt.x, p.y - pt.y) < 1e-3)) {
+        isects.push(pt);
+      }
+    }
+  }
+  if (isects.length >= 2) {
+    return { x1: isects[0].x, y1: isects[0].y, x2: isects[1].x, y2: isects[1].y };
+  }
+  return null;
 }
 
 /* 사이클 탐색 */
@@ -161,8 +201,9 @@ export default function TriangleCentersPage() {
   const [selectedItem, setSelectedItem] = useState<SelectedItem>(null);
   const [pendingStart, setPendingStart ] = useState<Point | null>(null);
   const [cursorPos,    setCursorPos   ] = useState<Pt2 | null>(null);
-  const [foldSource,   setFoldSource  ] = useState<{ pt: Pt2; polygonId: string } | null>(null);
+  const [foldSource,   setFoldSource  ] = useState<{ pt: Point; polygonId: string } | null>(null);
   const [foldResults,  setFoldResults ] = useState<FoldResult[]>([]);
+  const [creaseLines,  setCreaseLines ] = useState<CreaseLine[]>([]);
   const svgRef = useRef<SVGSVGElement>(null);
 
   const getCoords = useCallback((e: React.MouseEvent<SVGSVGElement>): Pt2 => {
@@ -270,20 +311,38 @@ export default function TriangleCentersPage() {
     /* ── 종이접기 ── */
     if (activeTool === "종이접기") {
       if (!foldSource) {
-        // 다각형 꼭짓점만 허용
-        const p = nearestPt(points, x, y, 15);
+        // 다각형 꼭짓점만 선택 허용
+        const p = nearestPt(points, x, y, 18);
         if (!p) return;
         const poly = polygons.find(pl => pl.pts.some(pp => pp.id === p.id));
         if (!poly) return;
-        setFoldSource({ pt: { x: p.x, y: p.y }, polygonId: poly.id });
+        setFoldSource({ pt: p, polygonId: poly.id });
       } else {
-        const Q: Pt2 = { x, y };
-        const P = foldSource.pt;
-        if (Math.hypot(Q.x - P.x, Q.y - P.y) < 5) { setFoldSource(null); return; }
+        // 해당 다각형의 꼭짓점 목록에서 도착점 Q 스냅 선택
         const poly = polygons.find(pl => pl.id === foldSource.polygonId);
         if (!poly) { setFoldSource(null); return; }
+
+        const q = nearestPt(poly.pts, x, y, 20);
+        if (!q || q.id === foldSource.pt.id) {
+          // 같은 점이거나 꼭짓점이 아니면 취소 또는 재선택 대기
+          if (q && q.id === foldSource.pt.id) setFoldSource(null);
+          return;
+        }
+
+        const P: Pt2 = { x: foldSource.pt.x, y: foldSource.pt.y };
+        const Q: Pt2 = { x: q.x, y: q.y };
         const polyPts2: Pt2[] = poly.pts.map(pp => ({ x: pp.x, y: pp.y }));
+
         const { gonePoly, flapPoly, remainingPoly } = computeFold(polyPts2, P, Q);
+        const crease = getCreaseSegment(polyPts2, P, Q);
+
+        if (crease) {
+          setCreaseLines(prev => [
+            ...prev,
+            { id: `crease_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`, ...crease }
+          ]);
+        }
+
         const fid = `fold_${Date.now()}`;
         setFoldResults(prev => {
           const next = prev.filter(f => f.polygonId !== foldSource.polygonId);
@@ -294,6 +353,11 @@ export default function TriangleCentersPage() {
       return;
     }
   }, [activeTool, points, segments, pendingStart, foldSource, polygons, getCoords]);
+
+  /* 펼치기 (해당 다각형의 접힌 상태 원복, 접힌 자국은 유지) */
+  const handleUnfold = useCallback((polyId: string) => {
+    setFoldResults(prev => prev.filter(f => f.polygonId !== polyId));
+  }, []);
 
   /* 마우스 이동 */
   const handleMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
@@ -317,7 +381,8 @@ export default function TriangleCentersPage() {
   /* 초기화 */
   const handleClear = () => {
     setPoints([]); setSegments([]); setSelectedItem(null);
-    setPendingStart(null); setCursorPos(null); setFoldSource(null); setFoldResults([]);
+    setPendingStart(null); setCursorPos(null); setFoldSource(null);
+    setFoldResults([]); setCreaseLines([]);
   };
 
   const toSVGPts = (pts: Pt2[]) => pts.map(p => `${p.x},${p.y}`).join(" ");
@@ -326,10 +391,23 @@ export default function TriangleCentersPage() {
     : activeTool === "종이접기" ? (foldSource ? "crosshair" : "pointer")
     : activeTool === "선분" && pendingStart ? "crosshair" : "cell";
 
-  /* 종이접기 소스 점 */
-  const foldSrcPt = foldSource
-    ? points.find(p => Math.hypot(p.x - foldSource.pt.x, p.y - foldSource.pt.y) < 3)
-    : null;
+  /* 접힌 다각형들에 속해있는 선분 집합 (ID 집합) */
+  const foldedPolySegIds = useMemo(() => {
+    const s = new Set<string>();
+    for (const fold of foldResults) {
+      const poly = polygons.find(p => p.id === fold.polygonId);
+      if (!poly) continue;
+      for (let i = 0; i < poly.pts.length; i++) {
+        const id1 = poly.pts[i].id;
+        const id2 = poly.pts[(i + 1) % poly.pts.length].id;
+        const seg = segments.find(sg =>
+          (sg.p1Id === id1 && sg.p2Id === id2) || (sg.p1Id === id2 && sg.p2Id === id1)
+        );
+        if (seg) s.add(seg.id);
+      }
+    }
+    return s;
+  }, [foldResults, polygons, segments]);
 
   return (
     <div className="w-full flex-1 flex flex-col items-center justify-start"
@@ -376,7 +454,13 @@ export default function TriangleCentersPage() {
             )}
             {activeTool === "종이접기" && (
               <div className="mt-3 rounded-2xl bg-[#CBA7D2]/10 border border-dashed border-[#CBA7D2]/40 text-[#CBA7D2] text-xs leading-relaxed" style={{ padding: "0.65rem 1rem", fontFamily: "var(--font-body)" }}>
-                {foldSource ? "도착할 점을 클릭하세요." : "다각형의 꼭짓점을 클릭하세요."}
+                {foldSource ? (
+                  <>
+                    <span className="font-bold text-[#A855F7]">{foldSource.pt.label}</span> 점에서 시작 — 접어 도착할 꼭짓점을 클릭하세요.
+                  </>
+                ) : (
+                  "접기 시작할 다각형의 꼭짓점을 클릭하세요."
+                )}
               </div>
             )}
 
@@ -407,18 +491,13 @@ export default function TriangleCentersPage() {
                   <pattern id="tc-grid" width="40" height="40" patternUnits="userSpaceOnUse">
                     <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(203,167,210,0.12)" strokeWidth="1" />
                   </pattern>
-                  {/*
-                    ★ 버그 수정 (#4): grain을 SourceGraphic으로 in-clip하여
-                    다각형 바깥 사각형 영역에 질감이 번지는 현상 제거
-                  */}
+                  {/* 색종이 질감 필터 */}
                   <filter id="tc-paper" x="0%" y="0%" width="100%" height="100%">
                     <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" seed="7" result="noise" />
                     <feColorMatrix in="noise" type="matrix"
                       values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.22 0"
                       result="grain" />
-                    {/* grain을 다각형 범위로 클리핑 */}
                     <feComposite in="grain" in2="SourceGraphic" operator="in" result="clippedGrain" />
-                    {/* 원본 + 클리핑된 grain 합성 */}
                     <feComposite in="SourceGraphic" in2="clippedGrain" operator="arithmetic" k1="0" k2="1" k3="0.55" k4="0" />
                   </filter>
                 </defs>
@@ -426,7 +505,7 @@ export default function TriangleCentersPage() {
                 {/* 배경 격자 */}
                 <rect width="100%" height="100%" fill="url(#tc-grid)" rx="16" />
 
-                {/* ── 다각형 렌더링 ── */}
+                {/* ── 1. 다각형 렌더링 ── */}
                 {polygons.map(poly => {
                   const fold = foldMap.get(poly.id);
                   const pts2: Pt2[] = poly.pts.map(p => ({ x: p.x, y: p.y }));
@@ -443,36 +522,44 @@ export default function TriangleCentersPage() {
 
                   return (
                     <g key={poly.id}>
-                      {/* remaining (Q-side) */}
-                      {fold.remainingPoly.length >= 3 && (
-                        <polygon points={toSVGPts(fold.remainingPoly)}
-                          fill={poly.color.fill} fillOpacity={0.62}
-                          stroke="none" filter="url(#tc-paper)" />
-                      )}
-                      {/*
-                        flap (접혀 온 부분):
-                        remaining 위에 렌더되어 겹치는 곳은 알파 중첩으로 자연스럽게 진해짐
-                        1-(1-0.62)^2 ≈ 0.86
-                      */}
-                      {fold.flapPoly.length >= 3 && (
-                        <polygon points={toSVGPts(fold.flapPoly)}
-                          fill={poly.color.fill} fillOpacity={0.62}
-                          stroke={poly.color.stroke} strokeWidth={1}
-                          filter="url(#tc-paper)" />
-                      )}
-                      {/* gone (사라진 부분): 투명 + 점선 테두리 */}
+                      {/* 사라진 부분(gone): 투명 배경 + 외곽선 점선 처리 */}
                       {fold.gonePoly.length >= 3 && (
                         <polygon points={toSVGPts(fold.gonePoly)}
                           fill="none"
-                          stroke={poly.color.stroke} strokeWidth={1.5}
-                          strokeDasharray="6 4" />
+                          stroke="#9CA3AF" strokeWidth={1.8}
+                          strokeDasharray="5 4" />
+                      )}
+
+                      {/* 남아있는 부분(remaining): 기본 색상 질감 채우기 + 실선 테두리 */}
+                      {fold.remainingPoly.length >= 3 && (
+                        <polygon points={toSVGPts(fold.remainingPoly)}
+                          fill={poly.color.fill} fillOpacity={0.62}
+                          stroke="#374151" strokeWidth={2}
+                          filter="url(#tc-paper)" />
+                      )}
+
+                      {/* 접혀 겹친 부분(flap): 중첩되어 더 진한 색상 + 실선 테두리 */}
+                      {fold.flapPoly.length >= 3 && (
+                        <polygon points={toSVGPts(fold.flapPoly)}
+                          fill={poly.color.fill} fillOpacity={0.62}
+                          stroke="#374151" strokeWidth={2}
+                          filter="url(#tc-paper)" />
                       )}
                     </g>
                   );
                 })}
 
-                {/* ── 선분 ── */}
+                {/* ── 2. 접혔던 흔적(Crease lines) 영구 렌더링 ── */}
+                {creaseLines.map(cl => (
+                  <line key={cl.id}
+                    x1={cl.x1} y1={cl.y1} x2={cl.x2} y2={cl.y2}
+                    stroke="#9CA3AF" strokeWidth={1.5}
+                    strokeDasharray="4 3" strokeLinecap="round" />
+                ))}
+
+                {/* ── 3. 선분 렌더링 (접힌 다각형의 변은 다각형 내부 테두리로 처리) ── */}
                 {segments.map(seg => {
+                  if (foldedPolySegIds.has(seg.id)) return null;
                   const sel = selectedItem?.type === "segment" && selectedItem.id === seg.id;
                   return (
                     <line key={seg.id}
@@ -482,29 +569,29 @@ export default function TriangleCentersPage() {
                   );
                 })}
 
-                {/* ── 선분 미리보기 ── */}
+                {/* ── 4. 선분 미리보기 ── */}
                 {activeTool === "선분" && pendingStart && cursorPos && (
                   <line x1={pendingStart.x} y1={pendingStart.y} x2={cursorPos.x} y2={cursorPos.y}
                     stroke="#CBA7D2" strokeWidth={1.5} strokeDasharray="6 4" strokeLinecap="round" />
                 )}
 
-                {/* ── 점 ── */}
+                {/* ── 5. 점 렌더링 ── */}
                 {points.map(pt => {
-                  const isPending  = pendingStart?.id === pt.id;
-                  const isSel      = selectedItem?.type === "point" && selectedItem.id === pt.id;
-                  const isFoldSrc  = foldSrcPt?.id === pt.id;
+                  const isPending = pendingStart?.id === pt.id;
+                  const isSel     = selectedItem?.type === "point" && selectedItem.id === pt.id;
+                  const isFoldSrc = foldSource?.pt.id === pt.id;
                   const hl = isPending || isSel || isFoldSrc;
                   return (
                     <g key={pt.id}>
-                      {hl && <circle cx={pt.x} cy={pt.y} r={10}
-                        fill={isFoldSrc ? "rgba(251,191,36,0.2)" : "rgba(203,167,210,0.2)"}
-                        stroke={isFoldSrc ? "#F59E0B" : "#CBA7D2"}
-                        strokeWidth={1.5} strokeDasharray="4 3" />}
+                      {hl && <circle cx={pt.x} cy={pt.y} r={11}
+                        fill={isFoldSrc ? "rgba(168,85,247,0.2)" : "rgba(203,167,210,0.2)"}
+                        stroke={isFoldSrc ? "#A855F7" : "#CBA7D2"}
+                        strokeWidth={1.8} strokeDasharray="4 3" />}
                       <circle cx={pt.x} cy={pt.y} r={5}
-                        fill={isFoldSrc ? "#F59E0B" : hl ? "#CBA7D2" : "#374151"}
+                        fill={isFoldSrc ? "#A855F7" : hl ? "#CBA7D2" : "#374151"}
                         stroke="white" strokeWidth={1.5} />
                       <text x={pt.x + 9} y={pt.y - 7}
-                        fill={isFoldSrc ? "#F59E0B" : hl ? "#CBA7D2" : "#4B5563"}
+                        fill={isFoldSrc ? "#A855F7" : hl ? "#CBA7D2" : "#4B5563"}
                         fontSize={13} fontWeight="bold"
                         style={{ fontFamily: "var(--font-chalk)", userSelect: "none" }}>
                         {pt.label}
@@ -529,6 +616,41 @@ export default function TriangleCentersPage() {
                   삭제
                 </button>
               )}
+
+              {/* 펼치기 버튼들 */}
+              {foldResults.map(fold => {
+                const allPts = [...fold.gonePoly, ...fold.flapPoly, ...fold.remainingPoly];
+                if (!allPts.length) return null;
+                const maxX = Math.max(...allPts.map(p => p.x));
+                const minY = Math.min(...allPts.map(p => p.y));
+                return (
+                  <button
+                    key={fold.polygonId}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleUnfold(fold.polygonId);
+                    }}
+                    className="absolute z-10 font-bold transition-all hover:bg-purple-100 active:scale-95 flex items-center gap-1 shadow-sm"
+                    style={{
+                      left: maxX + 10,
+                      top: Math.max(12, minY),
+                      background: "#EDE9FE",
+                      border: "1.5px solid #C4B5FD",
+                      borderRadius: "0.5rem",
+                      color: "#6D28D9",
+                      fontSize: "0.78rem",
+                      padding: "3px 10px",
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                      fontFamily: "var(--font-body)",
+                      lineHeight: "1.5",
+                    }}
+                  >
+                    <span>펼치기</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
