@@ -496,13 +496,13 @@ export default function TriangleCentersPage() {
     let rawPts: Pt2[] = [];
 
     if (type === "acute") {
-      /* ── 예각삼각형 무작위 생성 (모든 내각 < 90도) ── */
-      const R = 80 + Math.random() * 70; // 반지름 무작위 (80 ~ 150)
-      const baseAngle = Math.random() * Math.PI * 2; // 전체 회전각 무작위
+      /* ── 예각삼각형 무작위 생성 (크기 2배, 모든 내각 < 90도) ── */
+      const R = 150 + Math.random() * 90; // 2배 크기 반지름 (150 ~ 240)
+      const baseAngle = Math.random() * Math.PI * 2;
 
-      // 외접원 위의 3개 호의 각도 (모두 < 180도이어야 세 내각이 모두 < 90도 예각 보장)
-      let a1 = 70 + Math.random() * 70; // 70 ~ 140도
-      let a2 = 70 + Math.random() * 70; // 70 ~ 140도
+      // 외접원 위의 3개 호의 각도 (< 180도)
+      let a1 = 70 + Math.random() * 70;
+      let a2 = 70 + Math.random() * 70;
       let a3 = 360 - (a1 + a2);
       while (a3 < 65 || a3 > 150) {
         a1 = 70 + Math.random() * 70;
@@ -520,26 +520,24 @@ export default function TriangleCentersPage() {
         { x: R * Math.cos(t3), y: R * Math.sin(t3) },
       ];
     } else if (type === "right") {
-      /* ── 직각삼각형 무작위 생성 (한 각 = 90도, 변 길이 및 회전 무작위) ── */
-      const L1 = 90 + Math.random() * 120; // 밑변 길이 무작위 (90 ~ 210)
-      const L2 = 80 + Math.random() * 120; // 높이 길이 무작위 (80 ~ 200)
-      const rot = Math.random() * Math.PI * 2; // 전체 회전각 무작위
+      /* ── 직각삼각형 무작위 생성 (크기 2배, 한 각 = 90도) ── */
+      const L1 = 180 + Math.random() * 180; // 2배 크기 밑변 (180 ~ 360)
+      const L2 = 160 + Math.random() * 180; // 2배 크기 높이 (160 ~ 340)
+      const rot = Math.random() * Math.PI * 2;
 
-      // P2가 직각 꼭짓점 (0,0)
       const P2: Pt2 = { x: 0, y: 0 };
       const P1: Pt2 = { x: L1 * Math.cos(rot), y: L1 * Math.sin(rot) };
       const P3: Pt2 = { x: -L2 * Math.sin(rot), y: L2 * Math.cos(rot) };
 
       rawPts = [P1, P2, P3];
     } else {
-      /* ── 둔각삼각형 무작위 생성 (한 각 > 90도, 각도 및 변 길이 무작위) ── */
-      const obtuseAngleDeg = 98 + Math.random() * 52; // 둔각 크기 무작위 (98도 ~ 150도)
+      /* ── 둔각삼각형 무작위 생성 (크기 2배, 한 각 > 90도) ── */
+      const obtuseAngleDeg = 98 + Math.random() * 52;
       const obtuseAngleRad = (obtuseAngleDeg * Math.PI) / 180;
-      const L1 = 90 + Math.random() * 110; // 첫 번째 변 길이 무작위 (90 ~ 200)
-      const L2 = 80 + Math.random() * 110; // 두 번째 변 길이 무작위 (80 ~ 190)
-      const rot = Math.random() * Math.PI * 2; // 회전각 무작위
+      const L1 = 180 + Math.random() * 180; // 2배 크기 첫 번째 변 (180 ~ 360)
+      const L2 = 160 + Math.random() * 160; // 2배 크기 두 번째 변 (160 ~ 320)
+      const rot = Math.random() * Math.PI * 2;
 
-      // P1이 둔각 꼭짓점 (0,0)
       const P1: Pt2 = { x: 0, y: 0 };
       const P2: Pt2 = { x: L1 * Math.cos(rot), y: L1 * Math.sin(rot) };
       const P3: Pt2 = { x: L2 * Math.cos(rot + obtuseAngleRad), y: L2 * Math.sin(rot + obtuseAngleRad) };
@@ -547,8 +545,8 @@ export default function TriangleCentersPage() {
       rawPts = [P1, P2, P3];
     }
 
-    // 캔버스 내 무작위 위치로 배치
-    const finalPts = fitInCanvas(rawPts, width, height, 55);
+    // 캔버스 내 무작위 위치로 배치 (여백 30px)
+    const finalPts = fitInCanvas(rawPts, width, height, 30);
 
     updateCurrentCanvas(prev => {
       const startIndex = prev.points.length;
@@ -754,46 +752,38 @@ export default function TriangleCentersPage() {
           {/* ════ 우측: 도화지 ════ */}
           <div className="xl:col-span-9 chalk-box flex flex-col bg-white/85 backdrop-blur-md" style={{ padding: "0.85rem", minHeight: "520px" }}>
 
-            {/* 1, 2, 3 도화지 선택 탭 바 (도화지와 명확하고 넉넉한 간격 mb-4 / 1.25rem 제공) */}
+            {/* 1, 2, 3 도화지 선택 버튼 영역 */}
             <div
-              className="flex items-center justify-between pb-3"
-              style={{
-                marginBottom: "1.25rem",
-                borderBottom: "1.5px dashed rgba(203, 167, 210, 0.45)",
-              }}
+              className="flex items-center gap-2.5"
+              style={{ marginBottom: "1.25rem" }}
             >
-              <div className="flex items-center gap-2.5">
-                <span className="text-sm font-bold text-gray-600 mr-1" style={{ fontFamily: "var(--font-chalk)" }}>
-                  도화지 선택:
-                </span>
-                {([1, 2, 3] as const).map(num => {
-                  const isActive = currentCanvasId === num;
-                  return (
-                    <button
-                      key={num}
-                      type="button"
-                      onClick={() => {
-                        setCurrentCanvasId(num);
-                        setSelectedItem(null);
-                        setPendingStart(null);
-                        setCursorPos(null);
-                        setFoldSource(null);
-                      }}
-                      className={`w-9 h-9 rounded-xl font-bold flex items-center justify-center transition-all cursor-pointer ${
-                        isActive
-                          ? "bg-[#CBA7D2] text-white shadow-md scale-105"
-                          : "bg-gray-100/90 text-gray-600 hover:bg-gray-200"
-                      }`}
-                      style={{ fontFamily: "var(--font-chalk)", fontSize: "1.1rem" }}
-                    >
-                      {num}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="text-xs font-semibold text-[#A855F7]/80 bg-[#CBA7D2]/15 px-3 py-1 rounded-full" style={{ fontFamily: "var(--font-body)" }}>
-                {currentCanvasId}번 도화지 편집 중
-              </div>
+              <span className="text-sm font-bold text-gray-600 mr-1" style={{ fontFamily: "var(--font-chalk)" }}>
+                도화지:
+              </span>
+              {([1, 2, 3] as const).map(num => {
+                const isActive = currentCanvasId === num;
+                return (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => {
+                      setCurrentCanvasId(num);
+                      setSelectedItem(null);
+                      setPendingStart(null);
+                      setCursorPos(null);
+                      setFoldSource(null);
+                    }}
+                    className={`w-9 h-9 rounded-xl font-bold flex items-center justify-center transition-all cursor-pointer ${
+                      isActive
+                        ? "bg-[#CBA7D2] text-white shadow-md scale-105"
+                        : "bg-gray-100/90 text-gray-600 hover:bg-gray-200"
+                    }`}
+                    style={{ fontFamily: "var(--font-chalk)", fontSize: "1.1rem" }}
+                  >
+                    {num}
+                  </button>
+                );
+              })}
             </div>
 
             {/* SVG 도화지 영역 */}
