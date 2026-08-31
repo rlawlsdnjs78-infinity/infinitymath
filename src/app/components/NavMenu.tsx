@@ -138,6 +138,17 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
                   <span className="w-[0.85rem] h-[0.85rem] rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
                   <span className="text-[1.05rem] font-medium text-gray-600 hover:text-gray-900" style={{ fontFamily: "var(--font-body)" }}>수식 피라미드</span>
                 </Link>
+                <Link
+                  href="/triple-dice"
+                  className="flex items-center gap-2.5 px-4 py-3 rounded transition-colors duration-150 hover:bg-gray-100"
+                  style={{
+                    textDecoration: "none",
+                  }}
+                  onClick={() => setIsBrainOpen(false)}
+                >
+                  <span className="w-[0.85rem] h-[0.85rem] rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
+                  <span className="text-[1.05rem] font-medium text-gray-600 hover:text-gray-900" style={{ fontFamily: "var(--font-body)" }}>트리플 다이스</span>
+                </Link>
               </div>
             </div>
           )}
