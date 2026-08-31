@@ -16,8 +16,8 @@ import NavMenu from "./NavMenu";
 export default function Header() {
   const pathname = usePathname();
 
-  // '수식 피라미드' 페이지에서는 전역 헤더 숨김
-  if (pathname === "/formula-pyramid") {
+  // '수식 피라미드' 및 '트리플 다이스' 페이지에서는 전역 헤더 숨김
+  if (pathname === "/formula-pyramid" || pathname === "/triple-dice") {
     return null;
   }
 

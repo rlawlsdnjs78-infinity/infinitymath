@@ -24,6 +24,7 @@ import {
   LogOut,
   Play,
   Dice5,
+  Pencil,
 } from "lucide-react";
 
 export default function TripleDicePage() {
@@ -58,6 +59,7 @@ export default function TripleDicePage() {
         paddingBottom: "1.45rem",
       }}
     >
+      {/* ─── 상단 타이틀 ─────────────────────────────── */}
       {!inGameRoom && (
         <>
           <div className="flex items-center justify-between w-full" style={{ marginTop: "0.25rem", marginBottom: "0.85rem" }}>
@@ -91,10 +93,14 @@ export default function TripleDicePage() {
         </>
       )}
 
+      {/* ─── 3분할 박스 ─────────────────────────────── */}
       <div className="grid grid-cols-1 xl:grid-cols-12 items-stretch" style={{ gap: "1.45rem" }}>
 
-        {/* 좌측 박스 */}
-        <div className="xl:col-span-3 chalk-box flex flex-col bg-white/80 backdrop-blur-md h-full" style={{ padding: "0.85rem" }}>
+        {/* ════════════════════ [좌측 박스] ════════════════════ */}
+        <div
+          className="xl:col-span-3 chalk-box flex flex-col bg-white/80 backdrop-blur-md h-full"
+          style={{ padding: "0.85rem" }}
+        >
           <div className="flex items-center gap-3 w-full min-h-[44px]">
             <LogIn className="text-[#CBA7D2] flex-shrink-0" size={28} />
             <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem", lineHeight: 1.1 }}>
@@ -103,6 +109,7 @@ export default function TripleDicePage() {
           </div>
           <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
 
+          {/* 탭 버튼: 방에 입장 중이 아닐 때만 표시 */}
           {!inGameRoom && (
             <div className="w-full flex justify-center" style={{ marginTop: "0", marginBottom: "2.45rem" }}>
               <div className="flex items-center rounded-full select-none bg-white/80 backdrop-blur-md border-2 border-[#CBA7D2]/70 shadow-sm w-full p-1 gap-0 overflow-hidden">
@@ -125,6 +132,7 @@ export default function TripleDicePage() {
           {inGameRoom && <div style={{ marginBottom: "0.5rem" }} />}
 
           {mode === "player" ? (
+            /* ── 플레이어 모드 입장 양식 ── */
             <div className="flex flex-col flex-1 gap-5">
               {!inGameRoom ? (
                 <form onSubmit={handleJoinGameRoom} className="flex flex-col gap-5">
@@ -161,6 +169,7 @@ export default function TripleDicePage() {
                   </button>
                 </form>
               ) : (
+                /* 게임방 입장 후: 접속 뱃지 + 실시간 점수판 */
                 <div className="flex flex-col flex-1 gap-4">
                   <div
                     className="flex items-center justify-between rounded-2xl bg-gray-50/80 backdrop-blur-md border border-dashed border-gray-300 text-gray-800 shadow-sm"
@@ -179,10 +188,15 @@ export default function TripleDicePage() {
                       <span>퇴장</span>
                     </button>
                   </div>
+                  <div
+                    className="flex-1 rounded-2xl border-2 border-dashed border-gray-300/80 bg-gray-50/40"
+                    style={{ paddingTop: "2rem", paddingBottom: "2rem", paddingLeft: "1.45rem", paddingRight: "1.45rem" }}
+                  />
                 </div>
               )}
             </div>
           ) : (
+            /* ── 딜러 모드 대기 정보 ── */
             <div className="flex flex-col justify-between flex-1 gap-4 text-sm text-gray-700 leading-relaxed py-1" style={{ fontFamily: "var(--font-body)" }}>
               <div className="flex flex-col gap-4">
                 {!inGameRoom && (
@@ -215,40 +229,143 @@ export default function TripleDicePage() {
           )}
         </div>
 
-        {/* 중앙 박스 */}
-        <div className="xl:col-span-6 chalk-box flex flex-col bg-white/85 backdrop-blur-md h-full gap-4" style={{ padding: "0.85rem" }}>
-          <div className="flex flex-col items-center justify-center flex-1 gap-6" style={{ minHeight: "420px" }}>
-            <div className="flex items-center gap-5">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="rounded-2xl border-4 border-dashed border-[#CBA7D2]/60 bg-gray-50/60 flex items-center justify-center shadow-xl"
-                  style={{ width: "90px", height: "90px" }}
-                >
-                  <Dice5 size={52} className="text-[#CBA7D2]/70" />
+        {/* ════════════════════ [중앙 박스] ════════════════════ */}
+        <div
+          className="xl:col-span-6 chalk-box flex flex-col bg-white/85 backdrop-blur-md h-full gap-4"
+          style={{ padding: "0.85rem" }}
+        >
+          {mode === "player" ? (
+            /* ── 플레이어 모드 가운데 UI ── */
+            <div className="flex flex-col gap-4 w-full h-full">
+              {/* 연습 모드(방 미접속): 게임 대기 안내 */}
+              {!inGameRoom ? (
+                <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between" style={{ gap: "1.45rem" }}>
+                  {/* 좌측: 주사위 플레이스홀더 */}
+                  <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0" style={{ gap: "1.25rem" }}>
+                    <div className="flex items-center gap-5">
+                      {[1, 2, 3].map((i) => (
+                        <div
+                          key={i}
+                          className="rounded-2xl border-4 border-dashed border-[#CBA7D2]/60 bg-gray-50/60 flex items-center justify-center shadow-xl"
+                          style={{ width: "80px", height: "80px" }}
+                        >
+                          <Dice5 size={44} className="text-[#CBA7D2]/70" />
+                        </div>
+                      ))}
+                    </div>
+                    <p
+                      className="text-gray-400 font-bold text-center"
+                      style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", letterSpacing: "0.04em" }}
+                    >
+                      게임 보드 (개발 중)
+                    </p>
+                  </div>
+
+                  {/* 우측: 연습 설명 */}
+                  <div className="flex-1 w-full flex flex-col items-center xl:items-stretch" style={{ gap: "0.65rem" }}>
+                    <div className="flex items-center gap-2 text-gray-700 font-semibold justify-center xl:justify-start" style={{ fontFamily: "var(--font-chalk)", fontSize: "0.85rem" }}>
+                      <Pencil size={16} className="text-[#CBA7D2] flex-shrink-0" />
+                      <span>게임 시작을 기다리는 동안 게임 설명을 확인해 보세요.</span>
+                    </div>
+                    <div
+                      className="w-full rounded-2xl border-2 border-dashed border-gray-200/80 bg-gray-50/60 text-center"
+                      style={{ padding: "1.25rem 1.45rem" }}
+                    >
+                      <p className="text-gray-500" style={{ fontFamily: "var(--font-body)", fontSize: "0.95rem", lineHeight: "1.7" }}>
+                        주사위를 굴리고 예측 카드를 제출하여 승점을 획득하세요.<br />
+                        게임 시작 후 이 영역에 주사위 보드가 표시됩니다.
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              ))}
+              ) : (
+                /* 방 입장 후: 주사위 보드 + 대기 안내 */
+                <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between gap-6">
+                  <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0" style={{ gap: "1.25rem" }}>
+                    <div className="flex items-center gap-5">
+                      {[1, 2, 3].map((i) => (
+                        <div
+                          key={i}
+                          className="rounded-2xl border-4 border-dashed border-[#CBA7D2]/60 bg-gray-50/60 flex items-center justify-center shadow-xl"
+                          style={{ width: "80px", height: "80px" }}
+                        >
+                          <Dice5 size={44} className="text-[#CBA7D2]/70" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="relative flex-1 w-full flex flex-col items-stretch gap-3">
+                    <div className="py-6 text-center text-gray-500 text-sm font-medium" style={{ fontFamily: "var(--font-body)" }}>
+                      게임 시작을 기다리는 중입니다...
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.45rem", marginBottom: "0.45rem" }} />
+
+              {/* 하단 컨트롤 영역 (입장 전: 안내 / 입장 후: 주사위 제출 자리) */}
+              <div className="flex flex-col w-full" style={{ gap: "0.85rem" }}>
+                <div
+                  className="w-full rounded-2xl border border-dashed bg-white border-gray-300 text-[#CBA7D2] transition-all duration-200 flex items-center justify-between min-h-[58px] h-[58px]"
+                  style={{ padding: "0.65rem" }}
+                >
+                  <div className="flex items-center gap-4">
+                    <span className="text-gray-600 font-extrabold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.45rem" }}>선택한 주사위:</span>
+                    <span className="font-black text-[#CBA7D2] tracking-widest" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem" }}>&nbsp;</span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  disabled
+                  className="btn-chalk w-full justify-center font-extrabold shadow-lg transition-all cursor-not-allowed opacity-60"
+                  style={{ padding: "0.65rem 1.45rem", fontFamily: "var(--font-chalk)", fontSize: "1.45rem", letterSpacing: "0.35em" }}
+                >
+                  제출하기
+                </button>
+              </div>
             </div>
-            <p
-              className="text-gray-400 font-bold text-center"
-              style={{ fontFamily: "var(--font-chalk)", fontSize: "1.15rem", letterSpacing: "0.04em" }}
-            >
-              게임 보드 영역 (개발 중)
-            </p>
-            <div
-              className="rounded-2xl border-2 border-dashed border-gray-200/80 bg-gray-50/60 text-center"
-              style={{ padding: "0.85rem 1.45rem", maxWidth: "380px" }}
-            >
-              <p className="text-gray-500" style={{ fontFamily: "var(--font-body)", fontSize: "0.95rem", lineHeight: "1.7" }}>
-                주사위를 굴리고 예측 카드를 제출하여 승점을 획득하세요.<br />
-                게임 시작 후 이 영역에 주사위 보드가 표시됩니다.
-              </p>
+          ) : (
+            /* ── 딜러 모드 가운데 UI ── */
+            <div className="relative flex flex-col gap-4 w-full">
+              {!inGameRoom && (
+                <div className="absolute inset-0 flex items-center justify-center z-10 bg-white/85 rounded-2xl backdrop-blur-sm">
+                  <div className="w-full flex items-center justify-center bg-white/90 rounded-2xl border-2 border-dashed border-gray-300/90 shadow-sm text-center" style={{ paddingTop: "0.85rem", paddingBottom: "0.85rem" }}>
+                    <div className="text-gray-800 font-medium flex items-center justify-center gap-3" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem" }}>
+                      <Megaphone size={20} className="text-[#CBA7D2] flex-shrink-0 animate-bounce" />
+                      <span>우측 [방 생성하기]를 클릭하면 딜러 대시보드가 실시간으로 연결됩니다.</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className={`flex flex-col gap-4 w-full${!inGameRoom ? " invisible" : ""}`}>
+                <div className="flex flex-col items-center justify-center py-10 gap-5">
+                  <div className="flex items-center gap-5">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="rounded-2xl border-4 border-dashed border-[#CBA7D2]/60 bg-gray-50/60 flex items-center justify-center shadow-xl"
+                        style={{ width: "80px", height: "80px" }}
+                      >
+                        <Dice5 size={44} className="text-[#CBA7D2]/70" />
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-gray-400 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem" }}>
+                    게임 보드 (개발 중)
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* 우측 박스 */}
-        <div className="xl:col-span-3 chalk-box flex flex-col bg-white/80 backdrop-blur-md h-full" style={{ padding: "0.85rem" }}>
+        {/* ════════════════════ [우측 박스] ════════════════════ */}
+        <div
+          className="xl:col-span-3 chalk-box flex flex-col bg-white/80 backdrop-blur-md h-full"
+          style={{ padding: "0.85rem" }}
+        >
           {mode === "player" ? (
             <>
               <div className="flex items-center gap-3 w-full min-h-[44px]">
@@ -327,6 +444,7 @@ export default function TripleDicePage() {
               </div>
             </>
           ) : inGameRoom && isDealerHost ? (
+            /* ── 딜러 방 생성 후: 실시간 게임 공지 ── */
             <div className="flex flex-col justify-between flex-1 h-full min-h-[460px]">
               <div className="flex flex-col flex-1">
                 <div className="flex items-center gap-3 w-full min-h-[44px]">
@@ -355,6 +473,7 @@ export default function TripleDicePage() {
               </div>
             </div>
           ) : (
+            /* ── 딜러 방 생성 전: 게임 생성 옵션 ── */
             <>
               <div className="flex items-center gap-3 w-full min-h-[44px]">
                 <Settings className="text-[#CBA7D2] flex-shrink-0" size={28} />
