@@ -1,4 +1,4 @@
-﻿/**
+/**
  * src/app/triple-dice/page.tsx
  * 트리플 다이스 게임 페이지
  *
@@ -51,14 +51,10 @@ export default function TripleDicePage() {
 
   return (
     <div
-      className="flex-1 flex flex-col"
-      style={{
-        paddingLeft: "1.25rem",
-        paddingRight: "1.25rem",
-        paddingTop: "1.45rem",
-        paddingBottom: "1.45rem",
-      }}
+      className="w-full flex-1 flex flex-col items-center justify-start"
+      style={{ paddingTop: "0.5rem", paddingBottom: "2rem", paddingLeft: "clamp(1rem, 4vw, 3rem)", paddingRight: "clamp(1rem, 4vw, 3rem)" }}
     >
+      <div className="w-full max-w-[1550px] flex flex-col mx-auto">
       {/* ─── 상단 타이틀 ─────────────────────────────── */}
       {!inGameRoom && (
         <>
@@ -498,8 +494,8 @@ export default function TripleDicePage() {
             </>
           )}
         </div>
-
       </div>
     </div>
+  </div>
   );
 }
