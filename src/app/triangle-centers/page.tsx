@@ -358,7 +358,8 @@ function findLineIntersection(l1: LineSegmentData, l2: LineSegmentData): Pt2 | n
   const t = ((l2.x1 - l1.x1) * dy2 - (l2.y1 - l1.y1) * dx2) / det;
   const u = ((l2.x1 - l1.x1) * dy1 - (l2.y1 - l1.y1) * dx1) / det;
 
-  const eps = 0.002;
+  // 허용 오차: 부동소수점 및 선분 끝점 근처 교차점을 위해 충분한 tolerance (0.04) 적용
+  const eps = 0.04;
   if (!l1.isExtended && (t < -eps || t > 1 + eps)) return null;
   if (!l2.isExtended && (u < -eps || u > 1 + eps)) return null;
 
@@ -413,14 +414,25 @@ function getAllLineIntersections(
   }
 
   const intersections: Pt2[] = [];
+
+  // 5-1. 모든 수선의 발 H = (pl.x2, pl.y2)는 100% 확실하게 교점 목록에 추가
+  for (const pl of perpLines) {
+    const footPt: Pt2 = { x: Math.round(pl.x2), y: Math.round(pl.y2) };
+    if (!intersections.some(existing => Math.hypot(existing.x - footPt.x, existing.y - footPt.y) < 1.0)) {
+      intersections.push(footPt);
+    }
+  }
+
+  // 6. 모든 선들 간의 교차점 계산
   for (let i = 0; i < allLines.length; i++) {
     for (let j = i + 1; j < allLines.length; j++) {
       const pt = findLineIntersection(allLines[i], allLines[j]);
       if (pt) {
         if (pt.x >= -100 && pt.x <= width + 100 && pt.y >= -100 && pt.y <= height + 100) {
-          const isDup = intersections.some(existing => Math.hypot(existing.x - pt.x, existing.y - pt.y) < 1.5);
+          const roundedPt: Pt2 = { x: Math.round(pt.x), y: Math.round(pt.y) };
+          const isDup = intersections.some(existing => Math.hypot(existing.x - roundedPt.x, existing.y - roundedPt.y) < 1.0);
           if (!isDup) {
-            intersections.push(pt);
+            intersections.push(roundedPt);
           }
         }
       }
@@ -430,7 +442,7 @@ function getAllLineIntersections(
   return intersections;
 }
 
-function nearestIntersection(isects: Pt2[], x: number, y: number, thr = 22): Pt2 | null {
+function nearestIntersection(isects: Pt2[], x: number, y: number, thr = 15): Pt2 | null {
   let best: Pt2 | null = null, minD = thr;
   for (const pt of isects) {
     const d = Math.hypot(pt.x - x, pt.y - y);
@@ -622,7 +634,7 @@ export default function TriangleCentersPage() {
   /* 점 도구 호버 시 근처 교점 스냅 인디케이터 */
   const hoveredSnapPt = useMemo(() => {
     if (activeTool !== "점" || !cursorPos) return null;
-    return nearestIntersection(lineIntersections, cursorPos.x, cursorPos.y, 22);
+    return nearestIntersection(lineIntersections, cursorPos.x, cursorPos.y, 15);
   }, [activeTool, cursorPos, lineIntersections]);
 
   /* 삭제 버튼 위치 (도화지 경계를 벗어나지 않도록 클램프) */
@@ -731,38 +743,14 @@ export default function TriangleCentersPage() {
       setSelectedItem(null); return;
     }
 
-    /* ── 점 (모든 선들의 교점 자동 스냅 및 외심/내심 스마트 스냅) ── */
+    /* ── 점 (모든 선들의 교점 자동 스냅) ── */
     if (activeTool === "점") {
       let finalCoord = { x, y };
 
-      // 1) 모든 선들(선분, 종이접기 접은선, 각의 이등분선, 수선 등)의 교점에 스냅
-      const snapIsect = nearestIntersection(lineIntersections, x, y, 22);
+      // 1) 클릭한 위치에서 가장 가까운 교점 탐색 (반경 15px)
+      const snapIsect = nearestIntersection(lineIntersections, x, y, 15);
       if (snapIsect) {
         finalCoord = { x: Math.round(snapIsect.x), y: Math.round(snapIsect.y) };
-      } else {
-        // 2) 외심/내심 스마트 스냅
-        const triangle = polygons.find(p => p.pts.length === 3);
-        if (triangle) {
-          const [A, B, C] = triangle.pts;
-
-          // 외심 스냅: 해당 삼각형의 접은선이 3개 이상 존재할 때
-          const triangleCreases = validCreaseLines.filter(cl => cl.polygonId === triangle.id);
-          if (triangleCreases.length >= 3) {
-            const circumcenter = getTriangleCircumcenter(A, B, C);
-            if (circumcenter && Math.hypot(circumcenter.x - x, circumcenter.y - y) <= 35) {
-              finalCoord = circumcenter;
-            }
-          }
-
-          // 내심 스냅: 해당 삼각형의 각의 이등분선이 3개 이상 존재할 때
-          const triangleBisectors = validBisectorLines.filter(bl => bl.polygonId === triangle.id);
-          if (triangleBisectors.length >= 3) {
-            const incenter = getTriangleIncenter(A, B, C);
-            if (incenter && Math.hypot(incenter.x - x, incenter.y - y) <= 35) {
-              finalCoord = incenter;
-            }
-          }
-        }
       }
 
       const id = `pt_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`;
