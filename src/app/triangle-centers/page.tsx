@@ -990,25 +990,45 @@ export default function TriangleCentersPage() {
     /* ── 컴퍼스 ── */
     if (activeTool === "컴퍼스") {
       if (!pendingCompassCenter) {
-        const snapIsect = nearestIntersection(lineIntersections, x, y, 15);
-        const coord = snapIsect ? { x: Math.round(snapIsect.x), y: Math.round(snapIsect.y) } : { x, y };
-        const center = nearestPt(points, coord.x, coord.y, 16) || {
-          id: `pt_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
-          x: coord.x, y: coord.y, label: makeLabel(points.length)
-        };
-        if (!points.some(p => p.id === center.id)) {
+        // 1순위: 이미 도화지에 표시된 점 근처를 클릭하면 해당 점 선택
+        const existingPt = nearestPt(points, x, y, 16);
+        let center: Point;
+        if (existingPt) {
+          center = existingPt;
+        } else {
+          // 2순위: 교점에 스냅 또는 클릭 위치에 새 점 생성
+          const snapIsect = nearestIntersection(lineIntersections, x, y, 15);
+          const coord = snapIsect ? { x: Math.round(snapIsect.x), y: Math.round(snapIsect.y) } : { x, y };
+          center = {
+            id: `pt_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+            x: coord.x,
+            y: coord.y,
+            label: makeLabel(points.length),
+          };
           updateCurrentCanvas(prev => ({ ...prev, points: [...prev.points, center] }));
         }
         setPendingCompassCenter(center);
       } else {
-        const snapIsect = nearestIntersection(lineIntersections, x, y, 15);
-        const coord = snapIsect ? { x: Math.round(snapIsect.x), y: Math.round(snapIsect.y) } : { x, y };
-        const passPt = nearestPt(points, coord.x, coord.y, 16) || {
-          id: `pt_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
-          x: coord.x, y: coord.y, label: makeLabel(points.length + 1)
-        };
-        if (!points.some(p => p.id === passPt.id)) {
+        // 1순위: 이미 도화지에 표시된 점 근처를 클릭하면 해당 점 선택
+        const existingPt = nearestPt(points, x, y, 16);
+        let passPt: Point;
+        if (existingPt && existingPt.id !== pendingCompassCenter.id) {
+          passPt = existingPt;
+        } else if (!existingPt) {
+          // 2순위: 교점에 스냅 또는 클릭 위치에 새 점 생성
+          const snapIsect = nearestIntersection(lineIntersections, x, y, 15);
+          const coord = snapIsect ? { x: Math.round(snapIsect.x), y: Math.round(snapIsect.y) } : { x, y };
+          passPt = {
+            id: `pt_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+            x: coord.x,
+            y: coord.y,
+            label: makeLabel(points.length),
+          };
           updateCurrentCanvas(prev => ({ ...prev, points: [...prev.points, passPt] }));
+        } else {
+          // 같은 점을 다시 클릭했을 경우 선택 취소
+          setPendingCompassCenter(null);
+          return;
         }
 
         const r = Math.hypot(passPt.x - pendingCompassCenter.x, passPt.y - pendingCompassCenter.y);
@@ -1371,11 +1391,6 @@ export default function TriangleCentersPage() {
 
             {/* 상태 안내 */}
             <div style={{ marginTop: "1.25rem" }}>
-              {activeTool === "점" && (
-                <div className="rounded-2xl bg-[#CBA7D2]/10 border border-dashed border-[#CBA7D2]/40 text-[#CBA7D2] text-xs leading-relaxed" style={{ padding: "0.75rem 1rem", fontFamily: "var(--font-body)" }}>
-                  도화지를 클릭하여 점을 찍으세요. 선들의 교점에 가까이 찍으면 자동으로 교점에 표시됩니다.
-                </div>
-              )}
               {activeTool === "선분" && (
                 <div className="rounded-2xl bg-[#CBA7D2]/10 border border-dashed border-[#CBA7D2]/40 text-[#CBA7D2] text-xs leading-relaxed" style={{ padding: "0.75rem 1rem", fontFamily: "var(--font-body)" }}>
                   {pendingStart ? <><span className="font-bold">{pendingStart.label}</span> 에서 시작 — 끝점을 클릭하세요.</> : "시작점을 클릭하세요."}
@@ -1399,7 +1414,7 @@ export default function TriangleCentersPage() {
                       </>
                     )
                   ) : (
-                    "접을 두 꼭짓점(외심) 또는 두 변(내심)을 차례로 클릭하세요."
+                    "접을 두 꼭짓점 또는 두 변을 차례로 클릭하세요."
                   )}
                 </div>
               )}
