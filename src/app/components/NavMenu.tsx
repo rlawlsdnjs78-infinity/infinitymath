@@ -20,7 +20,7 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
   // mode="center": 중앙 미니게임 & 브레인 서바이벌 & 동아리
   if (mode === "center") {
     return (
-      <nav aria-label="메인 네비게이션" className="flex items-center gap-6 sm:gap-8">
+      <nav aria-label="메인 네비게이션" className="flex items-center gap-1 md:gap-3 lg:gap-6">
         {/* ── 1. 미니게임 드롭다운 ── */}
         <div
           className="relative py-1"
@@ -29,18 +29,19 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
         >
           <button
             type="button"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 hover:bg-gray-100"
+            className="flex items-center gap-1 md:gap-2 px-1.5 md:px-3 py-1.5 rounded-md transition-all duration-200 hover:bg-gray-100"
             style={{
               fontFamily: "var(--font-chalk)",
-              fontSize: "1.45rem",
+              fontSize: "clamp(1.05rem, 1.8vw, 1.45rem)",
               color: isMiniOpen ? "var(--chalk-yellow)" : "var(--chalk-white)",
               background: "transparent",
               border: "none",
               cursor: "pointer",
               letterSpacing: "0.04em",
+              whiteSpace: "nowrap",
             }}
           >
-            <Gamepad2 size={22} className="text-[var(--chalk-yellow)]" />
+            <Gamepad2 size={18} className="text-[var(--chalk-yellow)] flex-shrink-0" />
             <span>미니게임</span>
             <ChevronDown
               size={18}
@@ -90,18 +91,19 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
         >
           <button
             type="button"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 hover:bg-gray-100"
+            className="flex items-center gap-1 md:gap-2 px-1.5 md:px-3 py-1.5 rounded-md transition-all duration-200 hover:bg-gray-100"
             style={{
               fontFamily: "var(--font-chalk)",
-              fontSize: "1.45rem",
+              fontSize: "clamp(1.05rem, 1.8vw, 1.45rem)",
               color: isBrainOpen ? "var(--chalk-yellow)" : "var(--chalk-white)",
               background: "transparent",
               border: "none",
               cursor: "pointer",
               letterSpacing: "0.04em",
+              whiteSpace: "nowrap",
             }}
           >
-            <Brain size={22} className="text-[var(--chalk-yellow)]" />
+            <Brain size={18} className="text-[var(--chalk-yellow)] flex-shrink-0" />
             <span>브레인 서바이벌</span>
             <ChevronDown
               size={18}
@@ -162,18 +164,19 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
         >
           <button
             type="button"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 hover:bg-gray-100"
+            className="flex items-center gap-1 md:gap-2 px-1.5 md:px-3 py-1.5 rounded-md transition-all duration-200 hover:bg-gray-100"
             style={{
               fontFamily: "var(--font-chalk)",
-              fontSize: "1.45rem",
+              fontSize: "clamp(1.05rem, 1.8vw, 1.45rem)",
               color: isClubOpen ? "var(--chalk-yellow)" : "var(--chalk-white)",
               background: "transparent",
               border: "none",
               cursor: "pointer",
               letterSpacing: "0.04em",
+              whiteSpace: "nowrap",
             }}
           >
-            <span style={{ fontSize: "1.65rem", fontWeight: "bold", lineHeight: 1 }} className="text-[var(--chalk-yellow)]">∞</span>
+            <span style={{ fontSize: "clamp(1.2rem, 1.8vw, 1.65rem)", fontWeight: "bold", lineHeight: 1 }} className="text-[var(--chalk-yellow)] flex-shrink-0">∞</span>
             <span>동아리</span>
             <ChevronDown
               size={18}
@@ -223,18 +226,19 @@ export default function NavMenu({ mode }: { mode: "center" | "auth" }) {
         >
           <button
             type="button"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 hover:bg-gray-100"
+            className="flex items-center gap-1 md:gap-2 px-1.5 md:px-3 py-1.5 rounded-md transition-all duration-200 hover:bg-gray-100"
             style={{
               fontFamily: "var(--font-chalk)",
-              fontSize: "1.45rem",
+              fontSize: "clamp(1.05rem, 1.8vw, 1.45rem)",
               color: isYorioOpen ? "var(--chalk-yellow)" : "var(--chalk-white)",
               background: "transparent",
               border: "none",
               cursor: "pointer",
               letterSpacing: "0.04em",
+              whiteSpace: "nowrap",
             }}
           >
-            <span style={{ fontSize: "1.45rem", lineHeight: 1 }} className="text-[var(--chalk-yellow)]">✦</span>
+            <span style={{ fontSize: "clamp(1.05rem, 1.8vw, 1.45rem)", lineHeight: 1 }} className="text-[var(--chalk-yellow)] flex-shrink-0">✦</span>
             <span>요리조리</span>
             <ChevronDown
               size={18}

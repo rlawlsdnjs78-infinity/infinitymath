@@ -285,7 +285,7 @@ export default function SpeedFactorizationPage() {
               <div className="flex items-start gap-2">
                 <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">①</span>
                 <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
-                  <strong className="text-[#CBA7D2] font-bold">&lsquo;스피드 소인수분해&rsquo;</strong>는 문제 판에서 적당한 카드를 선택하여 타깃 넘버를 소인수분해한 수식을 만드는 게임입니다.
+                  <strong className="text-[#CBA7D2] font-bold">&lsquo;스피드 소인수분해&rsquo;</strong>는 문제 판에서 카드를 선택하여 타깃 넘버를 소인수분해한 수식을 만드는 게임입니다.
                 </p>
               </div>
 
@@ -304,17 +304,17 @@ export default function SpeedFactorizationPage() {
                   {[
                     {
                       level: "쉬움",
-                      desc: "100 이하의 자연수 중 소인수를 2, 3, 5, 7 중 일부 또는 전체를 가지는 자연수",
+                      desc: "2, 3, 5, 7 중 일부 또는 전체를 소인수로 가지는 100 이하의 자연수",
                       color: "text-emerald-600",
                     },
                     {
                       level: "보통",
-                      desc: "200 이하의 자연수 중 소인수를 2, 3, 5, 7, 11 중 일부를 가지는 자연수",
+                      desc: "2, 3, 5, 7, 11 중 일부를 소인수로 가지는 200 이하의 자연수",
                       color: "text-amber-600",
                     },
                     {
                       level: "어려움",
-                      desc: "300 이하의 자연수 중 소인수를 2, 3, 5, 7, 11, 13 중 일부를 가지는 자연수",
+                      desc: "2, 3, 5, 7, 11, 13 중 일부를 소인수로 가지는 300 이하의 자연수",
                       color: "text-rose-600",
                     },
                   ].map(({ level, desc, color }) => (
@@ -337,10 +337,7 @@ export default function SpeedFactorizationPage() {
               <div className="flex items-start gap-2">
                 <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">③</span>
                 <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
-                  정답을 제출하면 1점을 획득합니다. 오답을 제출한 경우{" "}
-                  <span className="font-bold text-emerald-600">쉬움</span>,{" "}
-                  <span className="font-bold text-amber-600">보통</span>의 경우에는 감점이 없지만{" "}
-                  <span className="font-bold text-rose-600">어려움</span>의 경우에는 1점이 감점됩니다.
+                  정답을 제출하면 1점을 획득합니다. <span className="font-bold text-rose-600">어려움</span> 난이도에서는 오답을 제출하면 1점이 감점됩니다.
                 </p>
               </div>
 
@@ -348,7 +345,7 @@ export default function SpeedFactorizationPage() {
               <div className="flex items-start gap-2">
                 <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">④</span>
                 <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
-                  라운드 진행 시간이 지나면 라운드가 종료되고, 상위 10등은 명예의 전당에 등록됩니다.
+                  라운드 진행 시간이 지나면 라운드가 종료되고 난이도 별 상위 10등은 명예의 전당에 등록됩니다.
                 </p>
               </div>
             </div>
