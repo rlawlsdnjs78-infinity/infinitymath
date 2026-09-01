@@ -10,7 +10,7 @@ import { useState, useRef, useCallback, useMemo } from "react";
 /* ══════════════════════════════════════════════
    TYPES
 ══════════════════════════════════════════════ */
-type Tool = "선택" | "점" | "선분" | "종이접기" | "각의 이등분선" | "수선" | "컴퍼스";
+type Tool = "선택" | "점" | "선분" | "종이접기" | "수선" | "컴퍼스";
 type Pt2 = { x: number; y: number };
 
 interface Point { id: string; x: number; y: number; label: string; }
@@ -27,14 +27,6 @@ interface FoldResult {
 interface CreaseLine {
   id: string;
   polygonId: string;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-}
-interface AngleBisectorLine {
-  id: string;
-  polygonId?: string;
   x1: number;
   y1: number;
   x2: number;
@@ -62,12 +54,16 @@ type SelectedItem =
   | { type: "perpLine"; id: string }
   | null;
 
+type FoldSource =
+  | { type: "point"; pt: Point; polygonId: string }
+  | { type: "segment"; seg: Segment; polygonId: string }
+  | null;
+
 interface CanvasData {
   points: Point[];
   segments: Segment[];
   foldResults: FoldResult[];
   creaseLines: CreaseLine[];
-  bisectorLines: AngleBisectorLine[];
   perpLines: PerpendicularLine[];
   circles: CircleItem[];
 }
@@ -77,7 +73,6 @@ const initialCanvasData = (): CanvasData => ({
   segments: [],
   foldResults: [],
   creaseLines: [],
-  bisectorLines: [],
   perpLines: [],
   circles: [],
 });
@@ -104,16 +99,6 @@ function OrigamiCraneIcon({ size = 20, color = "currentColor" }: { size?: number
       <path d="M6 10 L11 15 L17 16" />
       <path d="M2 13 L4 15 L6 10" />
       <path d="M11 15 L14 20" />
-    </svg>
-  );
-}
-
-function AngleBisectorIcon({ size = 20, color = "currentColor" }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 20 L20 20" />
-      <path d="M4 20 L16 4" />
-      <path d="M4 20 L21 11" strokeDasharray="3 2" />
     </svg>
   );
 }
@@ -218,6 +203,7 @@ function reflectPt(V: Pt2, P: Pt2, Q: Pt2): Pt2 {
   return { x: V.x - 2 * (dot / len2) * nx, y: V.y - 2 * (dot / len2) * ny };
 }
 
+/** 두 꼭짓점을 맞포개어 접는 종이접기 계산 (P를 접어서 Q 위로) */
 function computeFold(polyPts: Pt2[], P: Pt2, Q: Pt2) {
   const M = { x: (P.x + Q.x) / 2, y: (P.y + Q.y) / 2 };
   const nx = Q.x - P.x, ny = Q.y - P.y;
@@ -244,59 +230,98 @@ function getExtendedBisector(P: Pt2, Q: Pt2, length = 4000): { x1: number; y1: n
   };
 }
 
-/** 두 선분의 각의 이등분선 직선 계산 */
-function computeAngleBisector(s1: Segment, s2: Segment, length = 4000): { x1: number; y1: number; x2: number; y2: number } | null {
+/** 두 변을 맞포개어 접는 종이접기 계산 (s1을 접어서 s2 위로) */
+function computeSideFold(polyPts: Pt2[], s1: Segment, s2: Segment, length = 4000) {
   const pA1 = { x: s1.x1, y: s1.y1, id: s1.p1Id };
   const pA2 = { x: s1.x2, y: s1.y2, id: s1.p2Id };
   const pB1 = { x: s2.x1, y: s2.y1, id: s2.p1Id };
   const pB2 = { x: s2.x2, y: s2.y2, id: s2.p2Id };
 
   let V: Pt2;
-  let A: Pt2;
-  let B: Pt2;
+  let P1: Pt2;
+  let P2: Pt2;
 
   if (pA1.id === pB1.id || Math.hypot(pA1.x - pB1.x, pA1.y - pB1.y) < 1e-3) {
-    V = pA1; A = pA2; B = pB2;
+    V = pA1; P1 = pA2; P2 = pB2;
   } else if (pA1.id === pB2.id || Math.hypot(pA1.x - pB2.x, pA1.y - pB2.y) < 1e-3) {
-    V = pA1; A = pA2; B = pB1;
+    V = pA1; P1 = pA2; P2 = pB1;
   } else if (pA2.id === pB1.id || Math.hypot(pA2.x - pB1.x, pA2.y - pB1.y) < 1e-3) {
-    V = pA2; A = pA1; B = pB2;
+    V = pA2; P1 = pA1; P2 = pB2;
   } else if (pA2.id === pB2.id || Math.hypot(pA2.x - pB2.x, pA2.y - pB2.y) < 1e-3) {
-    V = pA2; A = pA1; B = pB1;
+    V = pA2; P1 = pA1; P2 = pB1;
   } else {
     const isect = lineIsect(pA1, pA2, pB1, pB2);
     if (!isect) return null;
     V = isect;
-    A = { x: (pA1.x + pA2.x) / 2, y: (pA1.y + pA2.y) / 2 };
-    B = { x: (pB1.x + pB2.x) / 2, y: (pB1.y + pB2.y) / 2 };
+    P1 = { x: (pA1.x + pA2.x) / 2, y: (pA1.y + pA2.y) / 2 };
+    P2 = { x: (pB1.x + pB2.x) / 2, y: (pB1.y + pB2.y) / 2 };
   }
 
-  const dAx = A.x - V.x, dAy = A.y - V.y;
-  const dBx = B.x - V.x, dBy = B.y - V.y;
-  const lenA = Math.hypot(dAx, dAy);
-  const lenB = Math.hypot(dBx, dBy);
-  if (lenA < 1e-5 || lenB < 1e-5) return null;
+  const d1x = P1.x - V.x, d1y = P1.y - V.y;
+  const d2x = P2.x - V.x, d2y = P2.y - V.y;
+  const len1 = Math.hypot(d1x, d1y);
+  const len2 = Math.hypot(d2x, d2y);
+  if (len1 < 1e-5 || len2 < 1e-5) return null;
 
-  const uAx = dAx / lenA, uAy = dAy / lenA;
-  const uBx = dBx / lenB, uBy = dBy / lenB;
+  const u1x = d1x / len1, u1y = d1y / len1;
+  const u2x = d2x / len2, u2y = d2y / len2;
 
-  let bisX = uAx + uBx;
-  let bisY = uAy + uBy;
+  let bisX = u1x + u2x;
+  let bisY = u1y + u2y;
   let bisLen = Math.hypot(bisX, bisY);
 
   if (bisLen < 1e-5) {
-    bisX = -uAy;
-    bisY = uAx;
+    bisX = -u1y;
+    bisY = u1x;
   } else {
     bisX /= bisLen;
     bisY /= bisLen;
   }
 
-  return {
+  // 접은선: V를 지나며 (bisX, bisY) 방향
+  const extendedLine = {
     x1: Math.round(V.x - length * bisX),
     y1: Math.round(V.y - length * bisY),
     x2: Math.round(V.x + length * bisX),
     y2: Math.round(V.y + length * bisY),
+  };
+
+  const V_next: Pt2 = { x: V.x + bisX, y: V.y + bisY };
+
+  // s1(P1) 쪽이 접혀서 넘어가는 gonePoly / flapPoly가 됨
+  const sideP1 = cross2(V, V_next, P1);
+
+  let gonePoly: Pt2[];
+  let remainingPoly: Pt2[];
+
+  if (sideP1 >= 0) {
+    gonePoly = clipHalf(polyPts, V, V_next);
+    remainingPoly = clipHalf(polyPts, V_next, V);
+  } else {
+    gonePoly = clipHalf(polyPts, V_next, V);
+    remainingPoly = clipHalf(polyPts, V, V_next);
+  }
+
+  // 점 V와 방향벡터 (bisX, bisY)를 기준으로 대칭 이동
+  const reflectAcrossBisector = (pt: Pt2): Pt2 => {
+    const dx = pt.x - V.x;
+    const dy = pt.y - V.y;
+    const dot = dx * bisX + dy * bisY;
+    const projX = dot * bisX;
+    const projY = dot * bisY;
+    return {
+      x: Math.round(V.x + 2 * projX - dx),
+      y: Math.round(V.y + 2 * projY - dy),
+    };
+  };
+
+  const flapPoly = gonePoly.map(reflectAcrossBisector);
+
+  return {
+    extendedLine,
+    gonePoly,
+    remainingPoly,
+    flapPoly,
   };
 }
 
@@ -372,7 +397,6 @@ function findLineIntersection(l1: LineSegmentData, l2: LineSegmentData): Pt2 | n
 function getAllLineIntersections(
   segments: Segment[],
   creaseLines: CreaseLine[],
-  bisectorLines: AngleBisectorLine[],
   perpLines: PerpendicularLine[],
   foldResults: FoldResult[],
   width = 1200,
@@ -403,19 +427,14 @@ function getAllLineIntersections(
     allLines.push({ x1: cl.x1, y1: cl.y1, x2: cl.x2, y2: cl.y2, isExtended: true });
   }
 
-  // 4. 각의 이등분선 (연장선)
-  for (const bl of bisectorLines) {
-    allLines.push({ x1: bl.x1, y1: bl.y1, x2: bl.x2, y2: bl.y2, isExtended: true });
-  }
-
-  // 5. 수선
+  // 4. 수선
   for (const pl of perpLines) {
     allLines.push({ x1: pl.x1, y1: pl.y1, x2: pl.x2, y2: pl.y2, isExtended: false });
   }
 
   const intersections: Pt2[] = [];
 
-  // 5-1. 모든 수선의 발 H = (pl.x2, pl.y2)는 100% 확실하게 교점 목록에 추가
+  // 4-1. 모든 수선의 발 H = (pl.x2, pl.y2)는 100% 확실하게 교점 목록에 추가
   for (const pl of perpLines) {
     const footPt: Pt2 = { x: Math.round(pl.x2), y: Math.round(pl.y2) };
     if (!intersections.some(existing => Math.hypot(existing.x - footPt.x, existing.y - footPt.y) < 1.0)) {
@@ -423,7 +442,7 @@ function getAllLineIntersections(
     }
   }
 
-  // 6. 모든 선들 간의 교차점 계산
+  // 5. 모든 선들 간의 교차점 계산
   for (let i = 0; i < allLines.length; i++) {
     for (let j = i + 1; j < allLines.length; j++) {
       const pt = findLineIntersection(allLines[i], allLines[j]);
@@ -535,8 +554,7 @@ export default function TriangleCentersPage() {
   const [selectedItem, setSelectedItem] = useState<SelectedItem>(null);
   const [pendingStart, setPendingStart] = useState<Point | null>(null);
   const [cursorPos, setCursorPos] = useState<Pt2 | null>(null);
-  const [foldSource, setFoldSource] = useState<{ pt: Point; polygonId: string } | null>(null);
-  const [pendingAngleSeg, setPendingAngleSeg] = useState<Segment | null>(null);
+  const [foldSource, setFoldSource] = useState<FoldSource>(null);
   const [pendingPerpPt, setPendingPerpPt] = useState<Point | null>(null);
   const [pendingCompassCenter, setPendingCompassCenter] = useState<Point | null>(null);
 
@@ -560,7 +578,6 @@ export default function TriangleCentersPage() {
   const segments = currentData.segments;
   const foldResults = currentData.foldResults;
   const creaseLines = currentData.creaseLines;
-  const bisectorLines = currentData.bisectorLines;
   const perpLines = currentData.perpLines || [];
   const circles = currentData.circles || [];
 
@@ -615,10 +632,6 @@ export default function TriangleCentersPage() {
     return creaseLines.filter(cl => validPolyIds.has(cl.polygonId));
   }, [creaseLines, validPolyIds]);
 
-  const validBisectorLines = useMemo(() => {
-    return bisectorLines.filter(bl => !bl.polygonId || validPolyIds.has(bl.polygonId));
-  }, [bisectorLines, validPolyIds]);
-
   const validPerpLines = useMemo(() => {
     return perpLines.filter(pl => !pl.polygonId || validPolyIds.has(pl.polygonId));
   }, [perpLines, validPolyIds]);
@@ -628,8 +641,8 @@ export default function TriangleCentersPage() {
     const svg = svgRef.current;
     const w = svg && svg.clientWidth > 200 ? svg.clientWidth : 1200;
     const h = svg && svg.clientHeight > 200 ? svg.clientHeight : 800;
-    return getAllLineIntersections(segments, validCreaseLines, validBisectorLines, validPerpLines, validFoldResults, w, h);
-  }, [segments, validCreaseLines, validBisectorLines, validPerpLines, validFoldResults]);
+    return getAllLineIntersections(segments, validCreaseLines, validPerpLines, validFoldResults, w, h);
+  }, [segments, validCreaseLines, validPerpLines, validFoldResults]);
 
   /* 점 도구 호버 시 근처 교점 스냅 인디케이터 */
   const hoveredSnapPt = useMemo(() => {
@@ -676,7 +689,6 @@ export default function TriangleCentersPage() {
     setCursorPos(null);
     setSelectedItem(null);
     setFoldSource(null);
-    setPendingAngleSeg(null);
     setPendingPerpPt(null);
     setPendingCompassCenter(null);
   }, []);
@@ -769,7 +781,7 @@ export default function TriangleCentersPage() {
         if (snapped) {
           setPendingStart(snapped);
         } else {
-          const snapIsect = nearestIntersection(lineIntersections, x, y, 16);
+          const snapIsect = nearestIntersection(lineIntersections, x, y, 15);
           const coord = snapIsect ? { x: Math.round(snapIsect.x), y: Math.round(snapIsect.y) } : { x, y };
           const id = `pt_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`;
           const np: Point = { id, x: coord.x, y: coord.y, label: makeLabel(points.length) };
@@ -782,7 +794,7 @@ export default function TriangleCentersPage() {
         if (snapped && snapped.id !== pendingStart.id) {
           endPt = snapped;
         } else if (!snapped) {
-          const snapIsect = nearestIntersection(lineIntersections, x, y, 16);
+          const snapIsect = nearestIntersection(lineIntersections, x, y, 15);
           const coord = snapIsect ? { x: Math.round(snapIsect.x), y: Math.round(snapIsect.y) } : { x, y };
           const id = `pt_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`;
           endPt = { id, x: coord.x, y: coord.y, label: makeLabel(points.length) };
@@ -806,89 +818,106 @@ export default function TriangleCentersPage() {
       return;
     }
 
-    /* ── 종이접기 ── */
+    /* ── 종이접기 (꼭짓점 맞포개기[외심] 또는 두 변 맞포개기[내심]) ── */
     if (activeTool === "종이접기") {
       if (!foldSource) {
-        const p = nearestPt(points, x, y, 18);
-        if (!p) return;
-        const poly = polygons.find(pl => pl.pts.some(pp => pp.id === p.id));
-        if (!poly) return;
-        setFoldSource({ pt: p, polygonId: poly.id });
+        // 꼭짓점 먼저 탐색
+        const p = nearestPt(points, x, y, 16);
+        if (p) {
+          const poly = polygons.find(pl => pl.pts.some(pp => pp.id === p.id));
+          if (poly) {
+            setFoldSource({ type: "point", pt: p, polygonId: poly.id });
+            return;
+          }
+        }
+
+        // 변(선분) 탐색
+        let clickedSeg: Segment | null = null;
+        let minD = 16;
+        for (const s of segments) {
+          const d = distSeg(x, y, s.x1, s.y1, s.x2, s.y2);
+          if (d < minD) { minD = d; clickedSeg = s; }
+        }
+
+        if (clickedSeg) {
+          const poly = polygons.find(pl => {
+            return pl.pts.some(pt => pt.id === clickedSeg!.p1Id) && pl.pts.some(pt => pt.id === clickedSeg!.p2Id);
+          });
+          if (poly) {
+            setFoldSource({ type: "segment", seg: clickedSeg, polygonId: poly.id });
+            return;
+          }
+        }
       } else {
         const poly = polygons.find(pl => pl.id === foldSource.polygonId);
         if (!poly) { setFoldSource(null); return; }
 
-        const q = nearestPt(poly.pts, x, y, 20);
-        if (!q || q.id === foldSource.pt.id) {
-          if (q && q.id === foldSource.pt.id) setFoldSource(null);
-          return;
-        }
+        if (foldSource.type === "point") {
+          // 꼭짓점 맞포개기 (외심)
+          const q = nearestPt(poly.pts, x, y, 20);
+          if (!q || q.id === foldSource.pt.id) {
+            if (q && q.id === foldSource.pt.id) setFoldSource(null);
+            return;
+          }
 
-        const P: Pt2 = { x: foldSource.pt.x, y: foldSource.pt.y };
-        const Q: Pt2 = { x: q.x, y: q.y };
-        const polyPts2: Pt2[] = poly.pts.map(pp => ({ x: pp.x, y: pp.y }));
+          const P: Pt2 = { x: foldSource.pt.x, y: foldSource.pt.y };
+          const Q: Pt2 = { x: q.x, y: q.y };
+          const polyPts2: Pt2[] = poly.pts.map(pp => ({ x: pp.x, y: pp.y }));
 
-        const { gonePoly, flapPoly, remainingPoly } = computeFold(polyPts2, P, Q);
-        const extendedLine = getExtendedBisector(P, Q);
+          const { gonePoly, flapPoly, remainingPoly } = computeFold(polyPts2, P, Q);
+          const extendedLine = getExtendedBisector(P, Q);
 
-        const newCrease: CreaseLine = {
-          id: `crease_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
-          polygonId: foldSource.polygonId,
-          ...extendedLine,
-        };
-
-        const fid = `fold_${Date.now()}`;
-        updateCurrentCanvas(prev => {
-          const nextFolds = prev.foldResults.filter(f => f.polygonId !== foldSource.polygonId);
-          return {
-            ...prev,
-            creaseLines: [...prev.creaseLines, newCrease],
-            foldResults: [...nextFolds, { id: fid, polygonId: foldSource.polygonId, gonePoly, flapPoly, remainingPoly, color: poly.color }],
+          const newCrease: CreaseLine = {
+            id: `crease_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+            polygonId: foldSource.polygonId,
+            ...extendedLine,
           };
-        });
-        setFoldSource(null);
-      }
-      return;
-    }
 
-    /* ── 각의 이등분선 ── */
-    if (activeTool === "각의 이등분선") {
-      let clickedSeg: Segment | null = null;
-      let minD = 14;
-      for (const s of segments) {
-        const d = distSeg(x, y, s.x1, s.y1, s.x2, s.y2);
-        if (d < minD) { minD = d; clickedSeg = s; }
-      }
-      if (!clickedSeg) return;
-
-      if (!pendingAngleSeg) {
-        setPendingAngleSeg(clickedSeg);
-      } else {
-        if (pendingAngleSeg.id === clickedSeg.id) {
-          setPendingAngleSeg(null);
-          return;
-        }
-
-        const bisector = computeAngleBisector(pendingAngleSeg, clickedSeg);
-        if (bisector) {
-          const matchedPoly = polygons.find(p => {
-            const hasSeg1 = p.pts.some(pt => pt.id === pendingAngleSeg!.p1Id) && p.pts.some(pt => pt.id === pendingAngleSeg!.p2Id);
-            const hasSeg2 = p.pts.some(pt => pt.id === clickedSeg!.p1Id) && p.pts.some(pt => pt.id === clickedSeg!.p2Id);
-            return hasSeg1 && hasSeg2;
+          const fid = `fold_${Date.now()}`;
+          updateCurrentCanvas(prev => {
+            const nextFolds = prev.foldResults.filter(f => f.polygonId !== foldSource.polygonId);
+            return {
+              ...prev,
+              creaseLines: [...prev.creaseLines, newCrease],
+              foldResults: [...nextFolds, { id: fid, polygonId: foldSource.polygonId, gonePoly, flapPoly, remainingPoly, color: poly.color }],
+            };
           });
+          setFoldSource(null);
+        } else {
+          // 두 변 맞포개기 (내심 — 처음 선택한 변이 나중에 선택한 변 위로 접힘)
+          let secondSeg: Segment | null = null;
+          let minD = 18;
+          for (const s of segments) {
+            const d = distSeg(x, y, s.x1, s.y1, s.x2, s.y2);
+            if (d < minD) { minD = d; secondSeg = s; }
+          }
 
-          const newLine: AngleBisectorLine = {
-            id: `bisector_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
-            polygonId: matchedPoly?.id,
-            ...bisector,
-          };
+          if (!secondSeg || secondSeg.id === foldSource.seg.id) {
+            if (secondSeg && secondSeg.id === foldSource.seg.id) setFoldSource(null);
+            return;
+          }
 
-          updateCurrentCanvas(prev => ({
-            ...prev,
-            bisectorLines: [...prev.bisectorLines, newLine],
-          }));
+          const polyPts2: Pt2[] = poly.pts.map(pp => ({ x: pp.x, y: pp.y }));
+          const res = computeSideFold(polyPts2, foldSource.seg, secondSeg);
+          if (res) {
+            const newCrease: CreaseLine = {
+              id: `crease_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+              polygonId: foldSource.polygonId,
+              ...res.extendedLine,
+            };
+
+            const fid = `fold_${Date.now()}`;
+            updateCurrentCanvas(prev => {
+              const nextFolds = prev.foldResults.filter(f => f.polygonId !== foldSource.polygonId);
+              return {
+                ...prev,
+                creaseLines: [...prev.creaseLines, newCrease],
+                foldResults: [...nextFolds, { id: fid, polygonId: foldSource.polygonId, gonePoly: res.gonePoly, flapPoly: res.flapPoly, remainingPoly: res.remainingPoly, color: poly.color }],
+              };
+            });
+          }
+          setFoldSource(null);
         }
-        setPendingAngleSeg(null);
       }
       return;
     }
@@ -896,8 +925,8 @@ export default function TriangleCentersPage() {
     /* ── 수선 (점 선택 후 선분 선택) ── */
     if (activeTool === "수선") {
       if (!pendingPerpPt) {
-        // 1단계: 수선을 내릴 기준 점 선택 (기존 점 또는 교점/클릭 위치)
-        const snapIsect = nearestIntersection(lineIntersections, x, y, 18);
+        // 1단계: 수선을 내릴 기준 점 선택
+        const snapIsect = nearestIntersection(lineIntersections, x, y, 15);
         const targetCoord = snapIsect ? { x: Math.round(snapIsect.x), y: Math.round(snapIsect.y) } : { x, y };
         const snappedPt = nearestPt(points, targetCoord.x, targetCoord.y, 16);
 
@@ -961,7 +990,7 @@ export default function TriangleCentersPage() {
     /* ── 컴퍼스 ── */
     if (activeTool === "컴퍼스") {
       if (!pendingCompassCenter) {
-        const snapIsect = nearestIntersection(lineIntersections, x, y, 16);
+        const snapIsect = nearestIntersection(lineIntersections, x, y, 15);
         const coord = snapIsect ? { x: Math.round(snapIsect.x), y: Math.round(snapIsect.y) } : { x, y };
         const center = nearestPt(points, coord.x, coord.y, 16) || {
           id: `pt_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
@@ -972,7 +1001,7 @@ export default function TriangleCentersPage() {
         }
         setPendingCompassCenter(center);
       } else {
-        const snapIsect = nearestIntersection(lineIntersections, x, y, 16);
+        const snapIsect = nearestIntersection(lineIntersections, x, y, 15);
         const coord = snapIsect ? { x: Math.round(snapIsect.x), y: Math.round(snapIsect.y) } : { x, y };
         const passPt = nearestPt(points, coord.x, coord.y, 16) || {
           id: `pt_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
@@ -991,7 +1020,7 @@ export default function TriangleCentersPage() {
       }
       return;
     }
-  }, [activeTool, points, segments, validPerpLines, lineIntersections, pendingStart, foldSource, pendingAngleSeg, pendingPerpPt, pendingCompassCenter, polygons, validCreaseLines, validBisectorLines, getCoords, updateCurrentCanvas, runCompassAnimation]);
+  }, [activeTool, points, segments, validPerpLines, lineIntersections, pendingStart, foldSource, pendingPerpPt, pendingCompassCenter, polygons, validCreaseLines, getCoords, updateCurrentCanvas, runCompassAnimation]);
 
   /* 펼치기 */
   const handleUnfold = useCallback((polyId: string) => {
@@ -1055,7 +1084,6 @@ export default function TriangleCentersPage() {
     setPendingStart(null);
     setCursorPos(null);
     setFoldSource(null);
-    setPendingAngleSeg(null);
     setPendingPerpPt(null);
     setPendingCompassCenter(null);
     setCompassAnim(null);
@@ -1072,7 +1100,6 @@ export default function TriangleCentersPage() {
     setPendingStart(null);
     setCursorPos(null);
     setFoldSource(null);
-    setPendingAngleSeg(null);
     setPendingPerpPt(null);
     setPendingCompassCenter(null);
     setCompassAnim(null);
@@ -1165,7 +1192,7 @@ export default function TriangleCentersPage() {
 
   const svgCursor = activeTool === "선택" ? "default"
     : activeTool === "종이접기" ? (foldSource ? "crosshair" : "pointer")
-    : (activeTool === "선분" && pendingStart) || activeTool === "각의 이등분선" || (activeTool === "수선" && pendingPerpPt) || activeTool === "컴퍼스" ? "crosshair" : "cell";
+    : (activeTool === "선분" && pendingStart) || (activeTool === "수선" && pendingPerpPt) || activeTool === "컴퍼스" ? "crosshair" : "cell";
 
   const foldedPolySegIds = useMemo(() => {
     const s = new Set<string>();
@@ -1199,7 +1226,7 @@ export default function TriangleCentersPage() {
             </div>
             <div className="w-full border-t border-dashed border-gray-300/70" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
 
-            {/* 1. 기본 도구 목록 (3열 그리드: 1행 3개, 2행 3개, 3행 컴퍼스) */}
+            {/* 1. 기본 도구 목록 (3열 2행 깔끔한 그리드) */}
             <div className="grid grid-cols-3 gap-2">
               {/* 선택 */}
               <button
@@ -1263,23 +1290,6 @@ export default function TriangleCentersPage() {
                 <span className={`font-extrabold text-sm ${activeTool === "종이접기" ? "text-[#CBA7D2]" : "text-gray-600"}`}>종이접기</span>
               </button>
 
-              {/* 각의 이등분선 */}
-              <button
-                type="button"
-                onClick={() => changeTool("각의 이등분선")}
-                className={`flex flex-col items-center justify-center gap-1 rounded-2xl border-2 transition-all cursor-pointer ${
-                  activeTool === "각의 이등분선"
-                    ? "bg-[#CBA7D2]/20 border-[#CBA7D2] shadow-md"
-                    : "bg-gray-50/80 border-gray-200 hover:bg-gray-100/80 hover:border-[#CBA7D2]/50"
-                }`}
-                style={{ padding: "0.75rem 0.15rem", fontFamily: "var(--font-chalk)" }}
-              >
-                <span className="flex items-center justify-center">
-                  <AngleBisectorIcon size={20} color={activeTool === "각의 이등분선" ? "#CBA7D2" : "#9CA3AF"} />
-                </span>
-                <span className={`font-extrabold text-[0.72rem] whitespace-nowrap ${activeTool === "각의 이등분선" ? "text-[#CBA7D2]" : "text-gray-600"}`}>각의 이등분선</span>
-              </button>
-
               {/* 수선 */}
               <button
                 type="button"
@@ -1301,12 +1311,12 @@ export default function TriangleCentersPage() {
               <button
                 type="button"
                 onClick={() => changeTool("컴퍼스")}
-                className={`col-span-3 flex items-center justify-center gap-2 rounded-2xl border-2 transition-all cursor-pointer ${
+                className={`flex flex-col items-center justify-center gap-1 rounded-2xl border-2 transition-all cursor-pointer ${
                   activeTool === "컴퍼스"
                     ? "bg-[#CBA7D2]/20 border-[#CBA7D2] shadow-md"
                     : "bg-gray-50/80 border-gray-200 hover:bg-gray-100/80 hover:border-[#CBA7D2]/50"
                 }`}
-                style={{ padding: "0.65rem 0.3rem", fontFamily: "var(--font-chalk)" }}
+                style={{ padding: "0.75rem 0.3rem", fontFamily: "var(--font-chalk)" }}
               >
                 <span className="flex items-center justify-center">
                   <CompassIcon size={20} color={activeTool === "컴퍼스" ? "#CBA7D2" : "#9CA3AF"} />
@@ -1379,17 +1389,18 @@ export default function TriangleCentersPage() {
               {activeTool === "종이접기" && (
                 <div className="rounded-2xl bg-[#CBA7D2]/10 border border-dashed border-[#CBA7D2]/40 text-[#CBA7D2] text-xs leading-relaxed" style={{ padding: "0.75rem 1rem", fontFamily: "var(--font-body)" }}>
                   {foldSource ? (
-                    <>
-                      <span className="font-bold text-[#A855F7]">{foldSource.pt.label}</span> 점에서 시작 — 접어 도착할 꼭짓점을 클릭하세요.
-                    </>
+                    foldSource.type === "point" ? (
+                      <>
+                        <span className="font-bold text-[#A855F7]">{foldSource.pt.label}</span> 꼭짓점 선택됨 — 맞포갤 다른 꼭짓점을 클릭하세요.
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-bold text-[#A855F7]">첫 번째 변</span> 선택됨 — 처음 변이 포개어질 두 번째 변을 클릭하세요.
+                      </>
+                    )
                   ) : (
-                    "접기 시작할 다각형의 꼭짓점을 클릭하세요."
+                    "접을 두 꼭짓점(외심) 또는 두 변(내심)을 차례로 클릭하세요."
                   )}
-                </div>
-              )}
-              {activeTool === "각의 이등분선" && (
-                <div className="rounded-2xl bg-[#CBA7D2]/10 border border-dashed border-[#CBA7D2]/40 text-[#CBA7D2] text-xs leading-relaxed" style={{ padding: "0.75rem 1rem", fontFamily: "var(--font-body)" }}>
-                  {pendingAngleSeg ? "이등분할 각의 두 번째 선분을 클릭하세요." : "이등분할 각의 첫 번째 선분을 클릭하세요."}
                 </div>
               )}
               {activeTool === "수선" && (
@@ -1460,7 +1471,6 @@ export default function TriangleCentersPage() {
                       setPendingStart(null);
                       setCursorPos(null);
                       setFoldSource(null);
-                      setPendingAngleSeg(null);
                       setPendingPerpPt(null);
                       setPendingCompassCenter(null);
                       setCompassAnim(null);
@@ -1509,7 +1519,7 @@ export default function TriangleCentersPage() {
                 {/* 배경 격자 */}
                 <rect width="100%" height="100%" fill="url(#tc-grid)" rx="16" />
 
-                {/* ── 1. 접혔던 흔적(Crease lines) 연장된 직선 렌더링 ── */}
+                {/* ── 1. 접힌 흔적(Crease lines) 연장된 직선 렌더링 ── */}
                 {validCreaseLines.map(cl => (
                   <line key={cl.id}
                     x1={cl.x1} y1={cl.y1} x2={cl.x2} y2={cl.y2}
@@ -1517,15 +1527,7 @@ export default function TriangleCentersPage() {
                     strokeDasharray="6 4" strokeLinecap="round" />
                 ))}
 
-                {/* ── 2. 각의 이등분선 직선 렌더링 ── */}
-                {validBisectorLines.map(bl => (
-                  <line key={bl.id}
-                    x1={bl.x1} y1={bl.y1} x2={bl.x2} y2={bl.y2}
-                    stroke="#6366F1" strokeWidth={1.6}
-                    strokeDasharray="6 4" strokeLinecap="round" />
-                ))}
-
-                {/* ── 2.5. 수선(Perpendicular lines) 렌더링 ── */}
+                {/* ── 2. 수선(Perpendicular lines) 렌더링 ── */}
                 {validPerpLines.map(pl => {
                   const isSel = selectedItem?.type === "perpLine" && selectedItem.id === pl.id;
                   const targetSeg = segments.find(s => s.id === pl.targetSegId);
@@ -1642,13 +1644,13 @@ export default function TriangleCentersPage() {
                 {segments.map(seg => {
                   if (foldedPolySegIds.has(seg.id)) return null;
                   const sel = selectedItem?.type === "segment" && selectedItem.id === seg.id;
-                  const isAnglePending = pendingAngleSeg?.id === seg.id;
+                  const isFoldSelected = foldSource?.type === "segment" && foldSource.seg.id === seg.id;
                   return (
                     <line key={seg.id}
                       x1={seg.x1} y1={seg.y1} x2={seg.x2} y2={seg.y2}
-                      stroke={isAnglePending ? "#6366F1" : sel ? "#CBA7D2" : "#374151"}
-                      strokeWidth={isAnglePending ? 3.5 : sel ? 3 : 2}
-                      strokeDasharray={isAnglePending ? "5 3" : undefined}
+                      stroke={isFoldSelected ? "#A855F7" : sel ? "#CBA7D2" : "#374151"}
+                      strokeWidth={isFoldSelected ? 3.5 : sel ? 3 : 2}
+                      strokeDasharray={isFoldSelected ? "5 3" : undefined}
                       strokeLinecap="round" />
                   );
                 })}
@@ -1780,7 +1782,7 @@ export default function TriangleCentersPage() {
                 {points.map(pt => {
                   const isPending = pendingStart?.id === pt.id;
                   const isSel     = selectedItem?.type === "point" && selectedItem.id === pt.id;
-                  const isFoldSrc = foldSource?.pt.id === pt.id;
+                  const isFoldSrc = foldSource?.type === "point" && foldSource.pt.id === pt.id;
                   const isPerpSrc = pendingPerpPt?.id === pt.id;
                   const isCompassCenter = pendingCompassCenter?.id === pt.id;
                   const hl = isPending || isSel || isFoldSrc || isPerpSrc || isCompassCenter;
