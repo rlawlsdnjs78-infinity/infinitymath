@@ -395,13 +395,13 @@ export default function TripleDicePage() {
                     <div className="flex items-start gap-2">
                       <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">②</span>
                       <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
-                        모든 플레이어들에게는 흰색 주사위 9개, 빨간색 주사위 1개, 파란색 주사위 1개가 지급됩니다. 라운드가 시작되면 플레이어들은 11개의 주사위를 굴립니다. 흰색 주사위의 결과는 모든 플레이어에게 공개되며, 빨간색 주사위와 파란색 주사위의 결과는 오직 플레이어 자신만 확인할 수 있습니다.
+                        모든 플레이어들에게는 흰색 주사위 9개, 빨간색 주사위 1개, 파란색 주사위 1개가 지급됩니다. 라운드가 시작되면 플레이어들은 11개의 주사위를 굴립니다. 흰색 주사위의 결과는 모든 플레이어에게 공개되며 빨간색 주사위와 파란색 주사위의 결과는 오직 플레이어 자신만 확인할 수 있습니다.
                       </p>
                     </div>
                     <div className="flex items-start gap-2">
                       <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">③</span>
                       <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
-                        선 플레이어는 11개의 주사위 중 3개를 선택하여 첫 번째 주사위 조합을 제출합니다. 다음 플레이어부터는 앞 순서 플레이어가 제출한 주사위 조합을 참고하여 자신의 주사위 조합을 제출합니다. 만약 히든 주사위가 포함된 주사위 조합을 제출했다면, 히든 주사위의 결과는 모든 플레이어의 주사위 조합 제출이 끝나고 공개됩니다.
+                        선 플레이어는 11개의 주사위 중 3개를 선택하여 첫 번째 주사위 조합을 제출합니다. 다음 플레이어부터는 앞 순서 플레이어가 제출한 주사위 조합을 참고하여 자신의 주사위 조합을 제출합니다. 만약 히든 주사위가 포함된 주사위 조합을 제출했다면 히든 주사위의 결과는 모든 플레이어의 주사위 조합 제출이 끝나고 공개됩니다.
                       </p>
                     </div>
                   </>
@@ -457,7 +457,7 @@ export default function TripleDicePage() {
                     <div className="flex items-start gap-2">
                       <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">⑥</span>
                       <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
-                        두 번째 주사위 조합 제출부터는 이전 조합 제출에서 순위가 가장 높았던 사람이 선 플레이어가 되며, 남은 8개의 주사위 중 3개를 선택하여 두 번째 주사위 조합을 제출합니다. 이때 이전 조합 제출에서 가장 높은 순위가 2명 이상인 경우, 현재까지의 승점이 더 높은 사람이 선 플레이어가 됩니다. 이 과정을 반복하여 세 번째 주사위 제출까지 끝나면 한 라운드가 종료됩니다. 남은 주사위는 사용되지 않습니다.
+                        두 번째 주사위 조합 제출부터는 이전 제출에서 순위가 가장 높았던 사람이 선 플레이어가 되며 제출하고 남은 주사위 중 3개를 선택하여 주사위 조합을 제출합니다. 이때 이전 제출에서 가장 높은 순위가 2명 이상인 경우 현재까지의 승점이 더 높은 사람이 선 플레이어가 됩니다. 이 과정을 반복하여 세 번째 주사위 조합 제출까지 끝나면 한 라운드가 종료됩니다. 남은 주사위는 사용되지 않습니다.
                       </p>
                     </div>
                   </>
@@ -500,15 +500,14 @@ export default function TripleDicePage() {
                       className="w-full rounded-2xl shadow-lg border-2 border-dashed border-[#CBA7D2]/90 bg-gray-50/80 backdrop-blur-md"
                       style={{ padding: "0.65rem", display: "flex", flexDirection: "column", gap: "0.55rem" }}
                     >
-                      {[
-                        { desc: "MIN, MORE, MAX 예측에 성공했다면 해당 라운드에 획득한 승점은 2배가 됩니다." },
-                        { desc: "ZERO 예측에 성공했다면 40점을 획득합니다." },
-                      ].map(({ desc }, i) => (
-                        <div key={i} className="flex items-start gap-2 text-gray-600 font-medium" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
-                          <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">·</span>
-                          <span>{desc}</span>
-                        </div>
-                      ))}
+                      <div className="flex items-start gap-2 text-gray-600 font-medium" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                        <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">·</span>
+                        <span><span className="font-extrabold text-[#CBA7D2]">MIN, MORE, MAX</span> 예측에 성공했다면 해당 라운드에 획득한 승점은 2배가 됩니다.</span>
+                      </div>
+                      <div className="flex items-start gap-2 text-gray-600 font-medium" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                        <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">·</span>
+                        <span><span className="font-extrabold text-[#CBA7D2]">ZERO</span> 예측에 성공했다면 40점을 획득합니다.</span>
+                      </div>
                     </div>
                     <div className="flex items-start gap-2">
                       <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">⑨</span>
