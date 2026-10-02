@@ -436,18 +436,14 @@ export default function TripleDicePage() {
                       <div className="flex flex-col gap-1" style={{ paddingLeft: "0.25rem" }}>
                         <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
                           <span className="flex-shrink-0 font-bold text-amber-500 mt-0.5">⚠</span>
-                          <span>이때 제출된 주사위 조합이 같은 등급이라면 조합에 사용된 숫자 중 가장 높은 숫자가 더 큰 플레이어의 순위가 더 높습니다.</span>
+                          <span>이때 제출된 주사위 조합이 같은 등급이라면 다음 우선순위에 따라 플레이어의 순위가 결정됩니다.</span>
                         </div>
                         <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em", paddingLeft: "1rem" }}>
-                          <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">→</span>
-                          <span>만약 같은 등급의 주사위 조합에서 가장 높은 숫자가 같다면 조합에 사용된 숫자 중 두 번째로 높은 숫자가 더 큰 플레이어의 순위가 더 높습니다.</span>
+                          <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">:</span>
+                          <span>조합에 사용된 가장 높은 숫자가 더 큰 플레이어 → 조합에 사용된 두 번째로 높은 숫자가 더 큰 플레이어 → 나머지 숫자가 더 큰 플레이어</span>
                         </div>
-                        <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em", paddingLeft: "1rem" }}>
-                          <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">→</span>
-                          <span>만약 조합에 사용된 숫자 중 두 번째로 높은 숫자도 같다면 남은 숫자가 더 큰 플레이어의 순위가 더 높습니다.</span>
-                        </div>
-                        <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em", paddingLeft: "1rem" }}>
-                          <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">→</span>
+                        <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                          <span className="flex-shrink-0 font-bold text-amber-500 mt-0.5">⚠</span>
                           <span>완전히 동일한 주사위 조합이 제출되었다면 동점 처리됩니다.</span>
                         </div>
                       </div>
