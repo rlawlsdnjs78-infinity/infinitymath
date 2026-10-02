@@ -381,7 +381,7 @@ export default function TripleDicePage() {
               {/* ── 페이지 콘텐츠 */}
               <div
                 className="flex flex-col flex-1 text-gray-700 leading-relaxed py-1 overflow-y-auto"
-                style={{ gap: "0.85rem", fontFamily: "var(--font-chalk)", fontSize: "0.85rem", wordBreak: "break-all", letterSpacing: "-0.015em" }}
+                style={{ gap: "0.85rem", fontFamily: "var(--font-chalk)", fontSize: "0.85rem", wordBreak: "break-all", letterSpacing: "-0.015em", minHeight: "320px" }}
               >
                 {/* ════ 1페이지: ①~③ ════ */}
                 {descPage === 0 && (
