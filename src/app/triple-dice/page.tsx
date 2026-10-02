@@ -373,7 +373,7 @@ export default function TripleDicePage() {
                   <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem", lineHeight: 1.1 }}>게임 설명</h2>
                 </div>
                 <span className="text-gray-400 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "0.9rem" }}>
-                  {descPage + 1} / 3
+                  {descPage + 1} / 4
                 </span>
               </div>
               <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
@@ -416,47 +416,51 @@ export default function TripleDicePage() {
                   </div>
                 )}
 
-                {/* ════ 2페이지: ④~⑥ ════ */}
+                {/* ════ 2페이지: ④ ════ */}
                 {descPage === 1 && (
-                  <>
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-start gap-2">
-                        <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">④</span>
-                        <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
-                          첫 번째 주사위 제출이 끝나면 제출된 주사위 조합을 비교해 순위가 결정되고, 순위에 따라 승점이 주어집니다.
-                        </p>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-start gap-2">
+                      <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">④</span>
+                      <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
+                        첫 번째 주사위 제출이 끝나면 제출된 주사위 조합을 비교해 순위가 결정되고, 순위에 따라 승점이 주어집니다.
+                      </p>
+                    </div>
+                    <div
+                      className="w-full rounded-2xl shadow-lg border-2 border-dashed border-[#CBA7D2]/90 bg-gray-50/80 backdrop-blur-md"
+                      style={{ padding: "0.65rem", display: "flex", flexDirection: "column", gap: "0.55rem" }}
+                    >
+                      {[
+                        { label: "트리플(Triple)", desc: "제출한 주사위 3개의 숫자가 같습니다." },
+                        { label: "스트레이트(Straight)", desc: "제출한 3개의 숫자가 연속된 숫자입니다. 이때 6과 1은 연속되지 않습니다." },
+                        { label: "더블(Double)", desc: "제출한 주사위 3개 중 2개의 숫자가 같습니다." },
+                        { label: "싱글(Single)", desc: "제출한 주사위 3개가 트리플, 스트레이트, 더블 중 무엇에도 해당하지 않습니다." },
+                      ].map(({ label, desc }) => (
+                        <div key={label} className="flex items-start gap-2 text-gray-600 font-medium" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                          <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">·</span>
+                          <span><span className="font-extrabold text-[#CBA7D2]">{label}</span>{" "}: {desc}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex flex-col gap-1" style={{ paddingLeft: "0.25rem" }}>
+                      <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                        <span className="flex-shrink-0 font-bold text-amber-500 mt-0.5">⚠</span>
+                        <span>이때 제출된 주사위 조합이 같은 등급이라면 다음 우선순위에 따라 플레이어의 순위가 결정됩니다.</span>
                       </div>
-                      <div
-                        className="w-full rounded-2xl shadow-lg border-2 border-dashed border-[#CBA7D2]/90 bg-gray-50/80 backdrop-blur-md"
-                        style={{ padding: "0.65rem", display: "flex", flexDirection: "column", gap: "0.55rem" }}
-                      >
-                        {[
-                          { label: "트리플(Triple)", desc: "제출한 주사위 3개의 숫자가 같습니다." },
-                          { label: "스트레이트(Straight)", desc: "제출한 3개의 숫자가 연속된 숫자입니다. 이때 6과 1은 연속되지 않습니다." },
-                          { label: "더블(Double)", desc: "제출한 주사위 3개 중 2개의 숫자가 같습니다." },
-                          { label: "싱글(Single)", desc: "제출한 주사위 3개가 트리플, 스트레이트, 더블 중 무엇에도 해당하지 않습니다." },
-                        ].map(({ label, desc }) => (
-                          <div key={label} className="flex items-start gap-2 text-gray-600 font-medium" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
-                            <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">·</span>
-                            <span><span className="font-extrabold text-[#CBA7D2]">{label}</span>{" "}: {desc}</span>
-                          </div>
-                        ))}
+                      <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em", paddingLeft: "1rem" }}>
+                        <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">:</span>
+                        <span>조합에 사용된 가장 높은 숫자가 더 큰 플레이어 → 조합에 사용된 두 번째로 높은 숫자가 더 큰 플레이어 → 나머지 숫자가 더 큰 플레이어</span>
                       </div>
-                      <div className="flex flex-col gap-1" style={{ paddingLeft: "0.25rem" }}>
-                        <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
-                          <span className="flex-shrink-0 font-bold text-amber-500 mt-0.5">⚠</span>
-                          <span>이때 제출된 주사위 조합이 같은 등급이라면 다음 우선순위에 따라 플레이어의 순위가 결정됩니다.</span>
-                        </div>
-                        <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em", paddingLeft: "1rem" }}>
-                          <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">:</span>
-                          <span>조합에 사용된 가장 높은 숫자가 더 큰 플레이어 → 조합에 사용된 두 번째로 높은 숫자가 더 큰 플레이어 → 나머지 숫자가 더 큰 플레이어</span>
-                        </div>
-                        <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
-                          <span className="flex-shrink-0 font-bold text-amber-500 mt-0.5">⚠</span>
-                          <span>완전히 동일한 주사위 조합이 제출되었다면 동점 처리됩니다.</span>
-                        </div>
+                      <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                        <span className="flex-shrink-0 font-bold text-amber-500 mt-0.5">⚠</span>
+                        <span>완전히 동일한 주사위 조합이 제출되었다면 동점 처리됩니다.</span>
                       </div>
                     </div>
+                  </div>
+                )}
+
+                {/* ════ 3페이지: ⑤~⑥ ════ */}
+                {descPage === 2 && (
+                  <div className="flex flex-col" style={{ gap: "1.1rem" }}>
                     <div className="flex items-start gap-2">
                       <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">⑤</span>
                       <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
@@ -469,11 +473,11 @@ export default function TripleDicePage() {
                         두 번째 주사위 조합 제출부터는 이전 제출에서 순위가 가장 높았던 사람이 선 플레이어가 되며 제출하고 남은 주사위 중 3개를 선택하여 주사위 조합을 제출합니다. 이때 이전 제출에서 가장 높은 순위가 2명 이상인 경우 현재까지의 승점이 더 높은 사람이 선 플레이어가 됩니다. 이 과정을 반복하여 세 번째 주사위 조합 제출까지 끝나면 한 라운드가 종료됩니다. 남은 주사위는 사용되지 않습니다.
                       </p>
                     </div>
-                  </>
+                  </div>
                 )}
 
-                {/* ════ 3페이지: ⑦~⑨ ════ */}
-                {descPage === 2 && (
+                {/* ════ 4페이지: ⑦~⑨ ════ */}
+                {descPage === 3 && (
                   <>
                     <div className="flex flex-col gap-2">
                       <div className="flex items-start gap-2">
@@ -543,7 +547,7 @@ export default function TripleDicePage() {
                 </button>
                 {/* 인디케이터 점 */}
                 <div className="flex items-center gap-1.5">
-                  {[0, 1, 2].map((i) => (
+                  {[0, 1, 2, 3].map((i) => (
                     <button
                       key={i}
                       type="button"
@@ -565,10 +569,10 @@ export default function TripleDicePage() {
                 <button
                   type="button"
                   id="desc-next-btn"
-                  onClick={() => setDescPage((p) => Math.min(2, p + 1))}
-                  disabled={descPage === 2}
+                  onClick={() => setDescPage((p) => Math.min(3, p + 1))}
+                  disabled={descPage === 3}
                   className="flex items-center gap-1 rounded-xl transition-all duration-150 disabled:opacity-25 disabled:cursor-not-allowed hover:bg-gray-100"
-                  style={{ padding: "0.45rem 0.85rem", fontFamily: "var(--font-chalk)", fontSize: "0.85rem", color: "#CBA7D2", border: "1.5px dashed #CBA7D2", background: "transparent", cursor: descPage === 2 ? "not-allowed" : "pointer" }}
+                  style={{ padding: "0.45rem 0.85rem", fontFamily: "var(--font-chalk)", fontSize: "0.85rem", color: "#CBA7D2", border: "1.5px dashed #CBA7D2", background: "transparent", cursor: descPage === 3 ? "not-allowed" : "pointer" }}
                 >
                   <span>다음</span>
                   <ChevronRight size={15} />
