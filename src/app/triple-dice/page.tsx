@@ -381,11 +381,20 @@ export default function TripleDicePage() {
               {/* ── 페이지 콘텐츠 */}
               <div
                 className="flex flex-col flex-1 text-gray-700 leading-relaxed py-1 overflow-y-auto"
-                style={{ gap: "0.85rem", fontFamily: "var(--font-chalk)", fontSize: "0.85rem", wordBreak: "break-all", letterSpacing: "-0.015em", minHeight: "320px" }}
+                style={{
+                  height: "440px",
+                  maxHeight: "440px",
+                  gap: "0.85rem",
+                  fontFamily: "var(--font-chalk)",
+                  fontSize: "0.85rem",
+                  wordBreak: "break-all",
+                  letterSpacing: "-0.015em",
+                  scrollbarGutter: "stable",
+                }}
               >
                 {/* ════ 1페이지: ①~③ ════ */}
                 {descPage === 0 && (
-                  <>
+                  <div className="flex flex-col" style={{ gap: "1.1rem" }}>
                     <div className="flex items-start gap-2">
                       <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">①</span>
                       <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
@@ -404,7 +413,7 @@ export default function TripleDicePage() {
                         선 플레이어는 11개의 주사위 중 3개를 선택하여 첫 번째 주사위 조합을 제출합니다. 다음 플레이어부터는 앞 순서 플레이어가 제출한 주사위 조합을 참고하여 자신의 주사위 조합을 제출합니다. 만약 히든 주사위가 포함된 주사위 조합을 제출했다면 히든 주사위의 결과는 모든 플레이어의 주사위 조합 제출이 끝나고 공개됩니다.
                       </p>
                     </div>
-                  </>
+                  </div>
                 )}
 
                 {/* ════ 2페이지: ④~⑥ ════ */}
@@ -427,22 +436,22 @@ export default function TripleDicePage() {
                           { label: "더블(Double)", desc: "제출한 주사위 3개 중 2개의 숫자가 같습니다." },
                           { label: "싱글(Single)", desc: "제출한 주사위 3개가 트리플, 스트레이트, 더블 중 무엇에도 해당하지 않습니다." },
                         ].map(({ label, desc }) => (
-                          <div key={label} className="flex items-start gap-2 text-gray-600 font-medium" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                          <div key={label} className="flex items-start gap-2 text-gray-600 font-medium" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
                             <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">·</span>
                             <span><span className="font-extrabold text-[#CBA7D2]">{label}</span>{" "}: {desc}</span>
                           </div>
                         ))}
                       </div>
                       <div className="flex flex-col gap-1" style={{ paddingLeft: "0.25rem" }}>
-                        <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                        <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
                           <span className="flex-shrink-0 font-bold text-amber-500 mt-0.5">⚠</span>
                           <span>이때 제출된 주사위 조합이 같은 등급이라면 다음 우선순위에 따라 플레이어의 순위가 결정됩니다.</span>
                         </div>
-                        <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em", paddingLeft: "1rem" }}>
+                        <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em", paddingLeft: "1rem" }}>
                           <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">:</span>
                           <span>조합에 사용된 가장 높은 숫자가 더 큰 플레이어 → 조합에 사용된 두 번째로 높은 숫자가 더 큰 플레이어 → 나머지 숫자가 더 큰 플레이어</span>
                         </div>
-                        <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                        <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
                           <span className="flex-shrink-0 font-bold text-amber-500 mt-0.5">⚠</span>
                           <span>완전히 동일한 주사위 조합이 제출되었다면 동점 처리됩니다.</span>
                         </div>
@@ -483,7 +492,7 @@ export default function TripleDicePage() {
                           { label: "MORE", desc: "승점 7점 이상 10점 이하 획득" },
                           { label: "MAX", desc: "승점 10점 초과 획득" },
                         ].map(({ label, desc }) => (
-                          <div key={label} className="flex items-start gap-2 text-gray-600 font-medium" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                          <div key={label} className="flex items-start gap-2 text-gray-600 font-medium" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
                             <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">·</span>
                             <span><span className="font-extrabold text-[#CBA7D2]">{label}</span>{" "}: {desc}</span>
                           </div>
@@ -500,11 +509,11 @@ export default function TripleDicePage() {
                       className="w-full rounded-2xl shadow-lg border-2 border-dashed border-[#CBA7D2]/90 bg-gray-50/80 backdrop-blur-md"
                       style={{ padding: "0.65rem", display: "flex", flexDirection: "column", gap: "0.55rem" }}
                     >
-                      <div className="flex items-start gap-2 text-gray-600 font-medium" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                      <div className="flex items-start gap-2 text-gray-600 font-medium" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
                         <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">·</span>
                         <span><span className="font-extrabold text-[#CBA7D2]">MIN, MORE, MAX</span> 예측에 성공했다면 해당 라운드에 획득한 승점은 2배가 됩니다.</span>
                       </div>
-                      <div className="flex items-start gap-2 text-gray-600 font-medium" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                      <div className="flex items-start gap-2 text-gray-600 font-medium" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
                         <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">·</span>
                         <span><span className="font-extrabold text-[#CBA7D2]">ZERO</span> 예측에 성공했다면 40점을 획득합니다.</span>
                       </div>
