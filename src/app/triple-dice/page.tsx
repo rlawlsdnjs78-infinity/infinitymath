@@ -24,6 +24,8 @@ import {
   Play,
   Dice5,
   Pencil,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 export default function TripleDicePage() {
@@ -35,6 +37,7 @@ export default function TripleDicePage() {
   const [entryCode, setEntryCode] = useState("");
   const [activityLogs] = useState<{ id: string; tag: string; text: string }[]>([]);
   const [myNickname] = useState("");
+  const [descPage, setDescPage] = useState(0); // 게임 설명 페이지 (0~2)
   const [activeRoomCode] = useState("");
 
   const handleJoinGameRoom = (e: React.FormEvent) => {
@@ -363,176 +366,209 @@ export default function TripleDicePage() {
         >
           {mode === "player" ? (
             <>
-              <div className="flex items-center gap-3 w-full min-h-[44px]">
-                <HelpCircle className="text-[#CBA7D2] flex-shrink-0" size={28} />
-                <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem", lineHeight: 1.1 }}>게임 설명</h2>
+              {/* ── 헤더: 제목 + 페이지 표시 */}
+              <div className="flex items-center justify-between w-full min-h-[44px]">
+                <div className="flex items-center gap-3">
+                  <HelpCircle className="text-[#CBA7D2] flex-shrink-0" size={28} />
+                  <h2 className="text-[#CBA7D2] font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "1.85rem", lineHeight: 1.1 }}>게임 설명</h2>
+                </div>
+                <span className="text-gray-400 font-bold" style={{ fontFamily: "var(--font-chalk)", fontSize: "0.9rem" }}>
+                  {descPage + 1} / 3
+                </span>
               </div>
               <div className="w-full border-t border-dashed border-gray-200" style={{ marginTop: "0.85rem", marginBottom: "0.85rem" }} />
+
+              {/* ── 페이지 콘텐츠 */}
               <div
-                className="flex flex-col text-gray-700 leading-relaxed py-1 overflow-y-auto"
+                className="flex flex-col flex-1 text-gray-700 leading-relaxed py-1 overflow-y-auto"
                 style={{ gap: "0.85rem", fontFamily: "var(--font-chalk)", fontSize: "0.85rem", wordBreak: "break-all", letterSpacing: "-0.015em" }}
               >
-                {/* ① 게임 소개 */}
-                <div className="flex items-start gap-2">
-                  <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">①</span>
-                  <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
-                    <strong className="text-[#CBA7D2] font-bold">&lsquo;트리플 다이스&rsquo;</strong>는 세 개의 주사위를 조합해 높은 승점을 획득해야 하는 게임입니다.
-                  </p>
-                </div>
+                {/* ════ 1페이지: ①~③ ════ */}
+                {descPage === 0 && (
+                  <>
+                    <div className="flex items-start gap-2">
+                      <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">①</span>
+                      <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
+                        <strong className="text-[#CBA7D2] font-bold">&lsquo;트리플 다이스&rsquo;</strong>는 세 개의 주사위를 조합해 높은 승점을 획득해야 하는 게임입니다.
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">②</span>
+                      <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
+                        모든 플레이어들에게는 흰색 주사위 9개, 빨간색 주사위 1개, 파란색 주사위 1개가 지급됩니다. 라운드가 시작되면 플레이어들은 11개의 주사위를 굴립니다. 흰색 주사위의 결과는 모든 플레이어에게 공개되며, 빨간색 주사위와 파란색 주사위의 결과는 오직 플레이어 자신만 확인할 수 있습니다.
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">③</span>
+                      <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
+                        선 플레이어는 11개의 주사위 중 3개를 선택하여 첫 번째 주사위 조합을 제출합니다. 다음 플레이어부터는 앞 순서 플레이어가 제출한 주사위 조합을 참고하여 자신의 주사위 조합을 제출합니다. 만약 히든 주사위가 포함된 주사위 조합을 제출했다면, 히든 주사위의 결과는 모든 플레이어의 주사위 조합 제출이 끝나고 공개됩니다.
+                      </p>
+                    </div>
+                  </>
+                )}
 
-                {/* ② 주사위 지급 및 공개 규칙 */}
-                <div className="flex items-start gap-2">
-                  <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">②</span>
-                  <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
-                    모든 플레이어들에게는 흰색 주사위 9개, 빨간색 주사위 1개, 파란색 주사위 1개가 지급됩니다. 라운드가 시작되면 플레이어들은 11개의 주사위를 굴립니다. 흰색 주사위의 결과는 모든 플레이어에게 공개되며, 빨간색 주사위와 파란색 주사위의 결과는 오직 플레이어 자신만 확인할 수 있습니다.
-                  </p>
-                </div>
-
-                {/* ③ 주사위 조합 제출 */}
-                <div className="flex items-start gap-2">
-                  <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">③</span>
-                  <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
-                    선 플레이어는 11개의 주사위 중 3개를 선택하여 첫 번째 주사위 조합을 제출합니다. 다음 플레이어부터는 앞 순서 플레이어가 제출한 주사위 조합을 참고하여 자신의 주사위 조합을 제출합니다. 만약 히든 주사위가 포함된 주사위 조합을 제출했다면, 히든 주사위의 결과는 모든 플레이어의 주사위 조합 제출이 끝나고 공개됩니다.
-                  </p>
-                </div>
-
-                {/* ④ 순위 결정 + 등급 박스 */}
-                <div className="flex flex-col gap-2" style={{ marginBottom: "0.2rem" }}>
-                  <div className="flex items-start gap-2">
-                    <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">④</span>
-                    <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
-                      첫 번째 주사위 제출이 끝나면 제출된 주사위 조합을 비교해 순위가 결정되고, 순위에 따라 승점이 주어집니다.
-                    </p>
-                  </div>
-                  {/* 등급 박스 */}
-                  <div
-                    className="w-full rounded-2xl shadow-lg border-2 border-dashed border-[#CBA7D2]/90 bg-gray-50/80 backdrop-blur-md"
-                    style={{ padding: "0.65rem", display: "flex", flexDirection: "column", gap: "0.55rem" }}
-                  >
-                    {[
-                      { label: "트리플(Triple)", desc: "제출한 주사위 3개의 숫자가 같습니다." },
-                      { label: "스트레이트(Straight)", desc: "제출한 3개의 숫자가 연속된 숫자입니다. 이때 6과 1은 연속되지 않습니다." },
-                      { label: "더블(Double)", desc: "제출한 주사위 3개 중 2개의 숫자가 같습니다." },
-                      { label: "싱글(Single)", desc: "제출한 주사위 3개가 트리플, 스트레이트, 더블 중 무엇에도 해당하지 않습니다." },
-                    ].map(({ label, desc }) => (
-                      <div
-                        key={label}
-                        className="flex items-start gap-2 text-gray-600 font-medium"
-                        style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}
-                      >
-                        <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">·</span>
-                        <span>
-                          <span className="font-extrabold text-[#CBA7D2]">{label}</span>
-                          {" "}: {desc}
-                        </span>
+                {/* ════ 2페이지: ④~⑥ ════ */}
+                {descPage === 1 && (
+                  <>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-start gap-2">
+                        <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">④</span>
+                        <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
+                          첫 번째 주사위 제출이 끝나면 제출된 주사위 조합을 비교해 순위가 결정되고, 순위에 따라 승점이 주어집니다.
+                        </p>
                       </div>
-                    ))}
-                  </div>
-                  {/* 동점 처리 규칙 */}
-                  <div className="flex flex-col gap-1" style={{ paddingLeft: "0.25rem" }}>
-                    <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
-                      <span className="flex-shrink-0 font-bold text-amber-500 mt-0.5">⚠</span>
-                      <span>이때 제출된 주사위 조합이 같은 등급이라면 조합에 사용된 숫자 중 가장 높은 숫자가 더 큰 플레이어의 순위가 더 높습니다.</span>
-                    </div>
-                    <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em", paddingLeft: "1rem" }}>
-                      <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">→</span>
-                      <span>만약 같은 등급의 주사위 조합에서 가장 높은 숫자가 같다면 조합에 사용된 숫자 중 두 번째로 높은 숫자가 더 큰 플레이어의 순위가 더 높습니다.</span>
-                    </div>
-                    <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em", paddingLeft: "1rem" }}>
-                      <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">→</span>
-                      <span>만약 조합에 사용된 숫자 중 두 번째로 높은 숫자도 같다면 남은 숫자가 더 큰 플레이어의 순위가 더 높습니다.</span>
-                    </div>
-                    <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em", paddingLeft: "1rem" }}>
-                      <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">→</span>
-                      <span>완전히 동일한 주사위 조합이 제출되었다면 동점 처리됩니다.</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* ⑤ 승점 분배 */}
-                <div className="flex items-start gap-2">
-                  <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">⑤</span>
-                  <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
-                    주사위 조합의 순위에 따라 1위는 6점, 2위는 3점, 3위는 1점, 4위는 0점의 승점을 획득합니다. 이때 동점 처리된 플레이어들은 해당 순위의 승점을 합산해 나누어 갖습니다. <span className="text-[#CBA7D2] font-bold">(예)</span> 1위와 2위가 동점 처리된 경우 → 1위와 2위 모두 4.5점의 승점 획득
-                  </p>
-                </div>
-
-                {/* ⑥ 이후 조합 제출 규칙 */}
-                <div className="flex items-start gap-2">
-                  <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">⑥</span>
-                  <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
-                    두 번째 주사위 조합 제출부터는 이전 조합 제출에서 순위가 가장 높았던 사람이 선 플레이어가 되며, 남은 8개의 주사위 중 3개를 선택하여 두 번째 주사위 조합을 제출합니다. 이때 이전 조합 제출에서 가장 높은 순위가 2명 이상인 경우, 현재까지의 승점이 더 높은 사람이 선 플레이어가 됩니다. 이 과정을 반복하여 세 번째 주사위 제출까지 끝나면 남은 2개의 주사위는 사용되지 않으며 한 라운드가 종료됩니다.
-                  </p>
-                </div>
-
-                {/* ⑦ 승점 예측 카드 + 박스 */}
-                <div className="flex flex-col gap-2" style={{ marginBottom: "0.2rem" }}>
-                  <div className="flex items-start gap-2">
-                    <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">⑦</span>
-                    <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
-                      플레이어들은 매 라운드 첫 번째 주사위 조합을 제출하기 전에 해당 라운드에 획득할 자신의 승점을 예측하여 비공개로 승점 예측 카드를 제출합니다.
-                    </p>
-                  </div>
-                  <div
-                    className="w-full rounded-2xl shadow-lg border-2 border-dashed border-[#CBA7D2]/90 bg-gray-50/80 backdrop-blur-md"
-                    style={{ padding: "0.65rem", display: "flex", flexDirection: "column", gap: "0.55rem" }}
-                  >
-                    {[
-                      { label: "ZERO", desc: "승점 0점 획득" },
-                      { label: "MIN", desc: "승점 0점 초과 7점 미만 획득" },
-                      { label: "MORE", desc: "승점 7점 이상 10점 이하 획득" },
-                      { label: "MAX", desc: "승점 10점 초과 획득" },
-                    ].map(({ label, desc }) => (
                       <div
-                        key={label}
-                        className="flex items-start gap-2 text-gray-600 font-medium"
-                        style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}
+                        className="w-full rounded-2xl shadow-lg border-2 border-dashed border-[#CBA7D2]/90 bg-gray-50/80 backdrop-blur-md"
+                        style={{ padding: "0.65rem", display: "flex", flexDirection: "column", gap: "0.55rem" }}
                       >
-                        <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">·</span>
-                        <span>
-                          <span className="font-extrabold text-[#CBA7D2]">{label}</span>
-                          {" "}: {desc}
-                        </span>
+                        {[
+                          { label: "트리플(Triple)", desc: "제출한 주사위 3개의 숫자가 같습니다." },
+                          { label: "스트레이트(Straight)", desc: "제출한 3개의 숫자가 연속된 숫자입니다. 이때 6과 1은 연속되지 않습니다." },
+                          { label: "더블(Double)", desc: "제출한 주사위 3개 중 2개의 숫자가 같습니다." },
+                          { label: "싱글(Single)", desc: "제출한 주사위 3개가 트리플, 스트레이트, 더블 중 무엇에도 해당하지 않습니다." },
+                        ].map(({ label, desc }) => (
+                          <div key={label} className="flex items-start gap-2 text-gray-600 font-medium" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                            <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">·</span>
+                            <span><span className="font-extrabold text-[#CBA7D2]">{label}</span>{" "}: {desc}</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                      <div className="flex flex-col gap-1" style={{ paddingLeft: "0.25rem" }}>
+                        <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                          <span className="flex-shrink-0 font-bold text-amber-500 mt-0.5">⚠</span>
+                          <span>이때 제출된 주사위 조합이 같은 등급이라면 조합에 사용된 숫자 중 가장 높은 숫자가 더 큰 플레이어의 순위가 더 높습니다.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em", paddingLeft: "1rem" }}>
+                          <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">→</span>
+                          <span>만약 같은 등급의 주사위 조합에서 가장 높은 숫자가 같다면 조합에 사용된 숫자 중 두 번째로 높은 숫자가 더 큰 플레이어의 순위가 더 높습니다.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em", paddingLeft: "1rem" }}>
+                          <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">→</span>
+                          <span>만약 조합에 사용된 숫자 중 두 번째로 높은 숫자도 같다면 남은 숫자가 더 큰 플레이어의 순위가 더 높습니다.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em", paddingLeft: "1rem" }}>
+                          <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">→</span>
+                          <span>완전히 동일한 주사위 조합이 제출되었다면 동점 처리됩니다.</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">⑤</span>
+                      <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
+                        주사위 조합의 순위에 따라 1위는 6점, 2위는 3점, 3위는 1점, 4위는 0점의 승점을 획득합니다. 이때 동점 처리된 플레이어들은 해당 순위의 승점을 합산해 나누어 갖습니다. <span className="text-[#CBA7D2] font-bold">(예)</span> 1위와 2위가 동점 처리된 경우 → 1위와 2위 모두 4.5점의 승점 획득
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">⑥</span>
+                      <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
+                        두 번째 주사위 조합 제출부터는 이전 조합 제출에서 순위가 가장 높았던 사람이 선 플레이어가 되며, 남은 8개의 주사위 중 3개를 선택하여 두 번째 주사위 조합을 제출합니다. 이때 이전 조합 제출에서 가장 높은 순위가 2명 이상인 경우, 현재까지의 승점이 더 높은 사람이 선 플레이어가 됩니다. 이 과정을 반복하여 세 번째 주사위 제출까지 끝나면 남은 2개의 주사위는 사용되지 않으며 한 라운드가 종료됩니다.
+                      </p>
+                    </div>
+                  </>
+                )}
 
-                {/* ⑧ 예측 성공 시 추가 점수 + 박스 */}
-                <div className="flex flex-col gap-2" style={{ marginBottom: "0.2rem" }}>
-                  <div className="flex items-start gap-2">
-                    <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">⑧</span>
-                    <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
-                      승점 예측에 성공한 플레이어는 해당 라운드 종료 시 추가 점수를 받습니다.
-                    </p>
-                  </div>
-                  <div
-                    className="w-full rounded-2xl shadow-lg border-2 border-dashed border-[#CBA7D2]/90 bg-gray-50/80 backdrop-blur-md"
-                    style={{ padding: "0.65rem", display: "flex", flexDirection: "column", gap: "0.55rem" }}
-                  >
-                    {[
-                      { desc: "MIN, MORE, MAX 예측에 성공했다면 해당 라운드에 획득한 승점은 2배가 됩니다." },
-                      { desc: "ZERO 예측에 성공했다면 40점을 획득합니다." },
-                    ].map(({ desc }, i) => (
+                {/* ════ 3페이지: ⑦~⑨ ════ */}
+                {descPage === 2 && (
+                  <>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-start gap-2">
+                        <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">⑦</span>
+                        <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
+                          플레이어들은 매 라운드 첫 번째 주사위 조합을 제출하기 전에 해당 라운드에 획득할 자신의 승점을 예측하여 비공개로 승점 예측 카드를 제출합니다.
+                        </p>
+                      </div>
                       <div
-                        key={i}
-                        className="flex items-start gap-2 text-gray-600 font-medium"
-                        style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}
+                        className="w-full rounded-2xl shadow-lg border-2 border-dashed border-[#CBA7D2]/90 bg-gray-50/80 backdrop-blur-md"
+                        style={{ padding: "0.65rem", display: "flex", flexDirection: "column", gap: "0.55rem" }}
                       >
-                        <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">·</span>
-                        <span>{desc}</span>
+                        {[
+                          { label: "ZERO", desc: "승점 0점 획득" },
+                          { label: "MIN", desc: "승점 0점 초과 7점 미만 획득" },
+                          { label: "MORE", desc: "승점 7점 이상 10점 이하 획득" },
+                          { label: "MAX", desc: "승점 10점 초과 획득" },
+                        ].map(({ label, desc }) => (
+                          <div key={label} className="flex items-start gap-2 text-gray-600 font-medium" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                            <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">·</span>
+                            <span><span className="font-extrabold text-[#CBA7D2]">{label}</span>{" "}: {desc}</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">⑧</span>
+                      <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
+                        승점 예측에 성공한 플레이어는 해당 라운드 종료 시 추가 점수를 받습니다.
+                      </p>
+                    </div>
+                    <div
+                      className="w-full rounded-2xl shadow-lg border-2 border-dashed border-[#CBA7D2]/90 bg-gray-50/80 backdrop-blur-md"
+                      style={{ padding: "0.65rem", display: "flex", flexDirection: "column", gap: "0.55rem" }}
+                    >
+                      {[
+                        { desc: "MIN, MORE, MAX 예측에 성공했다면 해당 라운드에 획득한 승점은 2배가 됩니다." },
+                        { desc: "ZERO 예측에 성공했다면 40점을 획득합니다." },
+                      ].map(({ desc }, i) => (
+                        <div key={i} className="flex items-start gap-2 text-gray-600 font-medium" style={{ fontSize: "0.82rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
+                          <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">·</span>
+                          <span>{desc}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">⑨</span>
+                      <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
+                        게임은 4라운드로 진행되며, 4라운드가 끝난 후 최종 승점이 가장 높은 플레이어가 승리합니다.
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
 
-                {/* ⑨ 게임 종료 */}
-                <div className="flex items-start gap-2">
-                  <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">⑨</span>
-                  <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
-                    게임은 4라운드로 진행되며, 4라운드가 끝난 후 최종 승점이 가장 높은 플레이어가 승리합니다.
-                  </p>
+              {/* ── 페이지 네비게이션 버튼 */}
+              <div className="flex items-center justify-between w-full" style={{ marginTop: "0.85rem", paddingTop: "0.65rem", borderTop: "1px dashed rgba(0,0,0,0.08)" }}>
+                <button
+                  type="button"
+                  id="desc-prev-btn"
+                  onClick={() => setDescPage((p) => Math.max(0, p - 1))}
+                  disabled={descPage === 0}
+                  className="flex items-center gap-1 rounded-xl transition-all duration-150 disabled:opacity-25 disabled:cursor-not-allowed hover:bg-gray-100"
+                  style={{ padding: "0.45rem 0.85rem", fontFamily: "var(--font-chalk)", fontSize: "0.85rem", color: "#CBA7D2", border: "1.5px dashed #CBA7D2", background: "transparent", cursor: descPage === 0 ? "not-allowed" : "pointer" }}
+                >
+                  <ChevronLeft size={15} />
+                  <span>이전</span>
+                </button>
+                {/* 인디케이터 점 */}
+                <div className="flex items-center gap-1.5">
+                  {[0, 1, 2].map((i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setDescPage(i)}
+                      aria-label={`${i + 1}페이지`}
+                      style={{
+                        width: descPage === i ? "18px" : "8px",
+                        height: "8px",
+                        borderRadius: "9999px",
+                        background: descPage === i ? "#CBA7D2" : "#e0d0ea",
+                        border: "none",
+                        cursor: "pointer",
+                        transition: "all 0.25s ease",
+                        padding: 0,
+                      }}
+                    />
+                  ))}
                 </div>
+                <button
+                  type="button"
+                  id="desc-next-btn"
+                  onClick={() => setDescPage((p) => Math.min(2, p + 1))}
+                  disabled={descPage === 2}
+                  className="flex items-center gap-1 rounded-xl transition-all duration-150 disabled:opacity-25 disabled:cursor-not-allowed hover:bg-gray-100"
+                  style={{ padding: "0.45rem 0.85rem", fontFamily: "var(--font-chalk)", fontSize: "0.85rem", color: "#CBA7D2", border: "1.5px dashed #CBA7D2", background: "transparent", cursor: descPage === 2 ? "not-allowed" : "pointer" }}
+                >
+                  <span>다음</span>
+                  <ChevronRight size={15} />
+                </button>
               </div>
             </>
           ) : inGameRoom && isDealerHost ? (
