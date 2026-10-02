@@ -382,8 +382,9 @@ export default function TripleDicePage() {
               <div
                 className="flex flex-col flex-1 text-gray-700 leading-relaxed py-1 overflow-y-auto"
                 style={{
-                  height: "440px",
-                  maxHeight: "440px",
+                  height: "510px",
+                  minHeight: "510px",
+                  maxHeight: "510px",
                   gap: "0.85rem",
                   fontFamily: "var(--font-chalk)",
                   fontSize: "0.85rem",
@@ -394,7 +395,7 @@ export default function TripleDicePage() {
               >
                 {/* ════ 1페이지: ①~③ ════ */}
                 {descPage === 0 && (
-                  <div className="flex flex-col" style={{ gap: "1.1rem" }}>
+                  <div className="flex flex-col" style={{ gap: "1.35rem" }}>
                     <div className="flex items-start gap-2">
                       <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">①</span>
                       <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
@@ -418,7 +419,7 @@ export default function TripleDicePage() {
 
                 {/* ════ 2페이지: ④ ════ */}
                 {descPage === 1 && (
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col" style={{ gap: "0.85rem" }}>
                     <div className="flex items-start gap-2">
                       <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">④</span>
                       <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
@@ -460,7 +461,7 @@ export default function TripleDicePage() {
 
                 {/* ════ 3페이지: ⑤~⑥ ════ */}
                 {descPage === 2 && (
-                  <div className="flex flex-col" style={{ gap: "1.1rem" }}>
+                  <div className="flex flex-col" style={{ gap: "1.35rem" }}>
                     <div className="flex items-start gap-2">
                       <span className="flex-shrink-0 font-bold text-[#CBA7D2] w-5">⑤</span>
                       <p className="flex-1 leading-relaxed" style={{ wordBreak: "break-all", letterSpacing: "-0.015em" }}>
