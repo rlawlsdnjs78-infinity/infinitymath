@@ -445,11 +445,7 @@ export default function TripleDicePage() {
                     <div className="flex flex-col gap-1" style={{ paddingLeft: "0.2rem" }}>
                       <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
                         <span className="flex-shrink-0 font-bold text-amber-500 mt-0.5">⚠</span>
-                        <span>이때 제출된 주사위 조합이 같은 등급이라면 다음 우선순위에 따라 플레이어의 순위가 결정됩니다.</span>
-                      </div>
-                      <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em", paddingLeft: "1rem" }}>
-                        <span className="flex-shrink-0 text-[#CBA7D2] mt-0.5">:</span>
-                        <span>조합에 사용된 가장 높은 숫자가 더 큰 플레이어 → 조합에 사용된 두 번째로 높은 숫자가 더 큰 플레이어 → 나머지 숫자가 더 큰 플레이어</span>
+                        <span>이때 제출된 주사위 조합이 같은 등급이라면 ⑴ 조합에 사용된 가장 높은 숫자가 더 큰 플레이어 → ⑵ 조합에 사용된 두 번째로 높은 숫자가 더 큰 플레이어 → ⑶ 나머지 숫자가 더 큰 플레이어 순으로 순위가 결정됩니다.</span>
                       </div>
                       <div className="flex items-start gap-1.5 text-gray-600" style={{ fontSize: "0.85rem", lineHeight: "1.5", letterSpacing: "-0.015em" }}>
                         <span className="flex-shrink-0 font-bold text-amber-500 mt-0.5">⚠</span>
