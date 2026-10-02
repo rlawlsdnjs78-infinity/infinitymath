@@ -382,9 +382,9 @@ export default function TripleDicePage() {
               <div
                 className="flex flex-col flex-1 text-gray-700 leading-relaxed py-1 overflow-y-auto"
                 style={{
-                  height: "530px",
-                  minHeight: "530px",
-                  maxHeight: "530px",
+                  height: "477px",
+                  minHeight: "477px",
+                  maxHeight: "477px",
                   gap: "0.85rem",
                   fontFamily: "var(--font-chalk)",
                   fontSize: "0.85rem",
