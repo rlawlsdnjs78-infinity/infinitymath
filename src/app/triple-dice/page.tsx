@@ -11,7 +11,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Settings,
@@ -28,6 +28,64 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+/* ─── 주사위 눈 렌더링 ─────────────────────────────── */
+// 3x3 격자에서 각 눈(1~6)이 찍히는 칸 인덱스
+const PIP_CELLS: Record<number, number[]> = {
+  1: [4],
+  2: [0, 8],
+  3: [0, 4, 8],
+  4: [0, 2, 6, 8],
+  5: [0, 2, 4, 6, 8],
+  6: [0, 2, 3, 5, 6, 8],
+};
+
+type DiceColor = "white" | "red" | "blue";
+
+const DICE_STYLES: Record<DiceColor, { bg: string; border: string; pip: string }> = {
+  white: { bg: "linear-gradient(145deg, #ffffff, #eceff3)", border: "#cfd4dc", pip: "#2d3340" },
+  red: { bg: "linear-gradient(145deg, #f2707f, #d9405a)", border: "#b8324a", pip: "#ffffff" },
+  blue: { bg: "linear-gradient(145deg, #6aa4ff, #3a72e0)", border: "#2f5fc0", pip: "#ffffff" },
+};
+
+function DiceFace({ value, color, size = 52, rolling = false }: { value: number; color: DiceColor; size?: number; rolling?: boolean }) {
+  const s = DICE_STYLES[color];
+  const cells = PIP_CELLS[value] ?? [];
+  return (
+    <div
+      role="img"
+      aria-label={`${color === "white" ? "흰색" : color === "red" ? "빨간색" : "파란색"} 주사위 ${value}`}
+      className="rounded-xl shadow-md"
+      style={{
+        width: size,
+        height: size,
+        background: s.bg,
+        border: `2px solid ${s.border}`,
+        padding: size * 0.14,
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gridTemplateRows: "repeat(3, 1fr)",
+        transform: rolling ? `rotate(${((value * 47) % 30) - 15}deg) scale(0.94)` : "rotate(0deg) scale(1)",
+        transition: "transform 0.12s ease",
+      }}
+    >
+      {Array.from({ length: 9 }, (_, i) => (
+        <div key={i} className="flex items-center justify-center">
+          {cells.includes(i) && (
+            <span style={{ width: size * 0.17, height: size * 0.17, borderRadius: "9999px", background: s.pip, display: "block" }} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const rollDie = () => Math.floor(Math.random() * 6) + 1;
+const rollAll = () => ({
+  white: Array.from({ length: 9 }, rollDie),
+  red: rollDie(),
+  blue: rollDie(),
+});
+
 export default function TripleDicePage() {
   const [mode, setMode] = useState<"player" | "dealer">("player");
   const [inGameRoom, setInGameRoom] = useState(false);
@@ -39,6 +97,33 @@ export default function TripleDicePage() {
   const [myNickname] = useState("");
   const [descPage, setDescPage] = useState(0); // 게임 설명 페이지 (0~2)
   const [activeRoomCode] = useState("");
+
+  // 연습용 주사위 굴리기 (흰색 9개, 빨간색 1개, 파란색 1개)
+  const [practiceDice, setPracticeDice] = useState<{ white: number[]; red: number; blue: number } | null>(null);
+  const [isRolling, setIsRolling] = useState(false);
+  const rollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (rollTimerRef.current) clearInterval(rollTimerRef.current);
+    };
+  }, []);
+
+  const handleRollDice = () => {
+    if (isRolling) return;
+    setIsRolling(true);
+    let ticks = 0;
+    setPracticeDice(rollAll());
+    rollTimerRef.current = setInterval(() => {
+      ticks += 1;
+      setPracticeDice(rollAll());
+      if (ticks >= 8) {
+        if (rollTimerRef.current) clearInterval(rollTimerRef.current);
+        rollTimerRef.current = null;
+        setIsRolling(false);
+      }
+    }, 80);
+  };
 
   const handleJoinGameRoom = (e: React.FormEvent) => {
     e.preventDefault();
@@ -238,25 +323,49 @@ export default function TripleDicePage() {
               {/* 연습 모드(방 미접속): 게임 대기 안내 */}
               {!inGameRoom ? (
                 <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between" style={{ gap: "1.45rem" }}>
-                  {/* 좌측: 주사위 플레이스홀더 */}
+                  {/* 좌측: 주사위 보드 (굴리기 전에는 플레이스홀더) */}
                   <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0" style={{ gap: "1.25rem" }}>
-                    <div className="flex items-center gap-5">
-                      {[1, 2, 3].map((i) => (
-                        <div
-                          key={i}
-                          className="rounded-2xl border-4 border-dashed border-[#CBA7D2]/60 bg-gray-50/60 flex items-center justify-center shadow-xl"
-                          style={{ width: "80px", height: "80px" }}
-                        >
-                          <Dice5 size={44} className="text-[#CBA7D2]/70" />
+                    {practiceDice ? (
+                      <div className="flex items-center" style={{ gap: "1rem" }}>
+                        {/* 흰색 주사위 9개 (3x3) */}
+                        <div className="grid grid-cols-3" style={{ gap: "0.5rem" }}>
+                          {practiceDice.white.map((v, i) => (
+                            <DiceFace key={`w-${i}`} value={v} color="white" rolling={isRolling} />
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                    <p
-                      className="text-gray-400 font-bold text-center"
-                      style={{ fontFamily: "var(--font-chalk)", fontSize: "1.05rem", letterSpacing: "0.04em" }}
+                        {/* 빨간색 / 파란색 주사위 */}
+                        <div
+                          className="flex flex-col items-center border-l-2 border-dashed border-gray-200"
+                          style={{ gap: "0.75rem", paddingLeft: "1rem" }}
+                        >
+                          <DiceFace value={practiceDice.red} color="red" rolling={isRolling} />
+                          <DiceFace value={practiceDice.blue} color="blue" rolling={isRolling} />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-5">
+                        {[1, 2, 3].map((i) => (
+                          <div
+                            key={i}
+                            className="rounded-2xl border-4 border-dashed border-[#CBA7D2]/60 bg-gray-50/60 flex items-center justify-center shadow-xl"
+                            style={{ width: "80px", height: "80px" }}
+                          >
+                            <Dice5 size={44} className="text-[#CBA7D2]/70" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      id="td-roll-dice-btn"
+                      onClick={handleRollDice}
+                      disabled={isRolling}
+                      className={`btn-chalk justify-center font-extrabold shadow-lg transition-all ${isRolling ? "cursor-wait opacity-70" : "cursor-pointer hover:scale-105"}`}
+                      style={{ padding: "0.55rem 1.45rem", gap: "0.5rem", fontFamily: "var(--font-chalk)", fontSize: "1.15rem", letterSpacing: "0.04em" }}
                     >
-                      게임 보드 (개발 중)
-                    </p>
+                      <Dice5 size={20} className={`flex-shrink-0 ${isRolling ? "animate-spin" : ""}`} />
+                      <span>{isRolling ? "굴리는 중..." : "주사위 굴리기"}</span>
+                    </button>
                   </div>
 
                   {/* 우측: 연습 설명 */}
