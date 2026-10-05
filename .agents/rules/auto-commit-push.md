@@ -1,6 +1,19 @@
-# Auto Git Commit and Push
+---
+trigger: always_on
+---
 
-Whenever a task or request from the user is completed:
-1. Always stage all modified/added files (`git add .`).
-2. Commit with a concise and clear commit message explaining the change.
-3. Push the commit to the remote repository (`git push`).
+# 작업 완료 시 자동 커밋 & 푸시 (Auto Git Commit and Push)
+
+사용자의 요청을 처리하면서 저장소 파일을 수정했다면, 작업이 끝나는 시점에 **묻지 말고 자동으로 커밋하고 푸시**한다.
+
+## 절차
+1. 변경 사항 검증: `npx.cmd tsc --noEmit -p .` 와 `npx.cmd eslint <변경 경로>` 실행 (PowerShell 실행 정책 때문에 `npx` 대신 `npx.cmd`, `npm` 대신 `npm.cmd` 사용).
+2. 검증 통과 시 변경된 파일을 스테이징 (`git add`). 이번 요청과 무관해 보이는 변경이 섞여 있으면 해당 요청에서 바꾼 파일만 스테이징한다.
+3. 변경 내용을 간결하게 설명하는 Conventional Commits 형식의 한국어 커밋 메시지로 커밋 (예: `feat: ...`, `fix: ...`, `style: ...`, `refactor: ...`).
+4. 원격 저장소로 푸시 (`git push origin main`).
+5. 최종 응답에 커밋 해시와 메시지를 짧게 알린다.
+
+## 예외
+- 코드/파일 변경이 없는 요청(질문, 설명 등)은 커밋하지 않는다.
+- 타입 검사·린트가 실패하면 커밋하지 말고 먼저 고치거나 사용자에게 알린다.
+- 푸시가 실패(충돌, 인증 오류 등)하면 강제 푸시하지 말고 사용자에게 알린다.
