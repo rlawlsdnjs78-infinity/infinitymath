@@ -12,6 +12,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import NavMenu from "./NavMenu";
+import MobileMenu from "./MobileMenu";
 
 export default function Header() {
   const pathname = usePathname();
@@ -24,7 +25,7 @@ export default function Header() {
   return (
     <header
       id="header"
-      className="w-full relative z-30 py-3.5"
+      className="w-full relative z-30 py-3.5 px-4 sm:px-6 xl:px-10"
       style={{
         background: "rgba(255, 255, 255, 0.8)",
         backdropFilter: "blur(12px)",
@@ -32,22 +33,25 @@ export default function Header() {
         borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
         boxShadow: "0 4px 20px -2px rgba(0, 0, 0, 0.03)",
         minHeight: "72px",
-        paddingLeft: "2.5rem",
-        paddingRight: "2.5rem",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between"
       }}
     >
-      {/* ── [좌측] 로고 ─────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 z-10">
+      {/* ── [모바일 좌측] ≡ 메뉴 버튼 (xl 미만에서만 표시) ───────── */}
+      <div className="xl:hidden z-10">
+        <MobileMenu />
+      </div>
+
+      {/* ── 로고: 모바일에서는 정중앙, 데스크톱(xl+)에서는 좌측 ───── */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 xl:static xl:translate-x-0 xl:translate-y-0 flex items-center gap-3 z-10">
           <Link href="/" style={{ textDecoration: "none" }}>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 xl:gap-3">
               <span
                 aria-hidden="true"
+                className="text-[2rem] xl:text-[2.5rem]"
                 style={{
                   fontFamily: "var(--font-chalk)",
-                  fontSize: "2.5rem",
                   lineHeight: 1,
                   color: "var(--chalk-yellow)",
                   textShadow:
@@ -59,10 +63,9 @@ export default function Header() {
                 ∞
               </span>
               <span
-                className="chalk-flicker"
+                className="chalk-flicker text-[1.4rem] xl:text-[1.65rem]"
                 style={{
                   fontFamily: "var(--font-chalk)",
-                  fontSize: "1.65rem",
                   color: "var(--chalk-white)",
                   letterSpacing: "0.04em",
                   whiteSpace: "nowrap",
@@ -75,13 +78,13 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* ── [중앙] 브레인 서바이벌 (전체 헤더 기준 수학적 정중앙) ── */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+        {/* ── [중앙] 메인 메뉴 (데스크톱 xl+ 에서만, 전체 헤더 기준 수학적 정중앙) ── */}
+        <div className="hidden xl:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
           <NavMenu mode="center" />
         </div>
 
-        {/* ── [우측] 로그인 & 회원가입 버튼 ───────────────────── */}
-        <div className="flex items-center gap-4 z-10">
+        {/* ── [우측] 로그인 & 회원가입 버튼 (데스크톱 xl+ 에서만) ── */}
+        <div className="hidden xl:flex items-center gap-4 z-10">
           <NavMenu mode="auth" />
         </div>
       </header>

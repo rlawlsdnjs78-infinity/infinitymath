@@ -109,6 +109,17 @@ h1, h2, h3, h4, h5, h6 {
   to   { transform: translateY(0);    opacity: 1; }
 }
 
+/* 모바일 메뉴 드로어 */
+@keyframes drawerInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 /* =========================================
    커스텀 유틸리티 클래스
    ========================================= */
