@@ -79,6 +79,21 @@ function DiceFace({ value, color, size = 52, rolling = false }: { value: number;
   );
 }
 
+// 굴리기 전 빈 주사위 칸 (DiceFace와 동일한 크기로 레이아웃 고정)
+const SLOT_COLORS: Record<DiceColor, string> = { white: "#CBA7D2", red: "#e8899a", blue: "#8fb4f5" };
+
+function DiceSlot({ color = "white", size = 52 }: { color?: DiceColor; size?: number }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="rounded-xl bg-gray-50/60 flex items-center justify-center"
+      style={{ width: size, height: size, border: `2px dashed ${SLOT_COLORS[color]}`, opacity: 0.8 }}
+    >
+      <Dice5 size={size * 0.5} style={{ color: SLOT_COLORS[color], opacity: 0.6 }} />
+    </div>
+  );
+}
+
 const rollDie = () => Math.floor(Math.random() * 6) + 1;
 const rollAll = () => ({
   white: Array.from({ length: 9 }, rollDie),
@@ -323,38 +338,37 @@ export default function TripleDicePage() {
               {/* 연습 모드(방 미접속): 게임 대기 안내 */}
               {!inGameRoom ? (
                 <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between" style={{ gap: "1.45rem" }}>
-                  {/* 좌측: 주사위 보드 (굴리기 전에는 플레이스홀더) */}
+                  {/* 좌측: 주사위 보드 (굴리기 전에도 같은 크기의 빈 칸을 표시해 높이 고정) */}
                   <div className="flex flex-col items-center justify-center flex-shrink-0 py-2 mx-auto xl:mx-0" style={{ gap: "1.25rem" }}>
-                    {practiceDice ? (
-                      <div className="flex items-center" style={{ gap: "1rem" }}>
-                        {/* 흰색 주사위 9개 (3x3) */}
-                        <div className="grid grid-cols-3" style={{ gap: "0.5rem" }}>
-                          {practiceDice.white.map((v, i) => (
-                            <DiceFace key={`w-${i}`} value={v} color="white" rolling={isRolling} />
-                          ))}
-                        </div>
-                        {/* 빨간색 / 파란색 주사위 */}
-                        <div
-                          className="flex flex-col items-center border-l-2 border-dashed border-gray-200"
-                          style={{ gap: "0.75rem", paddingLeft: "1rem" }}
-                        >
-                          <DiceFace value={practiceDice.red} color="red" rolling={isRolling} />
-                          <DiceFace value={practiceDice.blue} color="blue" rolling={isRolling} />
-                        </div>
+                    <div className="flex items-center" style={{ gap: "1rem" }}>
+                      {/* 흰색 주사위 9개 (3x3) */}
+                      <div className="grid grid-cols-3" style={{ gap: "0.5rem" }}>
+                        {Array.from({ length: 9 }, (_, i) =>
+                          practiceDice ? (
+                            <DiceFace key={`w-${i}`} value={practiceDice.white[i]} color="white" rolling={isRolling} />
+                          ) : (
+                            <DiceSlot key={`w-${i}`} />
+                          )
+                        )}
                       </div>
-                    ) : (
-                      <div className="flex items-center gap-5">
-                        {[1, 2, 3].map((i) => (
-                          <div
-                            key={i}
-                            className="rounded-2xl border-4 border-dashed border-[#CBA7D2]/60 bg-gray-50/60 flex items-center justify-center shadow-xl"
-                            style={{ width: "80px", height: "80px" }}
-                          >
-                            <Dice5 size={44} className="text-[#CBA7D2]/70" />
-                          </div>
-                        ))}
+                      {/* 빨간색 / 파란색 주사위 */}
+                      <div
+                        className="flex flex-col items-center border-l-2 border-dashed border-gray-200"
+                        style={{ gap: "0.75rem", paddingLeft: "1rem" }}
+                      >
+                        {practiceDice ? (
+                          <>
+                            <DiceFace value={practiceDice.red} color="red" rolling={isRolling} />
+                            <DiceFace value={practiceDice.blue} color="blue" rolling={isRolling} />
+                          </>
+                        ) : (
+                          <>
+                            <DiceSlot color="red" />
+                            <DiceSlot color="blue" />
+                          </>
+                        )}
                       </div>
-                    )}
+                    </div>
                     <button
                       type="button"
                       id="td-roll-dice-btn"
