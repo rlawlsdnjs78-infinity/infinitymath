@@ -48,6 +48,28 @@ html {
   scroll-behavior: smooth;
 }
 
+/*
+ * 전역 헤더 좌우 여백
+ * 위 리셋(* { padding: 0 })이 Tailwind 의 px-* 유틸리티보다 우선하므로
+ * 반응형 여백은 이 클래스로 지정합니다. (데스크톱 2.5rem = 기존 값)
+ */
+.site-header {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+@media (min-width: 640px) {
+  .site-header {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+@media (min-width: 1280px) {
+  .site-header {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
+
 body {
   /* 화이트보드 배경 */
   background-color: var(--chalk-bg);

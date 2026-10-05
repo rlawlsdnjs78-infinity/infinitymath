@@ -136,8 +136,8 @@ export default function MobileMenu() {
             >
               {/* 드로어 헤더 */}
               <div
-                className="flex items-center justify-between px-5"
-                style={{ minHeight: 72, borderBottom: "1px solid rgba(0,0,0,0.06)" }}
+                className="flex items-center justify-between"
+                style={{ minHeight: 72, padding: "0 1.25rem", borderBottom: "1px solid rgba(0,0,0,0.06)" }}
               >
                 <Link href="/" onClick={close} style={{ textDecoration: "none" }} className="flex items-center gap-2">
                   <span
@@ -177,7 +177,7 @@ export default function MobileMenu() {
               </div>
 
               {/* 메뉴 목록 (아코디언) */}
-              <nav aria-label="모바일 네비게이션" className="flex-1 overflow-y-auto px-3 py-4">
+              <nav aria-label="모바일 네비게이션" className="flex-1 overflow-y-auto" style={{ padding: "1rem 0.75rem" }}>
                 <ul className="flex flex-col gap-1">
                   {MENU_GROUPS.map((group) => {
                     const isExpanded = expanded === group.id;
@@ -188,8 +188,9 @@ export default function MobileMenu() {
                           type="button"
                           aria-expanded={isExpanded}
                           onClick={() => setExpanded(isExpanded ? null : group.id)}
-                          className="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-colors duration-150 hover:bg-gray-100"
+                          className="w-full flex items-center gap-3 rounded-xl transition-colors duration-150 hover:bg-gray-100"
                           style={{
+                            padding: "0.75rem",
                             fontFamily: "var(--font-chalk)",
                             fontSize: "1.25rem",
                             color: isExpanded ? "var(--chalk-yellow)" : "var(--chalk-white)",
@@ -212,16 +213,16 @@ export default function MobileMenu() {
 
                         {isExpanded && (
                           <ul
-                            className="flex flex-col gap-0.5 pl-4 pr-1 pt-1 pb-2"
-                            style={{ animation: "slideInUp 0.2s ease forwards" }}
+                            className="flex flex-col gap-0.5"
+                            style={{ padding: "0.25rem 0.25rem 0.5rem 1rem", animation: "slideInUp 0.2s ease forwards" }}
                           >
                             {group.items.map((item) => (
                               <li key={item.label}>
                                 <Link
                                   href={item.href}
                                   onClick={close}
-                                  className="flex items-center gap-2.5 px-4 py-2.5 rounded-lg transition-colors duration-150 hover:bg-gray-100"
-                                  style={{ textDecoration: "none" }}
+                                  className="flex items-center gap-2.5 rounded-lg transition-colors duration-150 hover:bg-gray-100"
+                                  style={{ padding: "0.625rem 1rem", textDecoration: "none" }}
                                 >
                                   <span className="w-[0.6rem] h-[0.6rem] rounded-full bg-[var(--chalk-yellow)] inline-block flex-shrink-0" />
                                   <span
@@ -242,12 +243,13 @@ export default function MobileMenu() {
               </nav>
 
               {/* 하단: 로그인 / 회원가입 */}
-              <div className="flex gap-2 px-4 py-4" style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+              <div className="flex gap-2" style={{ padding: "1rem", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
                 <Link
                   href="#"
                   onClick={close}
-                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-full py-2.5 transition-colors duration-200 hover:bg-black/5"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-full transition-colors duration-200 hover:bg-black/5"
                   style={{
+                    padding: "0.625rem 0",
                     fontFamily: "var(--font-chalk)",
                     fontSize: "1.05rem",
                     color: "var(--chalk-white)",
@@ -262,8 +264,9 @@ export default function MobileMenu() {
                 <Link
                   href="#"
                   onClick={close}
-                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-full py-2.5 transition-opacity duration-200 hover:opacity-90"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-full transition-opacity duration-200 hover:opacity-90"
                   style={{
+                    padding: "0.625rem 0",
                     fontFamily: "var(--font-chalk)",
                     fontSize: "1.05rem",
                     color: "#ffffff",

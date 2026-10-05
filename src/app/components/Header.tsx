@@ -25,7 +25,7 @@ export default function Header() {
   return (
     <header
       id="header"
-      className="w-full relative z-30 py-3.5 px-4 sm:px-6 xl:px-10"
+      className="site-header w-full relative z-30 py-3.5"
       style={{
         background: "rgba(255, 255, 255, 0.8)",
         backdropFilter: "blur(12px)",
